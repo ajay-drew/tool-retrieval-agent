@@ -25,6 +25,13 @@ class FakeService:
     def meta(self):
         return {"model": "fake", "tools": 115}
 
+    def transcript(self, thread_id):
+        return (
+            [{"user": "hi", "events": [{"type": "message", "text": "hello"}]}]
+            if thread_id == "t1"
+            else None
+        )
+
 
 class BrokenService(FakeService):
     async def chat(self, thread_id, message):
@@ -82,3 +89,28 @@ def test_resume_passes_decisions_and_validates_them():
 def test_errors_mid_stream_become_an_error_event():
     events = lines(client(BrokenService()).post("/api/chat/stream", json={"message": "hi"}))
     assert events[-1] == {"type": "error", "detail": "RuntimeError: model went away"}
+
+
+def test_transcript_returns_turns_or_404():
+    c = client(FakeService())
+    body = c.get("/api/chat/t1").json()
+    assert body["thread_id"] == "t1" and body["turns"][0]["user"] == "hi"
+    assert c.get("/api/chat/missing").status_code == 404
+
+
+def test_recorded_stream_keeps_every_event():
+    import asyncio
+
+    from atlas.api.service import _recorded
+
+    async def events():
+        yield {"type": "message", "text": "a"}
+        yield {"type": "done", "status": "completed", "trace_url": None}
+
+    log = []
+
+    async def drain():
+        return [e async for e in _recorded(events(), log)]
+
+    assert asyncio.run(drain()) == log
+    assert [e["type"] for e in log] == ["message", "done"]

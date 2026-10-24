@@ -226,6 +226,7 @@ button.link { background: none; border: none; padding: 0; color: var(--link); fo
 }
 .notice { border-radius: var(--radius); padding: 0.6rem 0.8rem; font-size: 0.85rem; }
 .notice--danger { background: var(--danger-bg); color: var(--danger); }
+.notice--info { background: var(--info-bg); color: var(--info); }
 
 .hits { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
 .hit {

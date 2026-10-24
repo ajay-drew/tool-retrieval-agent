@@ -1,4 +1,4 @@
-import type { StreamEvent, TimelineItem, Turn } from "./types";
+import type { StoredTurn, StreamEvent, TimelineItem, Turn } from "./types";
 
 export function applyEvent(turn: Turn, event: StreamEvent): Turn {
   switch (event.type) {
@@ -43,6 +43,10 @@ function finish(turn: Turn): Turn {
   const last = turn.items.at(-1);
   if (last?.kind !== "note") return turn;
   return { ...turn, answer: last.text, items: turn.items.slice(0, -1) as TimelineItem[] };
+}
+
+export function replayTurn(stored: StoredTurn): Turn {
+  return stored.events.reduce(applyEvent, newTurn(stored.user));
 }
 
 export function newTurn(user: string): Turn {

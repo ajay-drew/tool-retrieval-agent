@@ -4,8 +4,8 @@ from pathlib import Path
 from typing import Literal
 from uuid import uuid4
 
-from fastapi import FastAPI
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -67,6 +67,13 @@ def create_app(settings: Settings | None = None, service: ChatService | None = N
     async def search(q: str, k: int = 10) -> list[dict]:
         return await chat_service().search(q, max(1, min(k, 30)))
 
+    @app.get("/api/chat/{thread_id}")
+    def transcript(thread_id: str) -> dict:
+        turns = chat_service().transcript(thread_id)
+        if turns is None:
+            raise HTTPException(404, f"No conversation {thread_id}; it may predate a restart.")
+        return {"thread_id": thread_id, "turns": turns}
+
     @app.post("/api/chat/stream")
     def chat(body: ChatRequest) -> StreamingResponse:
         thread_id = body.thread_id or uuid4().hex
@@ -86,5 +93,10 @@ def create_app(settings: Settings | None = None, service: ChatService | None = N
         )
 
     if WEB_DIST.exists():
+
+        @app.get("/c/{thread_id}")
+        def thread_page(thread_id: str) -> FileResponse:
+            return FileResponse(WEB_DIST / "index.html")
+
         app.mount("/", StaticFiles(directory=WEB_DIST, html=True), name="web")
     return app

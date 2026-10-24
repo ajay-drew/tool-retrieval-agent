@@ -75,6 +75,16 @@ export interface CatalogHit {
   path: string;
 }
 
+export interface StoredTurn {
+  user: string;
+  events: StreamEvent[];
+}
+
+export interface Transcript {
+  thread_id: string;
+  turns: StoredTurn[];
+}
+
 export interface Meta {
   model: string;
   tools: number;

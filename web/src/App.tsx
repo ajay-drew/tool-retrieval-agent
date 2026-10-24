@@ -1,11 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getMeta, streamEvents } from "./api";
+import { ApiError, getMeta, getTranscript, streamEvents } from "./api";
 import { Composer } from "./components/Composer";
 import { Header } from "./components/Header";
 import { Inspector } from "./components/Inspector";
 import { TurnView } from "./components/TurnView";
-import { applyEvent, newTurn } from "./turns";
+import { applyEvent, newTurn, replayTurn } from "./turns";
 import type { Meta, Retrieval, Turn } from "./types";
+
+const THREAD_PATH = /^\/c\/([A-Za-z0-9_-]+)\/?$/;
+
+function threadFromPath(): string | null {
+  return THREAD_PATH.exec(window.location.pathname)?.[1] ?? null;
+}
 
 export function App() {
   const [meta, setMeta] = useState<Meta | null>(null);
@@ -14,6 +20,7 @@ export function App() {
   const [threadId, setThreadId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [inspected, setInspected] = useState<{ turn: string; step: number } | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const controller = useRef<AbortController | null>(null);
   const end = useRef<HTMLDivElement | null>(null);
 
@@ -30,6 +37,38 @@ export function App() {
     end.current?.scrollIntoView({ block: "end", behavior: "smooth" });
   }, [turns]);
 
+  useEffect(() => {
+    async function open(id: string | null) {
+      controller.current?.abort();
+      setInspected(null);
+      setNotice(null);
+      if (!id) {
+        setTurns([]);
+        setThreadId(null);
+        return;
+      }
+      try {
+        const transcript = await getTranscript(id);
+        setTurns(transcript.turns.map(replayTurn));
+        setThreadId(id);
+      } catch (error) {
+        const missing = error instanceof ApiError && error.status === 404;
+        setNotice(
+          missing
+            ? "That conversation isn't on the server any more (it restarted). Starting a new one."
+            : (error as Error).message,
+        );
+        setTurns([]);
+        setThreadId(null);
+        window.history.replaceState(null, "", "/");
+      }
+    }
+    void open(threadFromPath());
+    const onPop = () => void open(threadFromPath());
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
   const updateLast = (update: (turn: Turn) => Turn) =>
     setTurns((all) => (all.length ? [...all.slice(0, -1), update(all[all.length - 1])] : all));
 
@@ -43,7 +82,12 @@ export function App() {
         path,
         body,
         (event) => {
-          if (event.type === "started") setThreadId(event.thread_id);
+          if (event.type === "started") {
+            setThreadId(event.thread_id);
+            if (threadFromPath() !== event.thread_id) {
+              window.history.pushState(null, "", `/c/${event.thread_id}`);
+            }
+          }
           else updateLast((turn) => applyEvent(turn, event));
         },
         abort.signal,
@@ -60,6 +104,7 @@ export function App() {
   }
 
   function send(message: string) {
+    setNotice(null);
     setTurns((all) => [...all, newTurn(message)]);
     void run("/api/chat/stream", { message, thread_id: threadId });
   }
@@ -83,6 +128,8 @@ export function App() {
     setTurns([]);
     setThreadId(null);
     setInspected(null);
+    setNotice(null);
+    if (window.location.pathname !== "/") window.history.pushState(null, "", "/");
   }
 
   const retrieval = useMemo<Retrieval | null>(() => {
@@ -103,6 +150,7 @@ export function App() {
       <main className="layout">
         <section className="chat">
           <div className="thread" aria-live="polite">
+          {notice && <p className="notice notice--info">{notice}</p>}
           {turns.length === 0 ? (
             <div className="empty panel">
               <h2>Ask Atlas about your PayPal account</h2>

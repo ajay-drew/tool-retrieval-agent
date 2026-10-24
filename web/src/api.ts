@@ -1,4 +1,4 @@
-import type { CatalogHit, Meta, StreamEvent } from "./types";
+import type { CatalogHit, Meta, StreamEvent, Transcript } from "./types";
 
 export class ApiError extends Error {
   constructor(
@@ -20,6 +20,10 @@ async function request(path: string, init?: RequestInit): Promise<Response> {
 
 export async function getMeta(): Promise<Meta> {
   return (await request("/api/meta")).json();
+}
+
+export async function getTranscript(threadId: string): Promise<Transcript> {
+  return (await request(`/api/chat/${encodeURIComponent(threadId)}`)).json();
 }
 
 export async function searchTools(query: string, k = 10, signal?: AbortSignal): Promise<CatalogHit[]> {

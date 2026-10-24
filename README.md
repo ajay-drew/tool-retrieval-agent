@@ -65,6 +65,7 @@ The web UI streams each turn live: which tools retrieval picked (with scores), e
 |---|---|---|
 | POST | `/api/chat/stream` | Run a message; streams NDJSON events |
 | POST | `/api/chat/{thread_id}/resume/stream` | Approve or reject a paused change |
+| GET | `/api/chat/{thread_id}` | A thread's transcript (backs `/c/<thread-id>` URLs) |
 | GET | `/api/tools/search?q=&k=` | Search the tool catalog |
 | GET | `/api/meta`, `/api/health` | Model info, liveness |
 
