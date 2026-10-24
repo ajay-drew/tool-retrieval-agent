@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Atlas HTTP API",
+    "output": "api.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "React UI",
+      "sublabel": "web/ \u00b7 Vite + React 19",
+      "pos": [
+        40,
+        300
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "chat \u00b7 approvals \u00b7 inspector"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "FastAPI",
+      "sublabel": "atlas serve :8000",
+      "pos": [
+        330,
+        300
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "NDJSON stream"
+    },
+    {
+      "id": "service",
+      "type": "backend",
+      "label": "AtlasService",
+      "sublabel": "ChatService interface",
+      "pos": [
+        620,
+        300
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "agent",
+      "type": "backend",
+      "label": "Atlas agent",
+      "sublabel": "LangChain create_agent",
+      "pos": [
+        910,
+        300
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "llm",
+      "type": "external",
+      "label": "Gemma 4 8B",
+      "sublabel": "Ollama :11434",
+      "pos": [
+        1200,
+        120
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "paypal",
+      "type": "external",
+      "label": "Mock PayPal",
+      "sublabel": "seed.json, in memory",
+      "pos": [
+        1200,
+        300
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "qdrant",
+      "type": "database",
+      "label": "Qdrant",
+      "sublabel": "atlas_tools \u00b7 atlas_kb",
+      "pos": [
+        910,
+        520
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "runlog",
+      "type": "database",
+      "label": "Run log",
+      "sublabel": "runs/runlog.jsonl",
+      "pos": [
+        620,
+        520
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "langsmith",
+      "type": "cloud",
+      "label": "LangSmith",
+      "sublabel": "traces \u00b7 project atlas",
+      "pos": [
+        1200,
+        520
+      ],
+      "size": [
+        150,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "ui-to-api",
+      "from": "ui",
+      "to": "api",
+      "label": "POST /api/chat/stream",
+      "variant": "emphasis"
+    },
+    {
+      "id": "api-to-service",
+      "from": "api",
+      "to": "service",
+      "label": "chat \u00b7 resume \u00b7 search",
+      "variant": "emphasis"
+    },
+    {
+      "id": "service-to-agent",
+      "from": "service",
+      "to": "agent",
+      "label": "stream_turn",
+      "variant": "emphasis"
+    },
+    {
+      "id": "agent-to-llm",
+      "from": "agent",
+      "to": "llm",
+      "label": "messages + 11 tools",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "agent-to-paypal",
+      "from": "agent",
+      "to": "paypal",
+      "label": "tool calls"
+    },
+    {
+      "id": "agent-to-qdrant",
+      "from": "agent",
+      "to": "qdrant",
+      "label": "retrieve top 8",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 90
+    },
+    {
+      "id": "service-to-runlog",
+      "from": "service",
+      "to": "runlog",
+      "label": "append turn",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 90
+    },
+    {
+      "id": "agent-to-langsmith",
+      "from": "agent",
+      "to": "langsmith",
+      "label": "traces",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Endpoints",
+      "items": [
+        "POST /api/chat/stream",
+        "POST /api/chat/{thread_id}/resume/stream",
+        "GET /api/tools/search?q=&k=",
+        "GET /api/meta \u00b7 GET /api/health",
+        "GET / serves web/dist"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "NDJSON stream events",
+      "items": [
+        "started \u00b7 retrieval \u00b7 tool_call \u00b7 tool_result",
+        "approval (stream ends; resume to continue)",
+        "message \u00b7 done (status, trace_url) \u00b7 error"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "State",
+      "items": [
+        "Mock PayPal and conversations live in memory",
+        "Restarting atlas serve resets both",
+        "Qdrant holds tool and handbook vectors"
+      ]
+    }
+  ]
+}

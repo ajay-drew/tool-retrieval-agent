@@ -8,6 +8,18 @@ Built on LangChain `create_agent`, Gemini 3.5 Flash (free tier, through its Open
 
 Sending every tool definition with every request doesn't scale. PayPal's 115 operations come to about **369k tokens** as raw OpenAPI schemas, and about 57k even after trimming. Accuracy also drops as near-identical tools (`invoices_list`, `invoices_search-invoices`, `invoices_get`) compete for the model's attention. At 500 or 2,000 tools, sending everything stops being possible at all.
 
+## Architecture
+
+### Agent loop
+
+![Atlas agent loop: a user message goes through tool retrieval, Gemma 4, an approval pause for write tools, the PayPal tools and the mock PayPal; find_tools, rag_search and system_search are side branches](docs/diagrams/agent.png)
+
+### HTTP API
+
+![Atlas HTTP API: React UI to FastAPI to AtlasService to the Atlas agent, which calls Gemma 4 on Ollama, the mock PayPal and Qdrant, appends to the run log and sends traces to LangSmith](docs/diagrams/api.png)
+
+Interactive versions, with search, focus and dark mode: [`docs/diagrams/agent.html`](docs/diagrams/agent.html) and [`docs/diagrams/api.html`](docs/diagrams/api.html) (download and open locally). Both were made with Archify from the JSON specs next to them.
+
 ## How Atlas works
 
 ```mermaid

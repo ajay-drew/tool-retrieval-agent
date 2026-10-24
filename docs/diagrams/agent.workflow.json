@@ -1,0 +1,221 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Atlas agent loop",
+    "output": "agent.html",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "ui",
+      "label": "User & UI"
+    },
+    {
+      "id": "agent",
+      "label": "Agent loop (create_agent middleware)"
+    },
+    {
+      "id": "tools",
+      "label": "Tools"
+    },
+    {
+      "id": "data",
+      "label": "Data"
+    }
+  ],
+  "mainPath": [
+    "user",
+    "retrieve",
+    "llm",
+    "approve",
+    "paypal_tools",
+    "mock"
+  ],
+  "nodes": [
+    {
+      "id": "user",
+      "lane": "ui",
+      "col": 0,
+      "type": "external",
+      "label": "User message",
+      "sublabel": "chat or atlas ask",
+      "width": 140
+    },
+    {
+      "id": "reply",
+      "lane": "ui",
+      "col": 5,
+      "type": "frontend",
+      "label": "Reply",
+      "sublabel": "answer + trace link",
+      "width": 140
+    },
+    {
+      "id": "retrieve",
+      "lane": "agent",
+      "col": 1,
+      "type": "backend",
+      "label": "Tool retrieval",
+      "sublabel": "before every model call",
+      "tag": "top 8 + 3 always-on",
+      "width": 150
+    },
+    {
+      "id": "llm",
+      "lane": "agent",
+      "col": 2,
+      "type": "external",
+      "label": "Gemma 4 8B",
+      "sublabel": "Ollama, tool calling",
+      "tag": "repair + retry",
+      "width": 150
+    },
+    {
+      "id": "approve",
+      "lane": "agent",
+      "col": 3,
+      "type": "security",
+      "label": "Approval pause",
+      "sublabel": "write tools only",
+      "width": 150
+    },
+    {
+      "id": "rag",
+      "lane": "tools",
+      "col": 1,
+      "type": "backend",
+      "label": "rag_search",
+      "sublabel": "+ system_search",
+      "width": 140
+    },
+    {
+      "id": "find_tools",
+      "lane": "tools",
+      "col": 2,
+      "type": "backend",
+      "label": "find_tools",
+      "sublabel": "adds tools to state",
+      "width": 140
+    },
+    {
+      "id": "paypal_tools",
+      "lane": "tools",
+      "col": 4,
+      "type": "messagebus",
+      "label": "PayPal tools",
+      "sublabel": "115, schema-checked",
+      "tag": "ToolRetry",
+      "width": 150
+    },
+    {
+      "id": "qdrant",
+      "lane": "data",
+      "col": 1,
+      "type": "database",
+      "label": "Qdrant",
+      "sublabel": "tool + handbook vectors",
+      "width": 150
+    },
+    {
+      "id": "mock",
+      "lane": "data",
+      "col": 4,
+      "type": "external",
+      "label": "Mock PayPal",
+      "sublabel": "seed.json, in memory",
+      "width": 150
+    }
+  ],
+  "edges": [
+    {
+      "id": "user-to-retrieve",
+      "from": "user",
+      "to": "retrieve",
+      "label": "message",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "retrieve-to-llm",
+      "from": "retrieve",
+      "to": "llm",
+      "label": "11 tools",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "llm-to-approve",
+      "from": "llm",
+      "to": "approve",
+      "label": "write call",
+      "variant": "security"
+    },
+    {
+      "id": "approve-to-tools",
+      "from": "approve",
+      "to": "paypal_tools",
+      "label": "approved",
+      "variant": "emphasis"
+    },
+    {
+      "id": "tools-to-mock",
+      "from": "paypal_tools",
+      "to": "mock",
+      "label": "call",
+      "variant": "emphasis"
+    },
+    {
+      "id": "llm-to-reply",
+      "from": "llm",
+      "to": "reply",
+      "label": "final answer",
+      "role": "return",
+      "variant": "emphasis"
+    },
+    {
+      "id": "llm-to-find",
+      "from": "llm",
+      "to": "find_tools",
+      "label": "no tool fits",
+      "role": "branch",
+      "variant": "dashed"
+    },
+    {
+      "id": "llm-to-rag",
+      "from": "llm",
+      "to": "rag",
+      "label": "policy / status",
+      "role": "branch",
+      "variant": "dashed"
+    },
+    {
+      "id": "qdrant-to-retrieve",
+      "from": "qdrant",
+      "to": "retrieve",
+      "label": "top-k search",
+      "role": "async",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Middleware, every model call",
+      "items": [
+        "ToolRetrieval \u2192 ToolCallRepair \u2192 approval pause \u2192 ModelRetry \u2192 ToolRetry \u2192 call limits",
+        "Tool results loop back through retrieval before the next call"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Why it scales",
+      "items": [
+        "115 tools registered, about 11 shown per call",
+        "find_tools recovers multi-step misses; every call is traced in LangSmith"
+      ]
+    }
+  ]
+}
