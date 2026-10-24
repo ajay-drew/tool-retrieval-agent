@@ -101,7 +101,8 @@ export function App() {
     <>
       <Header meta={meta} apiUp={apiUp} onNewConversation={reset} canReset={turns.length > 0} />
       <main className="layout">
-        <section className="chat" aria-live="polite">
+        <section className="chat">
+          <div className="thread" aria-live="polite">
           {turns.length === 0 ? (
             <div className="empty panel">
               <h2>Ask Atlas about your PayPal account</h2>
@@ -123,6 +124,8 @@ export function App() {
               />
             ))
           )}
+          <div ref={end} />
+          </div>
           <Composer
             busy={busy}
             disabled={apiUp === false || waitingForDecision}
@@ -134,7 +137,6 @@ export function App() {
                 : "What was my total sales volume last month?"
             }
           />
-          <div ref={end} />
         </section>
         <Inspector retrieval={retrieval} />
       </main>

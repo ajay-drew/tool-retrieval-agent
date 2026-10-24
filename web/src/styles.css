@@ -48,9 +48,9 @@ a { color: var(--link); }
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
-  max-width: 1240px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 2rem clamp(1rem, 4vw, 2.5rem) 1.25rem;
+  padding: 1.25rem clamp(1rem, 3vw, 2rem) 1rem;
 }
 .brand {
   display: flex;
@@ -69,11 +69,11 @@ a { color: var(--link); }
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
   gap: 1.5rem;
-  max-width: 1240px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0 clamp(1rem, 4vw, 2.5rem) 3rem;
+  padding: 0 clamp(1rem, 3vw, 2rem) 1.25rem;
   align-items: start;
 }
 @media (max-width: 880px) { .layout { grid-template-columns: minmax(0, 1fr); } }
@@ -90,7 +90,8 @@ a { color: var(--link); }
 .side { display: grid; gap: 1rem; position: sticky; top: 1rem; }
 @media (max-width: 880px) { .side { position: static; } }
 
-.chat { display: grid; gap: 1.25rem; min-width: 0; }
+.chat { display: grid; gap: 1rem; min-width: 0; }
+.thread { display: grid; gap: 1.25rem; align-content: start; min-width: 0; }
 .empty h2 { font: 600 1.6rem/1.2 var(--serif); }
 
 .field { display: grid; gap: 0.3rem; }
@@ -248,4 +249,14 @@ button.link { background: none; border: none; padding: 0; color: var(--link); fo
 @media (prefers-reduced-motion: reduce) {
   .step { animation: none; }
   .spinner { animation-duration: 2.4s; }
+}
+
+@media (min-width: 881px) {
+  html, body, #root { height: 100%; }
+  #root { display: flex; flex-direction: column; }
+  .top { flex: none; width: 100%; }
+  .layout { flex: 1; min-height: 0; width: 100%; align-items: stretch; }
+  .chat { grid-template-rows: minmax(0, 1fr) auto; min-height: 0; }
+  .thread { overflow-y: auto; padding-right: 0.35rem; scrollbar-gutter: stable; }
+  .side { position: static; overflow-y: auto; align-content: start; min-height: 0; padding-right: 0.35rem; }
 }
