@@ -32,11 +32,11 @@
 {"id": "pay-s06", "split": "test", "category": "single", "query": "The hold on authorization AUTH-0VF52814937998046 is about to expire, renew it", "expected_tools": ["authorizations_reauthorize"]}
 {"id": "pay-s07", "split": "test", "category": "single", "query": "Has the money from REF-1JU08902781691411 actually gone back to the buyer yet?", "expected_tools": ["refunds_get"]}
 {"id": "pay-s08", "split": "dev", "category": "single", "query": "Look up authorization AUTH-0VF52814937998046", "expected_tools": ["authorizations_get"]}
-{"id": "ord-s01", "split": "dev", "category": "single", "query": "Show order ORD-5O190127TN364715T", "expected_tools": ["orders_get"], "arg_checks": {"orders_get": {"path.id": "ORD-5O190127TN364715T"}}}
-{"id": "ord-s02", "split": "test", "category": "single", "query": "Capture payment for order ORD-8AB2342345KL9876M, the buyer approved it", "expected_tools": ["orders_capture"], "arg_checks": {"orders_capture": {"path.id": "ORD-8AB2342345KL9876M"}}}
+{"id": "ord-s01", "split": "dev", "category": "single", "query": "Show order 5O190127TN364715T", "expected_tools": ["orders_get"], "arg_checks": {"orders_get": {"path.id": "5O190127TN364715T"}}}
+{"id": "ord-s02", "split": "test", "category": "single", "query": "Capture payment for order 8AB2342345KL9876M, the buyer approved it", "expected_tools": ["orders_capture"], "arg_checks": {"orders_capture": {"path.id": "8AB2342345KL9876M"}}}
 {"id": "ord-s03", "split": "dev", "category": "single", "query": "Create a checkout order for $25 USD for a t-shirt", "expected_tools": ["orders_create"], "arg_checks": {"orders_create": {"body.purchase_units[0].amount.value": "25"}}}
-{"id": "ord-s04", "split": "test", "category": "single", "query": "Add UPS tracking 1Z999AA10123456784 to order ORD-8AB2342345KL9876M", "expected_tools": ["orders_track_create"], "alternatives": {"orders_track_create": ["trackers_post"]}}
-{"id": "ord-s05", "split": "test", "category": "single", "query": "Authorize payment on order ORD-8AB2342345KL9876M but don't capture it yet", "expected_tools": ["orders_authorize"]}
+{"id": "ord-s04", "split": "test", "category": "single", "query": "Add UPS tracking 1Z999AA10123456784 to order 8AB2342345KL9876M", "expected_tools": ["orders_track_create"], "alternatives": {"orders_track_create": ["trackers_post"]}}
+{"id": "ord-s05", "split": "test", "category": "single", "query": "Authorize payment on order 8AB2342345KL9876M but don't capture it yet", "expected_tools": ["orders_authorize"]}
 {"id": "sub-s01", "split": "dev", "category": "single", "query": "Show my subscription plans", "expected_tools": ["plans_list"]}
 {"id": "sub-s02", "split": "test", "category": "single", "query": "Create a 'Pro Monthly' plan at $29 a month for product PROD-XXCD1234QWER65782", "expected_tools": ["plans_create"], "arg_checks": {"plans_create": {"body.product_id": "PROD-XXCD1234QWER65782"}}}
 {"id": "sub-s03", "split": "dev", "category": "single", "query": "Turn off plan P-7GL4271244454362WXNWU5NQ so nobody new can sign up", "expected_tools": ["plans_deactivate"]}
@@ -64,7 +64,7 @@
 {"id": "whk-s02", "split": "test", "category": "single", "query": "Send PayPal payment notifications to https://shop.example.com/hooks", "expected_tools": ["webhooks_post"], "arg_checks": {"webhooks_post": {"body.url": "https://shop.example.com/hooks"}}}
 {"id": "whk-s03", "split": "test", "category": "single", "query": "Delete webhook WH-1A2B3C4D5E", "expected_tools": ["webhooks_delete"]}
 {"id": "whk-s04", "split": "dev", "category": "single", "query": "Show me the recent webhook events PayPal sent", "expected_tools": ["webhooks-events_list"]}
-{"id": "whk-s05", "split": "test", "category": "single", "query": "Resend webhook event WH-EVT-7RH12345 to my server", "expected_tools": ["webhooks-events_resend"]}
+{"id": "whk-s05", "split": "test", "category": "single", "query": "Resend webhook event WHEVT7RH12345 to my server", "expected_tools": ["webhooks-events_resend"]}
 {"id": "whk-s06", "split": "dev", "category": "single", "query": "I want to check my listener works: trigger a fake PAYMENT.CAPTURE.COMPLETED notification", "expected_tools": ["simulate-event_post"]}
 {"id": "whk-s07", "split": "test", "category": "single", "query": "Which kinds of notifications can PayPal push to my server?", "expected_tools": ["webhooks-event-types_list"], "alternatives": {"webhooks-event-types_list": ["event-types_list"]}}
 {"id": "whk-s08", "split": "test", "category": "single", "query": "Verify the signature on a webhook message I just received", "expected_tools": ["verify-webhook-signature_post"]}
@@ -88,8 +88,8 @@
 {"id": "m07", "split": "dev", "category": "multi", "query": "Create a product called 'Pilates Pass', then a $19/month plan for it", "expected_tools": ["products_create", "plans_create"], "ordered": true}
 {"id": "m08", "split": "test", "category": "multi", "query": "Create a plan for product PROD-XXCD1234QWER65782 at $9.99 monthly and activate it", "expected_tools": ["plans_create", "plans_activate"], "ordered": true}
 {"id": "m09", "split": "dev", "category": "multi", "query": "Suspend subscription I-BW452GLLEP1G and tell me when it originally started", "expected_tools": ["subscriptions_suspend", "subscriptions_get"]}
-{"id": "m10", "split": "test", "category": "multi", "query": "Capture order ORD-8AB2342345KL9876M, then add UPS tracking 1Z999AA10123456784 to it", "expected_tools": ["orders_capture", "orders_track_create"], "ordered": true, "alternatives": {"orders_track_create": ["trackers_post"]}}
-{"id": "m11", "split": "dev", "category": "multi", "query": "Look up order ORD-8AB2342345KL9876M and capture it if the buyer approved it", "expected_tools": ["orders_get", "orders_capture"], "ordered": true}
+{"id": "m10", "split": "test", "category": "multi", "query": "Capture order 8AB2342345KL9876M, then add UPS tracking 1Z999AA10123456784 to it", "expected_tools": ["orders_capture", "orders_track_create"], "ordered": true, "alternatives": {"orders_track_create": ["trackers_post"]}}
+{"id": "m11", "split": "dev", "category": "multi", "query": "Look up order 8AB2342345KL9876M and capture it if the buyer approved it", "expected_tools": ["orders_get", "orders_capture"], "ordered": true}
 {"id": "m12", "split": "test", "category": "multi", "query": "Check authorization AUTH-0VF52814937998046 and capture it", "expected_tools": ["authorizations_get", "authorizations_capture"], "ordered": true}
 {"id": "m13", "split": "dev", "category": "multi", "query": "How much did I make last month, and what's my balance now?", "expected_tools": ["search_get", "balances_get"]}
 {"id": "m14", "split": "test", "category": "multi", "query": "Pay out $100 to amy@example.com and then check how the batch is doing", "expected_tools": ["payouts_post", "payouts_get"], "ordered": true}

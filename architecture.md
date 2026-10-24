@@ -142,8 +142,10 @@ class BackendResult:
 
 `MockPayPal`:
 - Checks `args` against the **full** schema and returns a 422 with the failing paths if they don't match.
-- Keeps state, seeded from `backend/seed.json`, for invoices, transactions, disputes, orders, subscriptions and products. Creating something gives it a new ID, and later reads return it.
-- Every other operation returns a placeholder in the shape of the spec's 2xx response.
+- Routes each call generically from its path template: the part before the first `{param}` is the collection, the param is the item ID, and the next segment is the action (`/v2/invoicing/invoices/{invoice_id}/send` → collection `/v2/invoicing/invoices`, action `send`). Collection GET lists, POST creates, item GET/PUT/PATCH/DELETE read, update or remove, and an action applies its effect.
+- Everything PayPal-specific is data in `backend/seed.json`. That covers the seeded collections (invoices, templates, disputes, captures, authorizations, refunds, orders, plans, subscriptions, products, webhooks, payouts, trackers, payment tokens, web profiles, transactions, balances) and each collection's ID prefix, list key and status on create. It also covers what each action does (`send` sets SENT; `refund` sets REFUNDED and creates a refund in `/v2/payments/refunds`), search aliases (`search-invoices` searches invoices), and the date field the transaction list filters on. Seeded IDs follow the specs' patterns (order IDs are `^[A-Z0-9]+$`).
+- Operations on collections that aren't seeded return a minimal success placeholder (`{id, status: "OK"}`, or an empty list for GET).
+- A test calls all 115 tools with a minimal valid input generated from each schema (`tools/sample.py`) and requires a 2xx from every one.
 - Fake errors (429, 500) can be switched on through settings, so the error handling gets tested.
 
 The registry builds an async `StructuredTool` per spec that calls `backend.call`. A real sandbox backend in phase 2 would be another `Backend` implementation, with no changes to the agent.

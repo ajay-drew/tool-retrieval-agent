@@ -83,10 +83,10 @@ Phase 1 uses PayPal's 115 REST operations, plus `rag_search` and `system_search`
 **Done when** R0 runs in under 30 seconds with no API key and Recall@8 ≥ 0.95 on the 60 cases.
 
 ### 5. Mock backend and tool registry
-- [ ] A `Backend` interface, with `MockPayPal` as its first implementation
-- [ ] The mock checks inputs against the full schema, keeps seeded data (invoices, transactions, disputes, orders, subscriptions, products), and resets for each case
-- [ ] Every other operation returns a placeholder in the right shape
-- [ ] The registry builds one async `StructuredTool` per `ToolSpec`
+- [x] A `Backend` interface, with `MockPayPal` as its first implementation
+- [x] The mock checks inputs against the full schema, keeps seeded data (invoices, transactions, disputes, orders, subscriptions, products), and resets for each case
+- [x] Every other operation returns a placeholder in the right shape
+- [x] The registry builds one async `StructuredTool` per `ToolSpec`
 
 **Done when** every one of the 115 tools can be called with a valid example input and returns success.
 
@@ -149,6 +149,7 @@ Revised 2026-10-24 after R0 tuning on the dev split (`reports/r0_tuning.md`). Th
 
 - 2026-10-24: plan created.
 - 2026-10-24: model provider changed to OpenRouter (`deepseek/deepseek-v4-flash`, $0.091 / $0.182 per 1M tokens in / out). `langchain-deepseek` replaced by `langchain-openai`. The 1M context means R1 can also run untrimmed.
+- 2026-10-24: step 5 done. The mock is generic REST routing, with PayPal behaviour as data in seed.json. Seed IDs changed to match spec patterns (order and webhook event IDs), and the eval cases were updated to match. All 115 tools pass a minimal valid call.
 - 2026-10-24: steps 3–4 done. All 151 cases written at once (60 dev, 91 test) instead of 60 then 90. R0 on the test split: Recall@8 0.921, Recall@5 0.849, MRR 0.741, nDCG@5 0.739. That misses the 0.93 Recall@8 target by 0.01. Not tuned further, to keep the test split honest. The CI baseline is 0.9206. Step 3's "invoice tool in top 3" check passes (invoices_list is #1 for the brief's invoice request), but `invoices_create` is outside the top 5 for that query; that's covered by `find_tools` and measured as exposure recall.
 - 2026-10-24: R0 tuning on dev (8 setups): kept bge-small, 5 examples, dense only. Hybrid BM25+dense lost 0.05–0.11 Recall@8; 10 examples and bge-base moved results by ±0.02 (noise). Targets revised (see Phase 1 targets). Eval cases now carry a dev/test split; 11 cases were rewritten after the leakage check flagged them.
 - 2026-10-24: vector index changed from FAISS to a Qdrant server in Docker (v1.19.2, client 1.19.1). FAISS segfaulted on macOS when imported before torch. Search is async through `AsyncQdrantClient`, and the R3 description-only variant becomes a payload filter. CI runs Qdrant as a service container.

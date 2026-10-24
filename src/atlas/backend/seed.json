@@ -1,0 +1,815 @@
+{
+ "actions": {
+  "send": {
+   "status": "SENT"
+  },
+  "remind": {},
+  "cancel": {
+   "status": "CANCELLED"
+  },
+  "payments": {
+   "status": "MARKED_AS_PAID"
+  },
+  "refunds": {
+   "status": "MARKED_AS_REFUNDED"
+  },
+  "generate-qr-code": {
+   "returns": {
+    "qr_code": "iVBORw0KGgoAAAANSUhEUgAA-mock-qr"
+   }
+  },
+  "activate": {
+   "status": "ACTIVE"
+  },
+  "deactivate": {
+   "status": "INACTIVE"
+  },
+  "suspend": {
+   "status": "SUSPENDED"
+  },
+  "revise": {},
+  "update-pricing-schemes": {},
+  "capture": {
+   "status": "COMPLETED",
+   "creates": "/v2/payments/captures"
+  },
+  "authorize": {
+   "status": "COMPLETED",
+   "creates": "/v2/payments/authorizations"
+  },
+  "refund": {
+   "status": "REFUNDED",
+   "creates": "/v2/payments/refunds"
+  },
+  "void": {
+   "status": "VOIDED"
+  },
+  "reauthorize": {
+   "status": "CREATED"
+  },
+  "accept-claim": {
+   "status": "RESOLVED"
+  },
+  "accept-offer": {
+   "status": "RESOLVED"
+  },
+  "deny-offer": {
+   "status": "UNDER_REVIEW"
+  },
+  "make-offer": {
+   "status": "WAITING_FOR_BUYER_RESPONSE"
+  },
+  "escalate": {
+   "status": "UNDER_REVIEW"
+  },
+  "appeal": {
+   "status": "UNDER_REVIEW"
+  },
+  "adjudicate": {
+   "status": "RESOLVED"
+  },
+  "require-evidence": {
+   "status": "WAITING_FOR_SELLER_RESPONSE"
+  },
+  "provide-evidence": {
+   "status": "UNDER_REVIEW"
+  },
+  "provide-supporting-info": {},
+  "send-message": {},
+  "acknowledge-return-item": {
+   "status": "UNDER_REVIEW"
+  },
+  "track": {
+   "creates": "/v1/shipping/trackers"
+  },
+  "resend": {},
+  "transactions": {
+   "returns": {
+    "transactions": [
+     {
+      "id": "SUBTXN-0914",
+      "status": "COMPLETED",
+      "time": "2026-09-14T00:00:00Z",
+      "amount_with_breakdown": {
+       "gross_amount": {
+        "currency_code": "USD",
+        "value": "29.00"
+       }
+      }
+     },
+     {
+      "id": "SUBTXN-1014",
+      "status": "COMPLETED",
+      "time": "2026-10-14T00:00:00Z",
+      "amount_with_breakdown": {
+       "gross_amount": {
+        "currency_code": "USD",
+        "value": "29.00"
+       }
+      }
+     }
+    ]
+   }
+  },
+  "event-types": {
+   "returns": {
+    "event_types": [
+     {
+      "name": "PAYMENT.CAPTURE.COMPLETED"
+     }
+    ]
+   }
+  }
+ },
+ "collections": {
+  "/v2/invoicing/invoices": {
+   "id_prefix": "INV2-NEW-",
+   "create_status": "DRAFT",
+   "list_key": "items",
+   "items": [
+    {
+     "id": "INV2-A1B2-C3D4-E5F6-G7H8",
+     "status": "SENT",
+     "detail": {
+      "invoice_number": "NW-0141",
+      "currency_code": "USD",
+      "invoice_date": "2026-10-02",
+      "payment_term": {
+       "due_date": "2026-11-01"
+      }
+     },
+     "primary_recipients": [
+      {
+       "billing_info": {
+        "email_address": "jane@example.com",
+        "name": {
+         "given_name": "Jane",
+         "surname": "Ortiz"
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "name": "Brand workshop",
+       "quantity": "1",
+       "unit_amount": {
+        "currency_code": "USD",
+        "value": "120.00"
+       }
+      }
+     ],
+     "amount": {
+      "currency_code": "USD",
+      "value": "120.00"
+     }
+    },
+    {
+     "id": "INV2-K9L8-M7N6-P5Q4-R3S2",
+     "status": "DRAFT",
+     "detail": {
+      "invoice_number": "NW-0142",
+      "currency_code": "USD",
+      "invoice_date": "2026-10-10",
+      "payment_term": {
+       "due_date": "2026-11-09"
+      }
+     },
+     "primary_recipients": [
+      {
+       "billing_info": {
+        "email_address": "bob@acme.io",
+        "name": {
+         "given_name": "Bob",
+         "surname": "Lee"
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "name": "Website retainer",
+       "quantity": "1",
+       "unit_amount": {
+        "currency_code": "USD",
+        "value": "450.00"
+       }
+      }
+     ],
+     "amount": {
+      "currency_code": "USD",
+      "value": "450.00"
+     }
+    },
+    {
+     "id": "INV2-T1U2-V3W4-X5Y6-Z7A8",
+     "status": "SENT",
+     "detail": {
+      "invoice_number": "NW-0139",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-18",
+      "payment_term": {
+       "due_date": "2026-10-18"
+      }
+     },
+     "primary_recipients": [
+      {
+       "billing_info": {
+        "email_address": "lena@studio.co",
+        "name": {
+         "given_name": "Lena",
+         "surname": "Park"
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "name": "Photo edit",
+       "quantity": "1",
+       "unit_amount": {
+        "currency_code": "USD",
+        "value": "75.00"
+       }
+      }
+     ],
+     "amount": {
+      "currency_code": "USD",
+      "value": "75.00"
+     }
+    },
+    {
+     "id": "INV2-C4R0-L111-2222-3333",
+     "status": "SENT",
+     "detail": {
+      "invoice_number": "NW-0137",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-05",
+      "payment_term": {
+       "due_date": "2026-10-05"
+      }
+     },
+     "primary_recipients": [
+      {
+       "billing_info": {
+        "email_address": "carol@northwind.com",
+        "name": {
+         "given_name": "Carol",
+         "surname": "Diaz"
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "name": "Consulting",
+       "quantity": "2",
+       "unit_amount": {
+        "currency_code": "USD",
+        "value": "120.00"
+       }
+      }
+     ],
+     "amount": {
+      "currency_code": "USD",
+      "value": "240.00"
+     }
+    },
+    {
+     "id": "INV2-C4R0-DRFT-4444-5555",
+     "status": "DRAFT",
+     "detail": {
+      "invoice_number": "NW-0143",
+      "currency_code": "USD",
+      "invoice_date": "2026-10-20",
+      "payment_term": {
+       "due_date": "2026-11-19"
+      }
+     },
+     "primary_recipients": [
+      {
+       "billing_info": {
+        "email_address": "carol@northwind.com",
+        "name": {
+         "given_name": "Carol",
+         "surname": "Diaz"
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "name": "Consulting",
+       "quantity": "1",
+       "unit_amount": {
+        "currency_code": "USD",
+        "value": "120.00"
+       }
+      }
+     ],
+     "amount": {
+      "currency_code": "USD",
+      "value": "120.00"
+     }
+    }
+   ]
+  },
+  "/v2/invoicing/search-invoices": {
+   "search_of": "/v2/invoicing/invoices"
+  },
+  "/v2/invoicing/templates": {
+   "id_prefix": "TEMP-NEW-",
+   "list_key": "templates",
+   "items": [
+    {
+     "id": "TEMP-19V05281TU309413B",
+     "name": "Standard project",
+     "default_template": true
+    }
+   ]
+  },
+  "/v1/customer/disputes": {
+   "id_prefix": "PP-D-NEW-",
+   "list_key": "items",
+   "items": [
+    {
+     "id": "PP-D-27803",
+     "dispute_id": "PP-D-27803",
+     "status": "WAITING_FOR_SELLER_RESPONSE",
+     "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+     "dispute_amount": {
+      "currency_code": "USD",
+      "value": "89.00"
+     },
+     "create_time": "2026-10-12T09:14:00Z",
+     "disputed_transactions": [
+      {
+       "seller_transaction_id": "CAP-9XK12345",
+       "buyer": {
+        "name": "user_123",
+        "email": "user_123@example.com"
+       }
+      }
+     ]
+    },
+    {
+     "id": "PP-D-27811",
+     "dispute_id": "PP-D-27811",
+     "status": "RESOLVED",
+     "outcome": "RESOLVED_BUYER_FAVOUR",
+     "reason": "MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED",
+     "dispute_amount": {
+      "currency_code": "USD",
+      "value": "42.00"
+     },
+     "create_time": "2026-09-02T16:40:00Z",
+     "disputed_transactions": [
+      {
+       "seller_transaction_id": "CAP-4LM77881",
+       "buyer": {
+        "name": "user_456",
+        "email": "user_456@example.com"
+       }
+      }
+     ]
+    },
+    {
+     "id": "PP-D-27840",
+     "dispute_id": "PP-D-27840",
+     "status": "UNDER_REVIEW",
+     "reason": "UNAUTHORISED",
+     "dispute_amount": {
+      "currency_code": "USD",
+      "value": "35.00"
+     },
+     "create_time": "2026-10-19T11:02:00Z",
+     "disputed_transactions": [
+      {
+       "seller_transaction_id": "CAP-2QW99001",
+       "buyer": {
+        "name": "user_789",
+        "email": "user_789@example.com"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "/v2/payments/captures": {
+   "id_prefix": "CAP-NEW-",
+   "items": [
+    {
+     "id": "CAP-9XK12345",
+     "status": "COMPLETED",
+     "amount": {
+      "currency_code": "USD",
+      "value": "89.00"
+     },
+     "create_time": "2026-10-01T14:00:00Z"
+    }
+   ]
+  },
+  "/v2/payments/authorizations": {
+   "id_prefix": "AUTH-NEW-",
+   "items": [
+    {
+     "id": "AUTH-0VF52814937998046",
+     "status": "CREATED",
+     "amount": {
+      "currency_code": "USD",
+      "value": "64.00"
+     },
+     "expiration_time": "2026-10-27T10:00:00Z"
+    }
+   ]
+  },
+  "/v2/payments/refunds": {
+   "id_prefix": "REF-NEW-",
+   "items": [
+    {
+     "id": "REF-1JU08902781691411",
+     "status": "COMPLETED",
+     "amount": {
+      "currency_code": "USD",
+      "value": "20.00"
+     },
+     "create_time": "2026-09-21T08:30:00Z"
+    }
+   ]
+  },
+  "/v2/checkout/orders": {
+   "id_prefix": "NEWORD",
+   "create_status": "CREATED",
+   "items": [
+    {
+     "id": "5O190127TN364715T",
+     "status": "CREATED",
+     "intent": "CAPTURE",
+     "purchase_units": [
+      {
+       "amount": {
+        "currency_code": "USD",
+        "value": "38.00"
+       }
+      }
+     ]
+    },
+    {
+     "id": "8AB2342345KL9876M",
+     "status": "APPROVED",
+     "intent": "CAPTURE",
+     "purchase_units": [
+      {
+       "amount": {
+        "currency_code": "USD",
+        "value": "112.50"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "/v1/billing/plans": {
+   "id_prefix": "P-NEW-",
+   "create_status": "ACTIVE",
+   "list_key": "plans",
+   "items": [
+    {
+     "id": "P-5ML4271244454362WXNWU5NQ",
+     "name": "Pro Monthly",
+     "status": "ACTIVE",
+     "product_id": "PROD-XXCD1234QWER65782",
+     "billing_cycles": [
+      {
+       "frequency": {
+        "interval_unit": "MONTH",
+        "interval_count": 1
+       },
+       "pricing_scheme": {
+        "fixed_price": {
+         "currency_code": "USD",
+         "value": "29.00"
+        }
+       }
+      }
+     ]
+    },
+    {
+     "id": "P-7GL4271244454362WXNWU5NQ",
+     "name": "Basic Monthly",
+     "status": "INACTIVE",
+     "product_id": "PROD-XXCD1234QWER65782",
+     "billing_cycles": [
+      {
+       "frequency": {
+        "interval_unit": "MONTH",
+        "interval_count": 1
+       },
+       "pricing_scheme": {
+        "fixed_price": {
+         "currency_code": "USD",
+         "value": "9.00"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "/v1/billing/subscriptions": {
+   "id_prefix": "I-NEW-",
+   "create_status": "APPROVAL_PENDING",
+   "items": [
+    {
+     "id": "I-BW452GLLEP1G",
+     "status": "ACTIVE",
+     "plan_id": "P-5ML4271244454362WXNWU5NQ",
+     "quantity": "1",
+     "start_time": "2026-03-14T00:00:00Z",
+     "subscriber": {
+      "email_address": "sam@example.com"
+     }
+    },
+    {
+     "id": "I-CX783HJKMN2Q",
+     "status": "SUSPENDED",
+     "plan_id": "P-5ML4271244454362WXNWU5NQ",
+     "quantity": "2",
+     "start_time": "2026-06-01T00:00:00Z",
+     "subscriber": {
+      "email_address": "kai@example.com"
+     }
+    }
+   ]
+  },
+  "/v1/catalogs/products": {
+   "id_prefix": "PROD-NEW-",
+   "list_key": "products",
+   "items": [
+    {
+     "id": "PROD-XXCD1234QWER65782",
+     "name": "Video Streaming Service",
+     "type": "SERVICE",
+     "description": "Streaming plans"
+    }
+   ]
+  },
+  "/v1/notifications/webhooks": {
+   "id_prefix": "WH-NEW-",
+   "list_key": "webhooks",
+   "items": [
+    {
+     "id": "WH-1A2B3C4D5E",
+     "url": "https://example.com/hooks/paypal",
+     "event_types": [
+      {
+       "name": "PAYMENT.CAPTURE.COMPLETED"
+      }
+     ]
+    }
+   ]
+  },
+  "/v1/notifications/webhooks-events": {
+   "list_key": "events",
+   "items": [
+    {
+     "id": "WHEVT7RH12345",
+     "event_type": "PAYMENT.CAPTURE.COMPLETED",
+     "create_time": "2026-10-23T18:22:00Z",
+     "summary": "Payment completed for $89.00 USD"
+    }
+   ]
+  },
+  "/v1/payments/payouts": {
+   "id_prefix": "PAYOUTBATCH-NEW-",
+   "create_status": "PENDING",
+   "items": [
+    {
+     "id": "PAYOUTBATCH-5UXD2E6ZG4R5Y",
+     "batch_header": {
+      "batch_status": "SUCCESS",
+      "amount": {
+       "currency_code": "USD",
+       "value": "300.00"
+      }
+     },
+     "status": "SUCCESS"
+    }
+   ]
+  },
+  "/v1/payments/payouts-item": {
+   "items": [
+    {
+     "id": "PAYOUTITEM-8AL9EKD2N3E",
+     "transaction_status": "UNCLAIMED",
+     "status": "UNCLAIMED",
+     "payout_batch_id": "PAYOUTBATCH-5UXD2E6ZG4R5Y",
+     "payout_item": {
+      "receiver": "lee@example.com",
+      "amount": {
+       "currency_code": "USD",
+       "value": "100.00"
+      }
+     }
+    }
+   ]
+  },
+  "/v1/shipping/trackers": {
+   "id_prefix": "TRK-NEW-",
+   "list_key": "trackers",
+   "items": [
+    {
+     "id": "8MC585209K746392H-785412369874",
+     "transaction_id": "8MC585209K746392H",
+     "tracking_number": "785412369874",
+     "carrier": "FEDEX",
+     "status": "SHIPPED"
+    }
+   ]
+  },
+  "/v3/vault/payment-tokens": {
+   "id_prefix": "tok-",
+   "list_key": "payment_tokens",
+   "items": [
+    {
+     "id": "8kk8451t",
+     "customer": {
+      "id": "CUST-77821"
+     },
+     "payment_source": {
+      "card": {
+       "brand": "VISA",
+       "last_digits": "1881"
+      }
+     }
+    }
+   ]
+  },
+  "/v1/payment-experience/web-profiles": {
+   "id_prefix": "XP-NEW-",
+   "items": [
+    {
+     "id": "XP-CP6S-W9DY-96H8-MVN2",
+     "name": "Default checkout"
+    }
+   ]
+  },
+  "/v1/reporting/transactions": {
+   "list_key": "transaction_details",
+   "date_field": "transaction_info.transaction_initiation_date",
+   "items": [
+    {
+     "id": "9GS80322F53626837",
+     "transaction_info": {
+      "transaction_id": "9GS80322F53626837",
+      "transaction_event_code": "T0006",
+      "transaction_initiation_date": "2026-09-03T10:12:00Z",
+      "transaction_amount": {
+       "currency_code": "USD",
+       "value": "120.00"
+      },
+      "transaction_status": "S"
+     },
+     "payer_info": {
+      "email_address": "jane@example.com"
+     }
+    },
+    {
+     "id": "4BC29857VA1283322",
+     "transaction_info": {
+      "transaction_id": "4BC29857VA1283322",
+      "transaction_event_code": "T0006",
+      "transaction_initiation_date": "2026-09-11T15:40:00Z",
+      "transaction_amount": {
+       "currency_code": "USD",
+       "value": "75.50"
+      },
+      "transaction_status": "S"
+     },
+     "payer_info": {
+      "email_address": "lena@studio.co"
+     }
+    },
+    {
+     "id": "1HX39201KF4421937",
+     "transaction_info": {
+      "transaction_id": "1HX39201KF4421937",
+      "transaction_event_code": "T0006",
+      "transaction_initiation_date": "2026-09-19T09:05:00Z",
+      "transaction_amount": {
+       "currency_code": "USD",
+       "value": "310.00"
+      },
+      "transaction_status": "S"
+     },
+     "payer_info": {
+      "email_address": "bob@acme.io"
+     }
+    },
+    {
+     "id": "7TT48210MN0098311",
+     "transaction_info": {
+      "transaction_id": "7TT48210MN0098311",
+      "transaction_event_code": "T0006",
+      "transaction_initiation_date": "2026-09-27T20:30:00Z",
+      "transaction_amount": {
+       "currency_code": "USD",
+       "value": "49.99"
+      },
+      "transaction_status": "S"
+     },
+     "payer_info": {
+      "email_address": "kim@school.edu"
+     }
+    },
+    {
+     "id": "REF-1JU08902781691411",
+     "transaction_info": {
+      "transaction_id": "REF-1JU08902781691411",
+      "transaction_event_code": "T1107",
+      "transaction_initiation_date": "2026-09-21T08:30:00Z",
+      "transaction_amount": {
+       "currency_code": "USD",
+       "value": "-20.00"
+      },
+      "transaction_status": "S"
+     },
+     "payer_info": {
+      "email_address": "lena@studio.co"
+     }
+    },
+    {
+     "id": "CAP-9XK12345",
+     "transaction_info": {
+      "transaction_id": "CAP-9XK12345",
+      "transaction_event_code": "T0006",
+      "transaction_initiation_date": "2026-10-01T14:00:00Z",
+      "transaction_amount": {
+       "currency_code": "USD",
+       "value": "89.00"
+      },
+      "transaction_status": "S"
+     },
+     "payer_info": {
+      "email_address": "user_123@example.com"
+     }
+    },
+    {
+     "id": "8MC585209K746392H",
+     "transaction_info": {
+      "transaction_id": "8MC585209K746392H",
+      "transaction_event_code": "T0006",
+      "transaction_initiation_date": "2026-10-08T11:25:00Z",
+      "transaction_amount": {
+       "currency_code": "USD",
+       "value": "64.00"
+      },
+      "transaction_status": "S"
+     },
+     "payer_info": {
+      "email_address": "mike@contoso.com"
+     }
+    },
+    {
+     "id": "3KP77712AB0091277",
+     "transaction_info": {
+      "transaction_id": "3KP77712AB0091277",
+      "transaction_event_code": "T0006",
+      "transaction_initiation_date": "2026-10-16T17:45:00Z",
+      "transaction_amount": {
+       "currency_code": "USD",
+       "value": "215.00"
+      },
+      "transaction_status": "S"
+     },
+     "payer_info": {
+      "email_address": "dave@fabrikam.com"
+     }
+    }
+   ]
+  },
+  "/v1/reporting/balances": {
+   "singleton": {
+    "balances": [
+     {
+      "currency": "USD",
+      "primary": true,
+      "total_balance": {
+       "currency_code": "USD",
+       "value": "8420.15"
+      },
+      "available_balance": {
+       "currency_code": "USD",
+       "value": "8100.00"
+      },
+      "withheld_balance": {
+       "currency_code": "USD",
+       "value": "320.15"
+      }
+     }
+    ],
+    "as_of_time": "2026-10-24T09:00:00Z"
+   }
+  }
+ }
+}

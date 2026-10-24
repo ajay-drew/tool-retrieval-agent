@@ -1,9 +1,9 @@
 import math
-import re
 from collections.abc import Callable, Iterable
 from statistics import mean
 
 from atlas.evals.cases import Case
+from atlas.jsonpath import dig
 
 KS = (3, 5, 8, 10)
 MRR_DEPTH = 10
@@ -63,23 +63,6 @@ def grouped(
     for case, scores in rows:
         buckets.setdefault(key(case), []).append(scores)
     return {name: {"n": len(b), **average(b)} for name, b in sorted(buckets.items())}
-
-
-_INDEX = re.compile(r"([^\[\]]+)|\[(\d+)\]")
-
-
-def dig(value: object, dotted: str) -> object:
-    for part in dotted.split("."):
-        for key, index in _INDEX.findall(part):
-            if key:
-                if not isinstance(value, dict) or key not in value:
-                    return None
-                value = value[key]
-            else:
-                if not isinstance(value, list) or int(index) >= len(value):
-                    return None
-                value = value[int(index)]
-    return value
 
 
 def _as_number(value: object) -> float | None:
