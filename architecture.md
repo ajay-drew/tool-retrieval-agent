@@ -176,11 +176,11 @@ The registry builds an async `StructuredTool` per spec that calls `backend.call`
 |---|---|---|
 | POST | `/api/chat/stream` | Run one user message. Body `{message, thread_id?}`. Streams NDJSON events. |
 | POST | `/api/chat/{thread_id}/resume/stream` | Answer an approval pause. Body `{decisions: [{type: "approve" \| "reject", message?}]}`. Streams NDJSON. |
-| GET | `/api/chat/{thread_id}` | The thread's transcript: each turn's user message and the events it streamed, so a reloaded `/c/<thread-id>` page replays it. 404 when unknown (threads live in memory). |
+| GET | `/api/chat/{thread_id}` | The thread's transcript: each turn's user message and the events it streamed, so a reloaded `/atlas/<thread-id>` page replays it. 404 when unknown (threads live in memory). |
 | GET | `/api/tools/search?q=&k=` | Retrieval inspector: ranked tools with score, purpose, access and group |
 | GET | `/api/meta` | Model, tool count and request budget, for the header |
 | GET | `/api/health` | Liveness |
-| GET | `/`, `/c/{thread_id}` | The built React app (`web/dist`); `/c/…` serves the same page, which loads that thread |
+| GET | `/`, `/atlas/{thread_id}` | The built React app (`web/dist`); `/atlas/…` serves the same page, which loads that thread |
 
 **Stream events** (`agent/stream.py`, one JSON object per line):
 
@@ -195,11 +195,11 @@ The registry builds an async `StructuredTool` per spec that calls `backend.call`
 | `done` | `status`, `trace_url`, `thread_url` | Turn finished. `thread_url` is the LangSmith thread page (`<project URL>/t/<thread_id>`). |
 | `error` | `detail` | Turn failed |
 
-Every run of a turn, the root trace and every model and tool call under it, carries `metadata.thread_id` equal to the chat's thread ID (the one in `/c/<thread-id>`), so LangSmith groups a conversation's turns into one thread. LangSmith needs the key on child runs too, or they drop out of the thread's view and totals.
+Every run of a turn, the root trace and every model and tool call under it, carries `metadata.thread_id` equal to the chat's thread ID (the one in `/atlas/<thread-id>`), so LangSmith groups a conversation's turns into one thread. LangSmith needs the key on child runs too, or they drop out of the thread's view and totals.
 
 `ToolRetrievalMiddleware` writes `last_retrieval` (query, scored hits, shown, dropped by the budget) to state in `before_model`; `stream_turn` turns that state update into the `retrieval` event.
 
-**Web app (`web/`):** Vite + React 19 + TypeScript, Penny's CSS tokens and components ported as plain CSS, `react-markdown` for answers. The chat thread shows each turn as a timeline (retrieval step → tool calls with results → approval panel → answer with its LangSmith trace link). The side panel is the retrieval inspector: the latest retrieval's ranked hits (shown vs. dropped by the budget) and a search box over the catalog. Each conversation has its own URL, `/c/<thread-id>`. The UI moves there when the stream's `started` event arrives, and on load or back/forward it fetches `/api/chat/{thread_id}` and replays the stored events through the same reducer as live streaming. `npm run dev` proxies `/api` to `localhost:8000`; `npm run build` writes `web/dist`, which FastAPI serves.
+**Web app (`web/`):** Vite + React 19 + TypeScript, Penny's CSS tokens and components ported as plain CSS, `react-markdown` for answers. The chat thread shows each turn as a timeline (retrieval step → tool calls with results → approval panel → answer with its LangSmith trace link). The side panel is the retrieval inspector: the latest retrieval's ranked hits (shown vs. dropped by the budget) and a search box over the catalog. Each conversation has its own URL, `/atlas/<thread-id>`. The UI moves there when the stream's `started` event arrives, and on load or back/forward it fetches `/api/chat/{thread_id}` and replays the stored events through the same reducer as live streaming. `npm run dev` proxies `/api` to `localhost:8000`; `npm run build` writes `web/dist`, which FastAPI serves.
 
 ## Errors
 

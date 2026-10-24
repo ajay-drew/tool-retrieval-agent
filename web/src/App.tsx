@@ -7,7 +7,7 @@ import { TurnView } from "./components/TurnView";
 import { applyEvent, newTurn, replayTurn } from "./turns";
 import type { Meta, Retrieval, Turn } from "./types";
 
-const THREAD_PATH = /^\/c\/([A-Za-z0-9_-]+)\/?$/;
+const THREAD_PATH = /^\/atlas\/([A-Za-z0-9_-]+)\/?$/;
 
 function threadFromPath(): string | null {
   return THREAD_PATH.exec(window.location.pathname)?.[1] ?? null;
@@ -85,7 +85,7 @@ export function App() {
           if (event.type === "started") {
             setThreadId(event.thread_id);
             if (threadFromPath() !== event.thread_id) {
-              window.history.pushState(null, "", `/c/${event.thread_id}`);
+              window.history.pushState(null, "", `/atlas/${event.thread_id}`);
             }
           }
           else updateLast((turn) => applyEvent(turn, event));

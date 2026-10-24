@@ -94,7 +94,7 @@ def create_app(settings: Settings | None = None, service: ChatService | None = N
 
     if WEB_DIST.exists():
 
-        @app.get("/c/{thread_id}")
+        @app.get("/atlas/{thread_id}")
         def thread_page(thread_id: str) -> FileResponse:
             return FileResponse(WEB_DIST / "index.html")
 
