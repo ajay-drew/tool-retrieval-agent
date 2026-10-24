@@ -1,3 +1,3 @@
-FROM deepseek-r1:8b
+FROM gemma4:latest
 PARAMETER num_ctx 16384
 PARAMETER temperature 0
