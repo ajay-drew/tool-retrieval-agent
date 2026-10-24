@@ -19,6 +19,7 @@ class ToolSpec(BaseModel):
     full_schema_ref: str
     purpose: str = ""
     examples: list[str] = Field(default_factory=list)
+    keywords: str = ""
     raw_tokens: int = 0
     trimmed_tokens: int = 0
 

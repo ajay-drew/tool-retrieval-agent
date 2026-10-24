@@ -46,6 +46,7 @@ One record per API operation. Everything after ingest reads this record, never t
 | `params_schema` | dict | Trimmed JSON Schema with properties `path`, `query` and `body` |
 | `full_schema_ref` | str | Where to find the untrimmed schema, used by the mock to check inputs |
 | `purpose`, `examples` | str, list[str] | Added by the enrich step |
+| `keywords` | str | Curated business terms from `specs/<service>/overrides.json` (`keywords`), for operations whose API name hides what they're for (`search_get` lists transactions, which is where sales and revenue live) |
 | `raw_tokens`, `trimmed_tokens` | int | Size before and after trimming |
 
 In phase 2, names get a service prefix (`stripe__invoices_create`). The ingest step guarantees every name is unique.
@@ -91,6 +92,7 @@ class Hit:
 ```
 
 - `BgeEmbedder` normalises its vectors and adds bge's search prefix to queries.
+- Tools with curated `keywords` get one more point (`kind=keywords`) holding those terms, and the model-facing tool description adds "Use for: …". A tool's score is still its best point.
 - `QdrantToolIndex` uses a Qdrant server (Docker, `qdrant/qdrant:v1.19.2`) through `AsyncQdrantClient`. Collection `atlas_tools` stores 384-dimension cosine vectors: one point for `name + purpose + description` (`kind=head`) and one per example request (`kind=example`), about 6 per tool. The payload is `{tool, service, kind}`.
 - Search uses `query_points_groups` with `group_by="tool"` and `group_size=1`, so Qdrant returns ranked tools, not vectors. A tool's score is its best vector, and each tool appears once. `service` and `heads_only` become payload filters, so a description-only search needs no second index.
 - Point IDs are `uuid5(tool + text)`. `atlas index` recreates the collection, so a rebuild is clean and repeatable.
@@ -127,7 +129,7 @@ return handler(request)
   6. `ModelCallLimitMiddleware` (8)
   7. `ToolCallLimitMiddleware`
 - `checkpointer`: `InMemorySaver`
-- `system_prompt`: from `agent/prompt.md`. It tells the model to ask instead of guessing when a required input is missing, and to use `find_tools` when none of the tools fit.
+- `system_prompt`: from `agent/prompt.md`. It sets Atlas's persona (dry wit: facts first, at most one understated line, never joking about errors, disputes or money that went wrong) and the working rules: look things up rather than guess, search the catalog again before saying no, ask one question when something required is missing, the data rules (sales and revenue come from transactions, not invoices; amounts as two-decimal strings; UTC ISO dates), and the answer format (the answer first, then the IDs touched).
 
 **`run_turn` (`agent/turn.py`)** runs one user message, resumes approval pauses through an approver callback (the CLI asks, evals approve everything), and returns the answer, tool calls with their HTTP status, tokens, latency, status and the LangSmith trace URL. Status is `error` (an exception such as an API or network failure), `limit_hit`, `asked_user` (the answer contains a question and no change was made) or `completed`. Evals leave `error` cases out of every metric and report them separately, so an outage can't look like a weak agent.
 

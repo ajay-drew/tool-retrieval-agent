@@ -34,6 +34,8 @@ def coerce_json_strings(args: dict) -> dict:
 
 def tool_description(spec: ToolSpec) -> str:
     text = f"{spec.summary}. {spec.purpose}".strip(". ") + "."
+    if spec.keywords:
+        text += f" Use for: {spec.keywords}."
     if spec.access == "write":
         text += " Changes data."
     return text[:1000]

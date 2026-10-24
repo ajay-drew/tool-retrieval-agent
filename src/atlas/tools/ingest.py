@@ -103,9 +103,18 @@ def trim_to_budget(item: dict, op: dict, resolver: RefResolver, token_limit: int
     return schema
 
 
-def load_read_only(spec_dir: Path) -> set[str]:
+@dataclass(frozen=True)
+class Overrides:
+    read_only: frozenset[str] = frozenset()
+    keywords: dict[str, str] | None = None
+
+
+def load_overrides(spec_dir: Path) -> Overrides:
     path = spec_dir / "overrides.json"
-    return set(json.loads(path.read_text()).get("read_only", [])) if path.exists() else set()
+    if not path.exists():
+        return Overrides()
+    data = json.loads(path.read_text())
+    return Overrides(frozenset(data.get("read_only", [])), data.get("keywords", {}))
 
 
 def ingest_file(
@@ -113,8 +122,10 @@ def ingest_file(
     service: str,
     prefix_service: bool,
     token_limit: int = 1500,
-    read_only: frozenset[str] = frozenset(),
+    overrides: Overrides | None = None,
 ) -> IngestResult:
+    overrides = overrides or Overrides()
+    keywords = overrides.keywords or {}
     document = json.loads(path.read_text())
     resolver = RefResolver(document)
     specs: list[ToolSpec] = []
@@ -139,7 +150,10 @@ def ingest_file(
                     path=route,
                     summary=_plain(op.get("summary", "")),
                     description=_description(op),
-                    access="read" if method == "get" or op["operationId"] in read_only else "write",
+                    access="read"
+                    if method == "get" or op["operationId"] in overrides.read_only
+                    else "write",
+                    keywords=keywords.get(op["operationId"], ""),
                     params_schema=trimmed,
                     full_schema_ref=name,
                     raw_tokens=approx_tokens(full),
@@ -154,11 +168,11 @@ def ingest_service(
 ) -> IngestResult:
     specs: list[ToolSpec] = []
     full: dict[str, dict] = {}
-    read_only = frozenset(load_read_only(spec_dir))
+    overrides = load_overrides(spec_dir)
     for path in sorted(spec_dir.glob("*.json")):
         if path.name == "overrides.json":
             continue
-        result = ingest_file(path, service, prefix_service, token_limit, read_only)
+        result = ingest_file(path, service, prefix_service, token_limit, overrides)
         specs.extend(result.specs)
         full.update(result.full_schemas)
     return IngestResult(specs=specs, full_schemas=full)

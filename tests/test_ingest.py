@@ -90,3 +90,9 @@ def test_resolver_follows_required_refs_past_depth_limit():
     resolved = RefResolver(doc).resolve({"$ref": "#/components/schemas/A"}, max_depth=0)
     assert resolved["properties"]["b"]["properties"] == {"c": {"type": "string"}}
     assert "x" not in resolved["properties"]
+
+
+def test_keywords_come_from_overrides(result):
+    by_name = {s.name: s for s in result.specs}
+    assert "sales" in by_name["search_get"].keywords
+    assert by_name["invoices_get"].keywords == ""

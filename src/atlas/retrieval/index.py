@@ -42,7 +42,10 @@ class ToolIndex(Protocol):
 
 def tool_documents(spec: ToolSpec) -> list[tuple[str, str]]:
     head = f"{spec.name.replace('_', ' ')}: {spec.purpose or spec.summary}. {spec.description}"
-    return [(head, "head"), *((example, "example") for example in spec.examples)]
+    docs = [(head, "head"), *((example, "example") for example in spec.examples)]
+    if spec.keywords:
+        docs.append((spec.keywords, "keywords"))
+    return docs
 
 
 async def recreate_collection(

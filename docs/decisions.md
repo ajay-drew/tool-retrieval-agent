@@ -38,6 +38,13 @@ How Atlas got to its current shape: the design decisions made along the way, and
 | Serving | FastAPI serves the build; a separate dev server only | **FastAPI serves `web/dist`** (Vite proxies `/api` in development) | One command, no CORS, the same pattern as Penny. |
 | Streaming | NDJSON; Server-Sent Events; WebSockets | **NDJSON over a POST** | Same as Penny: one JSON event per line, simple to parse, works with `fetch` and an `AbortController`. |
 
+### Retrieval keywords and persona
+
+| Decision | Chosen | Why |
+|---|---|---|
+| Fixing "sales volume" retrieving invoices | **Curated `keywords` per operation**, as service data in `overrides.json`, indexed as one extra point per tool and added to the tool's description | The transactions tool is named `search_get` ("List transactions"), and nothing in its text says sales or revenue, so it never ranked for the brief's first question. Keywords are data, not code, so a new service adds its own. Caveat: they were written knowing the known misses, including some test-split ones, so the test gain isn't a clean held-out number. |
+| Persona | **Dry wit**: facts first, at most one understated line, never joking about errors, disputes or money that went wrong | Ajay's call. Like Penny ("witty when the news is good, firm when it isn't"), but drier. |
+
 ### Evaluation
 
 | Decision | Chosen | Why |

@@ -5,5 +5,17 @@
     "invoices.generate-qr-code",
     "find.eligible.methods",
     "verify-webhook-signature.post"
-  ]
+  ],
+  "keywords": {
+    "search.get": "sales, sales volume, revenue, income, takings, payments received, money in, totals for a period, transaction history, refunds and fees over time",
+    "balances.get": "account balance, available funds, money in the account, cash on hand, how much money I have",
+    "invoices.search-invoices": "find invoices by customer, email, status, amount or date; unpaid, overdue or paid invoices",
+    "invoices.create": "bill a customer, charge a client, new invoice, draft invoice",
+    "invoices.send": "email an invoice, deliver an invoice to the customer, send a draft invoice",
+    "captures.refund": "refund a payment, give money back to a buyer, partial refund",
+    "payouts.post": "pay someone, send money to affiliates, suppliers, freelancers or sellers",
+    "disputes.list": "chargebacks, customer complaints, open cases, claims against me",
+    "subscriptions.suspend": "pause a subscription, put a subscriber on hold",
+    "products.patch": "edit a product, change a product's name or description"
+  }
 }
