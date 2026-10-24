@@ -11,10 +11,6 @@ class CatalogPaths:
         self.tools = data / "tools.json"
         self.full_schemas = data / "full_schemas.json"
         self.enrichment = data / "enrichment.json"
-        self.index = data / "tools.faiss"
-        self.index_ids = data / "tools.ids.json"
-        self.kb_index = data / "kb.faiss"
-        self.kb_chunks = data / "kb.chunks.json"
 
 
 def load_catalog(settings: Settings) -> list[ToolSpec]:

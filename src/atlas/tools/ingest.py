@@ -1,3 +1,4 @@
+import html
 import json
 import re
 from collections.abc import Iterable
@@ -11,6 +12,7 @@ from atlas.tools.spec import ToolSpec
 
 HTTP_METHODS = ("get", "post", "put", "patch", "delete")
 NAME_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
+HTML_TAG = re.compile(r"<[^>]+>")
 TRIM_LEVELS = ((3, 120), (2, 120), (2, 60))
 OVER_BUDGET_REASON = (
     "still over budget at the depth-2 floor; trimming deeper removes fields the call needs"
@@ -32,8 +34,14 @@ def safe_name(operation_id: str, service: str, prefix_service: bool) -> str:
     return name
 
 
+def _plain(text: str) -> str:
+    return " ".join(html.unescape(HTML_TAG.sub(" ", text or "")).split())
+
+
 def _description(op: dict) -> str:
-    text = " ".join(f"{op.get('summary', '')} {op.get('description', '')}".split())
+    summary = _plain(op.get("summary", ""))
+    body = _plain(op.get("description", ""))
+    text = body if body.lower().startswith(summary.lower()) else f"{summary}. {body}".strip(". ")
     return text if len(text) <= 300 else text[:299].rstrip() + "…"
 
 
@@ -120,7 +128,7 @@ def ingest_file(
                     group=path.stem,
                     method=method.upper(),
                     path=route,
-                    summary=" ".join(op.get("summary", "").split()),
+                    summary=_plain(op.get("summary", "")),
                     description=_description(op),
                     access="read" if method == "get" else "write",
                     params_schema=trimmed,

@@ -1,0 +1,1267 @@
+{
+  "authorizations_capture": {
+    "hash": "4e28a61ccfc0810d",
+    "purpose": "A merchant can capture (settle) an authorized payment, either partially or in full, to complete a transaction and receive the funds.",
+    "examples": [
+      "Capture the full $150.00 authorization from order #AUTH-12345 for customer jane@example.com.",
+      "Please settle the remaining $42.50 on authorization ID 8MT12345K1234567 — we're shipping the rest of the order today.",
+      "We only shipped part of the order, so capture just $89.99 from the $200 authorization on invoice INV-2024-09.",
+      "Did the $250 authorization from last Tuesday's order actually get captured yet, or is it still pending?",
+      "How much of the total authorized amount across all open orders this month has been captured versus still waiting?"
+    ]
+  },
+  "authorizations_get": {
+    "hash": "abd7f95eabfd9679",
+    "purpose": "Shows details for a specific authorized payment, including its status, amount, and related transaction information.",
+    "examples": [
+      "Show me the details for authorization ID AUTH-12345ABC67890DEF",
+      "What's the status of payment authorization 7GH89012IJ3456KLM?",
+      "Get the authorized amount and remaining balance for authorization 9MN01234OP5678QRS",
+      "Did the $249.99 authorization for customer jane.smith@example.com go through yesterday?",
+      "How much of the $1,500 authorization on order #ORD-98765 has been captured so far?"
+    ]
+  },
+  "authorizations_reauthorize": {
+    "hash": "bd79c73813b03221",
+    "purpose": "A merchant can reauthorize an authorized PayPal payment to extend the hold on funds after the initial three-day honor period expires, ensuring the payment can still be captured within the 29-day authorization window.",
+    "examples": [
+      "Can you reauthorize the payment for authorization ID 8AA12345KH678901L? The original hold expired and I still need to capture it.",
+      "Please extend the hold on the $150.00 payment from customer jane.smith@email.com — the authorization is about to expire.",
+      "Reauthorize the payment for order #ORD-7890, the authorization ID is 9BB67890PL123456M.",
+      "Did the reauthorization for authorization 7CC34567MN890123P go through successfully? I need to make sure the funds are still reserved.",
+      "How many times has authorization 5DD90123QR456789R been reauthorized? I want to check if we're near the limit."
+    ]
+  },
+  "authorizations_void": {
+    "hash": "e2790a59fbb63399",
+    "purpose": "A merchant can cancel a previously authorized payment before it has been captured, releasing the hold on the buyer's funds.",
+    "examples": [
+      "Cancel the authorization for order #AUTH12345 from yesterday.",
+      "Void the $150 hold on customer order 8XK12345AB6789.",
+      "Please release the pending authorization for transaction 7GH90123.",
+      "Did the $250 hold on invoice INV-2024-0422 get released yet?",
+      "How many authorized payments are still pending from last week that haven't been captured?"
+    ]
+  },
+  "balances_get": {
+    "hash": "7d63bdbeadbade6e",
+    "purpose": "A business user retrieves current or historical account balances across all currencies as of a specific date and time.",
+    "examples": [
+      "Show me all our account balances as of March 15, 2024 at noon UTC.",
+      "What was the balance in our USD account on 2024-01-01T00:00:00Z?",
+      "Pull up the EUR balance snapshot for yesterday at 9 AM Eastern.",
+      "How much money did we have in total across all currencies at the end of last quarter?",
+      "Did our GBP balance change between December 1st and December 5th last year?"
+    ]
+  },
+  "captures_get": {
+    "hash": "d73882cbb6081d32",
+    "purpose": "Retrieves the complete details of a specific captured payment, including its status, amount, and transaction timestamps.",
+    "examples": [
+      "Show me the details for capture 3C948598CS684452D",
+      "What was the status of the $149.99 payment capture from customer order #ORD-8823?",
+      "Get the payout info for capture ID 2JU268706B8122415",
+      "Did the payment for invoice INV-2024-05-177 go through successfully?",
+      "How much of the $500 authorization from customer sarah@acme.com was actually captured?"
+    ]
+  },
+  "captures_refund": {
+    "hash": "0b0ef93366b22b29",
+    "purpose": "Allows a merchant to refund a captured payment, either fully or partially, by specifying the capture ID and optionally an amount, invoice ID, or note.",
+    "examples": [
+      "Refund capture 2GG79123EB602430J in full, the customer cancelled their order.",
+      "Process a partial refund of $15.00 on capture 4KH98321FC712540K for the shipping delay.",
+      "Please refund $38.50 from capture 7RJ45678GB103970M and leave a note saying 'Damaged item—sorry for the trouble.'",
+      "Did we already refund capture 5LP67439DA825160N? I need to check if that payment reversal went through yet.",
+      "What's the total amount we've refunded on capture 9XT83456HB201480P so far? Is there any remaining balance we can still refund?"
+    ]
+  },
+  "connections_get": {
+    "hash": "0c313b2bdcabaf08",
+    "purpose": "Lists all accounting platform connections (e.g., QuickBooks, Xero) that a merchant has set up for syncing invoice data.",
+    "examples": [
+      "Show me which accounting platforms I'm connected to",
+      "What accounting integrations do I have active on my account?",
+      "List my connected accounting services",
+      "Do I have QuickBooks linked for invoice syncing?",
+      "How many accounting connections do I have set up right now?"
+    ]
+  },
+  "customer_payment-tokens_get": {
+    "hash": "601c857b214f9b79",
+    "purpose": "Lists all stored payment tokens for a specific customer so you can view their saved payment methods.",
+    "examples": [
+      "Show me all the saved payment methods for customer CUST_abc123.",
+      "What payment tokens are on file for customer ID 7a9b8c_d4e5?",
+      "List the payment methods stored for customer CUST_xyz789.",
+      "How many saved payment methods does customer CUST_abc123 have?",
+      "Does customer 7a9b8c_d4e5 have any stored payment tokens on their account?"
+    ]
+  },
+  "disputes_accept-claim": {
+    "hash": "8cb5ad9ca79fd856",
+    "purpose": "Accepts liability for a dispute claim, automatically refunding the customer from the merchant's account and closing the dispute in the customer's favor.",
+    "examples": [
+      "I need to accept the claim on dispute PP-D-29384 and refund the customer.",
+      "Go ahead and take the loss on dispute ID 7A3F2E — just accept the claim.",
+      "Can you accept liability for the chargeback on order #10492? The customer is right on this one.",
+      "What's the status of dispute PP-D-29384? Did we accept the claim or are we still fighting it?",
+      "How many disputes did we lose last month where we had to accept the claim and refund the customer?"
+    ]
+  },
+  "disputes_accept-offer": {
+    "hash": "268f183ff74988d0",
+    "purpose": "A customer accepts a merchant's settlement offer on a dispute, which triggers an automatic refund of the proposed amount to the customer.",
+    "examples": [
+      "Accept the $250 offer on dispute PP-123-456-789, please.",
+      "I'd like to agree to the merchant's proposal for case #DIS-2024-001.",
+      "Go ahead and accept the refund offer of $89.50 from Acme Corp for dispute DP-987654.",
+      "What's the status of the offer the merchant made on my chargeback for the laptop purchase? I want to accept it.",
+      "Did the $150 settlement offer on dispute PD-334455 get accepted yet? I told my customer to approve it yesterday."
+    ]
+  },
+  "disputes_acknowledge-return-item": {
+    "hash": "2d175237b5cb591a",
+    "purpose": "A merchant submits proof that a customer returned a disputed item, moving the dispute toward resolution.",
+    "examples": [
+      "I need to confirm that the customer sent back the item for dispute DS-7821.",
+      "Can you upload the signed return receipt for case #CASE-4392 to finalize the refund?",
+      "Please submit the tracking proof for the returned item in dispute 58a7b9c3.",
+      "Did we get confirmation that the item was returned for the chargeback on order #ORD-8821?",
+      "How many of the \"not as described\" disputes have been fully resolved after the customer sent the item back?"
+    ]
+  },
+  "disputes_adjudicate": {
+    "hash": "97381bae3da3d9b8",
+    "purpose": "A merchant can settle a dispute in either their own favor or the customer's favor for sandbox testing purposes, simulating how PayPal normally resolves disputes.",
+    "examples": [
+      "Settle dispute PP-001-234-567-890 in the buyer's favor.",
+      "Please close dispute 7HX12345KJ6789012 and rule it in my favor as the merchant.",
+      "I need to finalize dispute 5PP9876543 by awarding it to the customer.",
+      "How many disputes did I win vs lose last month?",
+      "What was the outcome of dispute PP-002-345-678-901 — did it get ruled for me or against me?"
+    ]
+  },
+  "disputes_appeal": {
+    "hash": "bfe856fc9d7e221a",
+    "purpose": "Appeal a dispute by submitting new evidence or notes to support your case.",
+    "examples": [
+      "I need to appeal dispute DP-78342 with a signed delivery receipt — can you upload the PDF I just attached?",
+      "Please submit an appeal for dispute 9a2f1e8b with the customer's email confirmation as supporting evidence.",
+      "Appeal dispute ID 47b1-92e3 using the tracking proof document I'm attaching here.",
+      "Did we already appeal the chargeback for order #10492 from last week, or is it still waiting for evidence?",
+      "How many disputes are currently in the appeal stage, and which ones are past the 7-day deadline for submitting new evidence?"
+    ]
+  },
+  "disputes_deny-offer": {
+    "hash": "302f8bf1ab11a59b",
+    "purpose": "A business user rejects a settlement offer from the merchant for a specific dispute, optionally adding notes that only PayPal can see.",
+    "examples": [
+      "Deny the settlement offer for dispute DISP-12345 because they only offered $50 but I'm owed $200.",
+      "Reject the merchant's offer on dispute #DISP-67890 and note that the item was never delivered.",
+      "I want to turn down the proposed resolution of $75 for dispute DISP-24680 since the product arrived damaged.",
+      "Did the merchant's offer on dispute DISP-13579 get formally denied yet or is it still pending?",
+      "How many offers have we rejected this month for chargebacks over $100?"
+    ]
+  },
+  "disputes_escalate": {
+    "hash": "450a9f4d3c7f4f71",
+    "purpose": "Escalate a dispute to a formal PayPal claim when the dispute is still in the inquiry stage.",
+    "examples": [
+      "Escalate dispute PP-D-12345 to a claim, the customer is not responding to my messages.",
+      "Please escalate my open inquiry with dispute ID PP-D-98765 to a PayPal claim.",
+      "I need to move dispute PP-D-45678 to a claim because the buyer filed a chargeback with their bank.",
+      "Can you check if dispute PP-D-33442 was escalated to a claim yet? I sent the escalation request yesterday.",
+      "How many of my open disputes in the inquiry stage have been escalated to claims this month?"
+    ]
+  },
+  "disputes_get": {
+    "hash": "baa934b471ae301e",
+    "purpose": "A merchant retrieves the full details of a specific dispute, including its status, reason, and related transaction information, to review or respond to the case.",
+    "examples": [
+      "Show me the details for dispute DIS-2024-03821.",
+      "What's the current status of dispute 7a9f3e2b-1c45?",
+      "Pull up the dispute with ID 48291 and tell me why it was filed.",
+      "How much money is at stake in dispute case-2024-112?",
+      "Did the customer win the dispute for transaction TXN-88473, and what was the reason given?"
+    ]
+  },
+  "disputes_list": {
+    "hash": "9234fb7437037ce5",
+    "purpose": "Lists disputes for a merchant with summary details like ID, reason, status, amount, and timestamps, with filtering by date range, transaction ID, state, and pagination.",
+    "examples": [
+      "Show me all disputes from the last 30 days",
+      "List disputes for transaction TXN_9A2B3C4D",
+      "Get disputes in REVIEW state created since 2024-10-01",
+      "How many disputes did we have this month?",
+      "What's the status of dispute DPT-98765 and when was it last updated?"
+    ]
+  },
+  "disputes_make-offer": {
+    "hash": "bfd7b0e846553af9",
+    "purpose": "A merchant sends a settlement offer to the other party in a dispute, specifying an amount and optional return shipping address, to try to resolve the case.",
+    "examples": [
+      "Offer $150 to resolve dispute PP-D-28742 regarding the defective headphones.",
+      "Make a refund offer of 75 euros on dispute case DS-7T4G82 for the missing shipment.",
+      "Send an offer to the buyer in dispute 23A4B9C for the return of $200 with free shipping back.",
+      "What's the status of the offer I made on dispute PP-D-28742 yesterday? Did the buyer accept?",
+      "How many of my open disputes have received counteroffers versus pending my initial offer?"
+    ]
+  },
+  "disputes_patch": {
+    "hash": "020a031d2e7230d5",
+    "purpose": "Partially update a dispute's details, such as adding communication notes or partner action information, without replacing the entire dispute record.",
+    "examples": [
+      "Update dispute DIS-12345 with the customer's latest email address support@acme.com.",
+      "Add a note to dispute 78901 saying the partner has initiated a chargeback reversal.",
+      "Change the communication detail on dispute 4455-AB to 'Refund issued on 2025-02-10 via original payment method'.",
+      "What's the current status of dispute 3321-XY — has the partner taken any action yet?",
+      "How many disputes from last month still have no partner action recorded?"
+    ]
+  },
+  "disputes_provide-evidence": {
+    "hash": "4ccdcc4ccdaf2d86",
+    "purpose": "A merchant or customer can upload supporting evidence files for a specific dispute to help resolve it in their favor.",
+    "examples": [
+      "Upload the proof of delivery PDF for dispute 8a3f-72b1.",
+      "I need to submit the refund receipt for order #1045 — the dispute ID is 9c2e-41d7.",
+      "Attach the tracking screenshot to dispute 5f1a-93c4, please.",
+      "Did the buyer ever upload their evidence for dispute 7b2d-18e6?",
+      "How many disputes are still waiting for my evidence so I can close them out?"
+    ]
+  },
+  "disputes_provide-supporting-info": {
+    "hash": "34925c9b83a88913",
+    "purpose": "A merchant or buyer can upload evidence files to support their case in an active dispute.",
+    "examples": [
+      "I need to upload the signed delivery receipt for dispute DP-2024-0381 to prove the item was delivered.",
+      "Can you submit the tracking confirmation PDF for chargeback 7a9f2c on my behalf?",
+      "Please attach the email thread with the customer showing they agreed to the refund terms for dispute DP-2024-112.",
+      "Did the buyer ever upload any supporting documents for dispute DP-2024-056?",
+      "How many disputes still need supporting evidence from us before the deadline next Friday?"
+    ]
+  },
+  "disputes_require-evidence": {
+    "hash": "4062122a3252dac6",
+    "purpose": "Advances a dispute from under review to the evidence-collection phase, specifying whether the buyer or seller is now required to submit supporting documentation.",
+    "examples": [
+      "Can you mark dispute DP-3842 as needing buyer response so we can gather their evidence?",
+      "Set dispute DP-2910 to waiting for seller evidence—we need the merchant to submit their proof of shipment.",
+      "Move dispute DP-4738 into the evidence collection phase for the seller side.",
+      "How many active disputes are currently awaiting buyer evidence submission?",
+      "What's the status of dispute DP-8312—has it moved to the evidence gathering stage yet?"
+    ]
+  },
+  "disputes_send-message": {
+    "hash": "8423530b799e81c4",
+    "purpose": "A merchant or customer sends a message with optional supporting document to the other party in an active dispute that is still in the inquiry stage.",
+    "examples": [
+      "Send a message to the customer about dispute DP-8842 explaining why the charge is valid.",
+      "Attach the signed delivery receipt to dispute 7A3F-2B1C and notify the buyer.",
+      "Reply to the merchant on dispute DP-9910 with the proof of return tracking number.",
+      "Did we send any follow-up messages to the cardholder for dispute DP-4521 after uploading the invoice?",
+      "How many disputes in inquiry stage still need a response from the other side?"
+    ]
+  },
+  "event-types_list": {
+    "hash": "2d44be85c97eee83",
+    "purpose": "Lists all event types a webhook is currently subscribed to, so you can verify or review which notifications the webhook will receive.",
+    "examples": [
+      "What events is my webhook wh-abc123 currently subscribed to?",
+      "Show me the notification subscriptions for the webhook I set up for order updates.",
+      "List the event types registered on webhook wh-xyz789.",
+      "Is my inventory webhook still listening for product stock changes?",
+      "How many event subscriptions does webhook wh-def456 have, and which ones are active?"
+    ]
+  },
+  "find_eligible_methods": {
+    "hash": "356e6390a535789c",
+    "purpose": "A merchant can check which payment methods are available for a customer's purchase based on their location, currency, and other details.",
+    "examples": [
+      "What payment options can I offer a customer in Germany buying €150 worth of goods?",
+      "Show me the eligible payment methods for order #ORD-78432 with a total of $230 USD.",
+      "Can a customer from Japan pay with PayPal for a ¥25,000 purchase through our mobile app?",
+      "Why didn't our UK customer see Klarna as an option for their £89.99 order?",
+      "List all available payment methods for a buyer in Australia using email customer@example.com on a desktop browser."
+    ]
+  },
+  "invoice_connection_details_get": {
+    "hash": "963af1a4dbbf9399",
+    "purpose": "Lists all accounting platform connections and their sync status for a specific invoice, helping merchants verify that their invoice data is reaching the right systems.",
+    "examples": [
+      "Show me which accounting platforms my invoice INV-2024-001 is connected to",
+      "Check the connection status of invoice #3421 in QuickBooks and Xero",
+      "List all accounting sync connections for the invoice with ID 987654",
+      "Has invoice #5678 been synced successfully to our accounting system yet?",
+      "Are there any failed connections for invoice INV-2024-089 that need my attention?"
+    ]
+  },
+  "invoices_cancel": {
+    "hash": "80ba8f7a50eb6493",
+    "purpose": "A merchant cancels a sent invoice and optionally sends cancellation notifications to the payer, merchant, and additional CC recipients.",
+    "examples": [
+      "Cancel invoice INV-2024-001 for the Smith project and send a cancellation notice to both myself and the client.",
+      "Please void invoice #1024 from last month and email a cancellation notification to support@vendor.com as a CC.",
+      "I need to cancel invoice INV-9876 that was sent to acme@company.com and notify the payer but not the merchant.",
+      "Did the invoice for the Johnson account (INV-334) get cancelled yet? I need to confirm it's been voided.",
+      "Show me all invoices that were cancelled last week—I want to see how many cancellations we processed between March 1 and March 7."
+    ]
+  },
+  "invoices_create": {
+    "hash": "3ddfbb4b8d51df3f",
+    "purpose": "Creates a draft invoice with merchant and item details so it can later be sent to a buyer for payment.",
+    "examples": [
+      "Create a draft invoice for $1,500 to Acme Corp for consulting services this month.",
+      "Draft a new invoice for project #2049 with 20 hours of design work at $85/hour.",
+      "Set up a draft invoice for Sarah from BlueLeaf Designs — include her email and due in 30 days.",
+      "How many draft invoices did I create last quarter that haven't been sent yet?",
+      "What's the total amount of unpaid draft invoices older than 60 days?"
+    ]
+  },
+  "invoices_delete": {
+    "hash": "e1e0adc784436ed7",
+    "purpose": "A merchant removes a draft or scheduled invoice that hasn't been sent yet so it won't clutter their records or be processed accidentally.",
+    "examples": [
+      "Get rid of invoice DRAFT-001 that I messed up.",
+      "Remove the scheduled invoice for $450 from last Tuesday — I need to redo it.",
+      "Delete the draft invoice for Acme Corp (ID: INV-2024-089).",
+      "How many draft invoices have we deleted this month?",
+      "Did that scheduled invoice for the Smith project get removed before it was sent?"
+    ]
+  },
+  "invoices_generate-qr-code": {
+    "hash": "32d603f492aa7bdf",
+    "purpose": "Generates a QR code image for an invoice that customers can scan with their mobile devices to view or pay the invoice.",
+    "examples": [
+      "Generate a QR code for invoice INV-2024-001 so I can add it to the PDF before mailing it to the customer.",
+      "Create a 300x300 pixel QR code for invoice INV-2024-042 with the pay action.",
+      "I need a QR code for invoice INV-2024-015 that shows the invoice details when scanned, not the payment page.",
+      "Can you make a QR code for invoice INV-2024-078 that's 400 pixels wide so it fits nicely on the printed statement?",
+      "What's the smallest QR code I can generate for invoice INV-2024-033 to put on the packing slip?"
+    ]
+  },
+  "invoices_get": {
+    "hash": "b554730c00629ff8",
+    "purpose": "A merchant retrieves the full details of a specific invoice, including its status, line items, amounts, and customer information, using the invoice ID.",
+    "examples": [
+      "Show me invoice INV-2024-8932",
+      "What's the status of invoice 4421 for the Johnson project?",
+      "Pull up the details for the March invoice from Acme Corp",
+      "How much was invoice INV-2024-7721 for, and has it been paid yet?",
+      "Can you re-send invoice #5583 to billing@example.com?"
+    ]
+  },
+  "invoices_list": {
+    "hash": "d0f171cde438aa7d",
+    "purpose": "Lists invoices with optional filtering, pagination, and field selection so a merchant can view, search, or manage their invoice records.",
+    "examples": [
+      "Show me my last 20 invoices.",
+      "List all unpaid invoices from March 2025.",
+      "I need to see invoices for customer jane@example.com.",
+      "How many invoices did I send last month?",
+      "Did invoice INV-2025-00423 get paid yet?"
+    ]
+  },
+  "invoices_payments": {
+    "hash": "f7c9b242b20f3a12",
+    "purpose": "Records a payment against a specific invoice so the system can update the invoice status to PAID or PARTIALLY PAID and track the outstanding balance.",
+    "examples": [
+      "Can you record a payment of $250 for invoice INV-2024-089 via wire transfer? It came through yesterday.",
+      "Mark invoice #INV-2024-112 as paid — we received a check for $1,200 on March 15th.",
+      "Log an external cash payment of $85.50 for invoice INV-2024-054 and note it was paid at our retail counter.",
+      "What's the status of invoice INV-2024-077? Has any payment been applied to it yet?",
+      "How much is still outstanding on invoice INV-2024-033 after the partial payment we received last week?"
+    ]
+  },
+  "invoices_payments-delete": {
+    "hash": "c6c8f8d17fbc7cab",
+    "purpose": "Delete a recorded external payment from a draft invoice to correct a mistake or remove an incorrectly applied payment.",
+    "examples": [
+      "Remove the $250 payment with transaction ID TXN-8842 from invoice INV-2024-039.",
+      "Delete the payment that was accidentally applied to draft invoice 8a3f7b from customer John.",
+      "Can you take off the Visa payment of $150.75 from invoice 4421? It was meant for a different order.",
+      "How many external payments are still attached to invoice INV-2024-039 after we removed the duplicate one?",
+      "Did the $300 refund transaction TXN-9912 get cleared from the draft invoice yet?"
+    ]
+  },
+  "invoices_refunds": {
+    "hash": "0f4eaabd49218f57",
+    "purpose": "Records a refund against an invoice and updates the invoice status to REFUNDED or PARTIALLY_REFUNDED based on whether the full amount was returned.",
+    "examples": [
+      "Refund invoice INV-2024-0891 for $150.00 via bank transfer.",
+      "Process a partial refund of $45.50 on invoice INV-2024-1023 using a credit card.",
+      "Record a cash refund for the full amount of invoice INV-2024-0772 from last week.",
+      "Did invoice INV-2024-0915 get fully refunded or is it still partially paid?",
+      "What's the total amount refunded on invoice INV-2024-0653 so far?"
+    ]
+  },
+  "invoices_refunds-delete": {
+    "hash": "0164dc28d178703e",
+    "purpose": "Allows a business user to delete a previously recorded external refund from a draft invoice, removing that refund entry from the invoice record.",
+    "examples": [
+      "Can you delete the refund transaction TXN-8842 from invoice INV-2024-3891?",
+      "Please remove the $250 refund I recorded on invoice #10293 by mistake.",
+      "I need to delete that refund entry tied to transaction 7A9F2C from the November invoice for Acme Corp.",
+      "Why does invoice INV-3342 still show a refund of $150 when I voided that payment last week?",
+      "How many refund adjustments have been removed from our invoices this quarter?"
+    ]
+  },
+  "invoices_remind": {
+    "hash": "7175c98344dd0ca9",
+    "purpose": "Send a reminder notification to the payer for a specific invoice, optionally including a subject line, a note, and CC recipients.",
+    "examples": [
+      "Send a reminder to john@example.com about invoice INV-2024-001 that's still unpaid.",
+      "Can you ping the client about invoice INV-2024-045? It's 14 days overdue.",
+      "Remind the buyer about invoice 8BX12345YX678901M and note that the due date was last Friday.",
+      "How many reminders have we already sent today for invoice INV-2024-032? I don't want to exceed the limit.",
+      "Did we send the reminder for the $2,450.00 invoice to jane.smith@vendor.com yet this morning?"
+    ]
+  },
+  "invoices_search-invoices": {
+    "hash": "3448008e2940c490",
+    "purpose": "Search for and filter invoices based on various criteria like recipient details, invoice number, status, amount range, currency, and other fields.",
+    "examples": [
+      "Find all invoices sent to john@example.com that are still in \"DRAFT\" status.",
+      "Show me invoices from last month with a total amount between $500 and $2,000.",
+      "Search for invoice number INV-2024-0892 and tell me its current status.",
+      "How many unpaid invoices do we have for Acme Corp with a total over $10,000?",
+      "Did Sarah Johnson ever receive invoice #1045, and has it been paid yet?"
+    ]
+  },
+  "invoices_send": {
+    "hash": "364bd06a8312f499",
+    "purpose": "Send or schedule an invoice to be delivered to a customer, either immediately or on a future date.",
+    "examples": [
+      "Send invoice INV-2024-0892 to the customer right now.",
+      "Schedule invoice #8432 to go out on next Monday, December 18th.",
+      "Please resend the invoice for order 5503 to john@example.com and also cc my accountant.",
+      "Did invoice INV-2024-0892 get sent yet?",
+      "How many invoices are currently scheduled to go out this week?"
+    ]
+  },
+  "invoices_update": {
+    "hash": "5c0e702061a2da36",
+    "purpose": "A merchant fully replaces all details of an existing invoice, such as its status, recipient, dates, line items, or payment terms, by providing a complete updated invoice object.",
+    "examples": [
+      "Update invoice INV-2024-089 to show it's been paid in full as of today.",
+      "Change the due date on invoice INV-089 to May 15, 2025, and set the status back to draft.",
+      "Fully replace the customer details on invoice INV-2024-089 with Sarah Chen (sarah.chen@example.com) as the new recipient.",
+      "Has invoice INV-2024-089 been paid or is it still outstanding?",
+      "How many times has the recipient been changed on invoice INV-089 in the last 3 days?"
+    ]
+  },
+  "invoicing_generate-next-invoice-number": {
+    "hash": "1b04e1832a34797b",
+    "purpose": "Merchants generate the next sequential invoice number so they can assign a unique, properly formatted identifier to their next customer invoice.",
+    "examples": [
+      "What's the next invoice number I should use for my new order?",
+      "Get me a fresh invoice number to bill Acme Corp for $2,450.",
+      "I need to generate the next available invoice number for receipt #2024-891.",
+      "Did we already use INV-5678 or is that still available for the upcoming billing cycle?",
+      "How many invoices have we issued so far this month—and what number should I start with for the next one?"
+    ]
+  },
+  "orders_authorize": {
+    "hash": "c880f56e60b18219",
+    "purpose": "A merchant authorizes payment for an approved order to capture the funds and complete the transaction.",
+    "examples": [
+      "Authorize payment for order 8GH12345JKL that the customer just approved.",
+      "Please capture the funds for order 9AB67890XYZ — the buyer has already given the go-ahead.",
+      "I need to finalize payment on order 4CD11223WER using the saved card on file.",
+      "Did the payment for order 2EF33445QAZ go through after the customer approved it?",
+      "What's the total amount authorized on order 7HI55667UJM so far?"
+    ]
+  },
+  "orders_capture": {
+    "hash": "d5e75476c80706d9",
+    "purpose": "Captures payment for an approved order so the merchant can complete the transaction and receive funds.",
+    "examples": [
+      "Capture the payment for order 8FJ48203KH901234L.",
+      "Please finalize payment on order 7XK92045RT672890P — the buyer already approved it.",
+      "I need to settle order 3MN56178AB234567Q now that the customer has confirmed.",
+      "Did the payment for order 2BC34901XY890123R go through successfully yesterday?",
+      "How much total revenue did we capture from orders approved last week?"
+    ]
+  },
+  "orders_confirm": {
+    "hash": "cee5241a36595460",
+    "purpose": "A merchant or payer confirms their intent to pay for an order using a specific payment source like a card, PayPal, or a saved token.",
+    "examples": [
+      "Confirm my payment with card ending 4321 for order ORD-5A8B2C",
+      "I'd like to finalize my PayPal payment for order 7X9K1M",
+      "Please complete the purchase for order A1B2C3 using my saved billing agreement",
+      "Did order 9Z8Y7W get paid successfully after I submitted my card details?",
+      "What's the status of my order 3X4Y5Z — has my payment been confirmed yet?"
+    ]
+  },
+  "orders_create": {
+    "hash": "e388288055a1c6ab",
+    "purpose": "Creates a new order for a customer, specifying payment intent, payer details, and purchase items.",
+    "examples": [
+      "Create an order for $49.99 from customer jane@example.com with intent to capture payment immediately.",
+      "Set up an authorization order for $120.00 from buyer John Smith, including his tax ID BR_CNPJ 12.345.678/0001-90.",
+      "Place a new order for 3 units of item SKU-1001 at $15 each, billing to the customer's address in country code US.",
+      "Did the order from maria@shop.com for $89.50 go through successfully or is it still pending?",
+      "How many orders were created yesterday with a CAPTURE intent, and what's the total dollar amount?"
+    ]
+  },
+  "orders_get": {
+    "hash": "cc50cfb4fca81742",
+    "purpose": "Allows a business user to retrieve the full details of a specific order by its ID, including payment source, amounts, and line items.",
+    "examples": [
+      "Show me the details for order 8WH12345KU",
+      "What was the payment method used on order 4TH78901AB?",
+      "Pull up the shipping address and total for order 2MN34567CD",
+      "Was order 9XY67890EF paid with PayPal or a card?",
+      "How many items were in my last big order from last Tuesday?"
+    ]
+  },
+  "orders_patch": {
+    "hash": "138b2676ff7b912d",
+    "purpose": "Update the details of an existing order that hasn't been completed yet, such as changing the shipping address, items, or amounts.",
+    "examples": [
+      "Can you update order #5A3B2C1 to change the shipping address to 123 Oak Street, Austin, TX 78701?",
+      "I need to replace the item in order #8F7E6D0 from a small blue t-shirt to a medium red one.",
+      "Please add a 10% discount to order #2G4H6J8 before we finalize it.",
+      "Did order #9K1L3M5 get updated with the new shipping method I requested earlier today?",
+      "What's the current total on order #4P7Q2R9 after the price adjustment we discussed?"
+    ]
+  },
+  "orders_track_create": {
+    "hash": "6d08c464555d4ff7",
+    "purpose": "Add shipment tracking information (carrier and tracking number) to an existing order so the merchant and buyer can monitor delivery progress.",
+    "examples": [
+      "Add tracking number DHL9832 to order 45GH7 using DHL carrier.",
+      "Can you attach tracking info TRACK123 from USPS to my order 89KL2?",
+      "Set the tracking for order 23AB1 to FedEx with number FX-90210 and notify the customer.",
+      "Was order 67MN8 shipped yet? I need to know if tracking was added.",
+      "How many of my orders from last week have tracking numbers attached to them?"
+    ]
+  },
+  "orders_trackers_patch": {
+    "hash": "2e17dd9bdb795ea4",
+    "purpose": "A merchant can update or cancel tracking information for a customer's order, such as changing the tracking number, carrier, or shipment status.",
+    "examples": [
+      "Update the tracking number for order 8WH12345ABC to 1Z999AA10123456784 with UPS.",
+      "Cancel the tracking for order 3RJ78901XYZ, tracker TRK001, because the shipment was returned.",
+      "Change the carrier from USPS to FedEx for order 5PL45678DEF, tracker TRK002.",
+      "Did the tracking info for order 2AB34567GHI get updated to the new FedEx number yet?",
+      "How many items in order 9XY90123JKL were actually delivered according to the latest tracker update?"
+    ]
+  },
+  "partner-referrals_create": {
+    "hash": "08e877bead726ad5",
+    "purpose": "A business user creates a partner referral to onboard a new seller by sharing their personal, business, and financial details with PayPal.",
+    "examples": [
+      "I need to submit a referral for a new seller, Jane Smith, with her business email jane@smithco.com and a tracking ID of REF-2024-001.",
+      "Please create a partner referral for a merchant in India with a purpose code of 'P0102' and an annual sales volume between $50,000 and $100,000.",
+      "Set up a new seller referral for ABC Corp, including their beneficial owner details and a return URL of https://mypartner.com/return for the onboarding flow.",
+      "Did the referral for the seller with tracking ID TRK-8823 get submitted successfully, or is it still pending?",
+      "How many new seller referrals have we created this month, and what's the average monthly volume range for those merchants?"
+    ]
+  },
+  "partner-referrals_read": {
+    "hash": "3a6929dca6a26b00",
+    "purpose": "Shows the full details of a specific partner referral record by its ID, so the merchant can review the referral's status, shared data, and history.",
+    "examples": [
+      "Show me the details for partner referral ID pref_9a8b7c6d5e.",
+      "What's the current status of referral pref_3f2e1d0c9b?",
+      "Pull up the referral record with ID pref_7a6b5c4d3e so I can see what data was shared.",
+      "Did the referral from partner ABC Corp on March 12 go through? The ID is pref_2b1c0d9e8f.",
+      "How many times has referral pref_4e5f6a7b8c been updated and what's the latest status?"
+    ]
+  },
+  "payment-tokens_create": {
+    "hash": "34e1058303cc20c3",
+    "purpose": "Allows a merchant to store a customer's payment source (e.g., credit or debit card) in the PayPal Vault for future use in repeat transactions.",
+    "examples": [
+      "Save my customer's Visa card ending in 1234 to their vault so I don't have to ask for it again.",
+      "Add this new MasterCard 5555-xxxx-xxxx-8888 to customer vault for Jane Smith (customer ID CUST-98765).",
+      "Store the Amex card with expiration 2027-03 for recurring billing on my customer's profile.",
+      "Did customer ID ABC-12345 successfully have their payment method vaulted last week?",
+      "How many cards do we currently have stored in our customers' vaults across all accounts?"
+    ]
+  },
+  "payment-tokens_delete": {
+    "hash": "35d125d837cae253",
+    "purpose": "Deletes a specific saved payment token so the merchant can remove outdated, expired, or unwanted payment methods from a customer's vault.",
+    "examples": [
+      "Delete payment token tok_7H9kL2mN4pQ for customer order #4821.",
+      "Remove the saved Visa ending in 1234 from my wallet.",
+      "Clear out the expired payment method associated with token ABC-xyz_9876.",
+      "How many payment tokens are currently stored for recurring billing profiles?",
+      "Did the token for the Amex card I added last week get deleted after the failed renewal attempt?"
+    ]
+  },
+  "payment-tokens_get": {
+    "hash": "367ee1419d0b8404",
+    "purpose": "A business user can look up the full details of a vaulted payment source — such as card type, last four digits, expiration date, or PayPal account email — using the token ID stored for that customer.",
+    "examples": [
+      "Show me the vaulted payment source for token ID abc123_def456",
+      "What payment method is stored under vault token xyz789_abc321?",
+      "Pull up the details for payment token tok_5f8a2b1c3d4e5",
+      "Did that customer's card saved on December 3rd still have the last four digits 4242?",
+      "How many vaulted PayPal accounts did we have as of last Friday?"
+    ]
+  },
+  "payouts-item_cancel": {
+    "hash": "758ba1858b314ec2",
+    "purpose": "A merchant can cancel an unclaimed payout item before the automatic 30-day refund period ends, returning the funds to the sender.",
+    "examples": [
+      "Cancel payout item 8F468793WP654321L that's still unclaimed from last week.",
+      "Please reverse the unclaimed payment of $250.00 to vendor@supplyco.com before the 30-day auto-refund kicks in.",
+      "Stop the pending payout to contractor John Smith (payout item ID: 9GH12345AB67890CD) — they never claimed it.",
+      "Did the $1,200 payout to invoices@freelancer.com ever get claimed, or can I pull it back now?",
+      "How many unclaimed payout items are still outstanding from the March 15 batch, and can I cancel the oldest one?"
+    ]
+  },
+  "payouts-item_get": {
+    "hash": "772c4d33dbff9d4d",
+    "purpose": "A merchant can look up the current status and details of a specific payout item to check whether a payment was completed, denied, or still processing.",
+    "examples": [
+      "Show me the details for payout item 8DXF7G2H3K",
+      "What happened with payout item 4M9Q1R5T6W? Was it denied?",
+      "Get the status of payout item 2B3C7V8N9M",
+      "Did the $150.00 payout to vendor@example.com go through or get denied?",
+      "Why was payout item 5J6K2L3P4Q rejected — can you give me the full details?"
+    ]
+  },
+  "payouts_get": {
+    "hash": "c99df1c1ce1b28bc",
+    "purpose": "Shows the current status and details of a specific payout batch, including individual transaction results.",
+    "examples": [
+      "Show me the status of payout batch P-1234567890.",
+      "What happened with the payout I sent yesterday for $5,000?",
+      "Get the details for payout ID pay_abc123def456.",
+      "Did the payout batch from last Friday complete successfully, and how many payments failed?",
+      "How much was the total amount in payout batch P-9876543210 and how many individual items were in it?"
+    ]
+  },
+  "payouts_post": {
+    "hash": "98acfdfc347e3d56",
+    "purpose": "Create a batch payout to send payments to one or more recipients in a single request.",
+    "examples": [
+      "Send out $500 to sarah@company.com for the Q3 marketing bonus.",
+      "Batch pay 15 freelancers a total of $12,350 for last month's project work.",
+      "Issue a payout of €2,000 to johan@consulting.eu with a note about the strategy review.",
+      "Did the payout of $3,250 to mike@designstudio.com go through yet?",
+      "How many recipients were included in yesterday's batch payout and what was the total amount?"
+    ]
+  },
+  "plans_activate": {
+    "hash": "129cdd40795d22e0",
+    "purpose": "Reactivates a previously paused or canceled subscription so billing and service resume for the customer.",
+    "examples": [
+      "Activate the paused subscription plan for customer ID sub_8f3a2b1c.",
+      "Please resume billing for account 47291 — the trial period should be over.",
+      "Can you turn back on the monthly plan for user jane@acmecorp.com? We're ready to continue.",
+      "How many subscriptions are currently paused and waiting to be activated?",
+      "Did the upgrade to the Pro plan for client 10883 go through yesterday, or is it still on hold?"
+    ]
+  },
+  "plans_create": {
+    "hash": "87cf4d671682e0c7",
+    "purpose": "A merchant creates a billing plan with pricing, billing cycles, and payment preferences for a product subscription.",
+    "examples": [
+      "Create a monthly subscription plan for $29.99 called \"Pro Tier\" with a 7-day free trial, and link it to my product PROD-ABC123XYZ.",
+      "Set up a yearly billing plan called \"Enterprise\" at $499/year with no trial period and auto-bill outstanding amounts.",
+      "I need to make an \"Annual Basic\" plan for product PROD-XYZ789ABC that bills $99 once per year and stays ACTIVE right away.",
+      "How many billing cycles does the \"Starter\" plan have, and does it include a trial period?",
+      "What's the status of plan PROD-DEF456GHI — is it active yet or still in created state?"
+    ]
+  },
+  "plans_deactivate": {
+    "hash": "28f81fb8e817b992",
+    "purpose": "Allows a merchant to deactivate a specific billing plan so it can no longer be used for new subscriptions.",
+    "examples": [
+      "Please deactivate the 'Premium Monthly' plan with ID plan_8f3a2b.",
+      "Can you turn off the 'Starter' plan so new customers can't sign up for it anymore?",
+      "I need to retire the 'Enterprise Annual' plan (ID plan_9c7e1d) effective immediately.",
+      "How many active plans do we have right now? I thought we deactivated the legacy 'Basic' plan last quarter.",
+      "Did the 'Pro Weekly' plan get deactivated yet? I submitted a request to remove it yesterday."
+    ]
+  },
+  "plans_get": {
+    "hash": "55a1ec45bef5644e",
+    "purpose": "Retrieves the details of a specific billing plan so a merchant can review its features, pricing, and terms.",
+    "examples": [
+      "Show me the details for the Professional plan.",
+      "What's included in the Enterprise plan with ID plan_abc123?",
+      "Pull up the pricing and feature list for the Starter plan.",
+      "Does the Growth plan include priority support and API access?",
+      "How much does the Business plan cost per month and what's the billing cycle?"
+    ]
+  },
+  "plans_list": {
+    "hash": "85affa751d20d931",
+    "purpose": "Lists available billing plans with optional filtering, pagination, and totals so business users can browse pricing options and plan offerings.",
+    "examples": [
+      "Show me all the billing plans we offer",
+      "What's the pricing plan for product ID PROD-98765?",
+      "List the first 5 billing plans on page 2",
+      "How many different subscription plans do we have available?",
+      "Are there any enterprise plans costing over $500 a month?"
+    ]
+  },
+  "plans_patch": {
+    "hash": "a21bb2c532dc268d",
+    "purpose": "Updates an existing billing plan's settings, such as pricing, taxes, or payment preferences, while the plan is in a draft or active state.",
+    "examples": [
+      "Change the tax percentage on my Professional plan (plan_ABC123) from 8% to 9.5%.",
+      "Update the auto-bill setting on my Basic plan so it automatically charges outstanding balances.",
+      "Switch my Enterprise plan (plan_XYZ789) from active to inactive status.",
+      "What's the current tax rate applied to my Premium subscription plan?",
+      "Did my plan's auto-bill preference get updated after I requested the change last week?"
+    ]
+  },
+  "plans_update-pricing-schemes": {
+    "hash": "3f85058b6d911562",
+    "purpose": "Updates the pricing amounts and billing cycle structure for a specific subscription plan.",
+    "examples": [
+      "Change the monthly subscription from $5 to $7 starting next cycle for plan 12345.",
+      "Update the pricing scheme for billing cycle 2 to $15 per user for plan abc-789.",
+      "Raise the price of the second billing cycle from $10 to $12.50 on plan premium-001.",
+      "How much would customers be charged if we updated the pricing on cycle 3 of plan gold-2025?",
+      "Did the pricing update for billing cycle 1 on plan starter-99 go through yet?"
+    ]
+  },
+  "products_create": {
+    "hash": "1bfa3da08ebec374",
+    "purpose": "Creates a new product in the catalog so it can be listed, searched, and sold through the chat agent.",
+    "examples": [
+      "Add a new product called 'Premium Yoga Mat' with a description 'Extra-thick non-slip mat for home practice', set it as a physical item, and use the image from https://example.com/yoga-mat.jpg.",
+      "Create a digital product named 'E-Book: Gardening 101' under the category ACADEMIC_SOFTWARE with the home page https://shop.example.com/gardening-101.",
+      "Set up a service called 'AC Tune-Up' in the AC_REFRIGERATION_REPAIR category, physical type, with description 'Annual maintenance check for residential units'.",
+      "How many products do we have in the AC_REFRIGERATION_REPAIR category right now?",
+      "Did the 'Premium Yoga Mat' product get created successfully? I need the SKU that was assigned."
+    ]
+  },
+  "products_get": {
+    "hash": "8cc263a2f2103b23",
+    "purpose": "A merchant can look up full details for a specific product in their catalog using its product ID.",
+    "examples": [
+      "Show me the details for product PROD-8842.",
+      "I need the current price and stock level for item SKU-3321.",
+      "Pull up the product page for ID 7a9f3c2e-1b45-4d80-9e6f-2a3b8c7d0e1f.",
+      "Is product PROD-102 still available in size large?",
+      "What was the original list price of item 550e8400-e29b-41d4-a716-446655440000 when it was first listed?"
+    ]
+  },
+  "products_list": {
+    "hash": "fa9a7c3dc181db4f",
+    "purpose": "A business user can browse or paginate through their product catalog to find items, check inventory, or review product listings.",
+    "examples": [
+      "Show me the first 10 products in my catalog.",
+      "Can you list all products on page 3 of my inventory?",
+      "I need to see my product catalog, 20 items at a time.",
+      "How many total products do I have in my store right now?",
+      "Do I have any products listed beyond page 5 of my catalog?"
+    ]
+  },
+  "products_patch": {
+    "hash": "bceabbee8a2ca9cc",
+    "purpose": "Update specific fields on an existing product listing without replacing the entire record.",
+    "examples": [
+      "Change the category for product 5543 from \"Winter Gear\" to \"Clearance Winter Gear\".",
+      "Remove the image URL from product 7782.",
+      "Update the home page link for product 3301 to https://shop.example.com/featured/spring-sale.",
+      "Did product 4409 get its image updated yet after last week's photo shoot?",
+      "What products in the \"Outdoor\" category had their home_url changed in the last 24 hours?"
+    ]
+  },
+  "refunds_get": {
+    "hash": "358165ff5282f874",
+    "purpose": "Shows details for a specific refund, including its status, amount, and associated transaction information.",
+    "examples": [
+      "Show me the details for refund 8F323373CV8455808",
+      "What's the status of refund 1AB23456CD789012E?",
+      "Get the refund info for transaction 5WX12345AB67890CD",
+      "Did the $45.67 refund for order #ORD-2024-0921 go through yet?",
+      "How much of the $129.99 purchase was actually refunded to the customer?"
+    ]
+  },
+  "search_get": {
+    "hash": "b2e9480a0ab73468",
+    "purpose": "Lists a merchant's PayPal transactions with optional filters like date range, transaction ID, type, status, amount, currency, and pagination.",
+    "examples": [
+      "Show me all my PayPal transactions from last week",
+      "Did a payment of $150.00 go through on March 3rd?",
+      "Find transaction ID 5WX12345AB6789012 and tell me its status",
+      "How many refunds did I process in February 2025?",
+      "What's the total balance-impacting transactions between Jan 1 and Jan 15?"
+    ]
+  },
+  "server_callback": {
+    "hash": "d42f0c5e58e3e65b",
+    "purpose": "A merchant receives and processes updated order information—such as shipping address changes, shipping option selections, and associated cost updates—sent by PayPal via a callback, so they can adjust the order details and respond with the correct shipping options.",
+    "examples": [
+      "I need to update the shipping options for order #8FJ293045K after PayPal sent the callback with the corrected address.",
+      "Please process the order-update callback from PayPal for transaction 5YK78901AB123450P and update the shipping costs.",
+      "Handle the incoming order update for order #3VT928461L — PayPal says the buyer changed their shipping address to a PO Box.",
+      "Did PayPal already send the callback for order #2PA183765M? I'm waiting to see the new shipping options so I can confirm the total.",
+      "What shipping method did the buyer select in the latest callback from PayPal for order #6GH452813N?"
+    ]
+  },
+  "setup-tokens_create": {
+    "hash": "aa2b105c1d01f492",
+    "purpose": "Creates a setup token to vault a customer's payment source (e.g., credit or debit card) and store it in the Vault for future transactions.",
+    "examples": [
+      "Save this Visa ending in 1234 with expiry 2027-03 to our vault for customer CUST-abc123.",
+      "Vault the Amex card 3782*****0005 for merchant customer ID ACME-98765.",
+      "Create a setup token for customer ID CUST-xyz789 using the Maestro card number 6759649826438453.",
+      "Did we successfully store the new Mastercard for customer ACME-98765 in our vault yesterday?",
+      "Can you check if customer CUST-abc123's card with last four digits 4321 has been vaulted yet?"
+    ]
+  },
+  "setup-tokens_get": {
+    "hash": "700dfbdbcbbe7574",
+    "purpose": "Retrieve the details of a temporarily stored payment source using its setup token ID.",
+    "examples": [
+      "Show me the payment method saved under setup token tok_9kL3mN7xQ2",
+      "What card was stored with the setup token abc123XYZ?",
+      "Pull up the vaulted payment details for token pm_setup_8fG4hJ2kL0",
+      "Was the setup token tok_4pR6sT8uV1 for a Visa or Mastercard?",
+      "Did the customer use a credit card or PayPal for the setup token that was created yesterday?"
+    ]
+  },
+  "simulate-event_post": {
+    "hash": "a8c36de00b55d641",
+    "purpose": "A merchant can test whether their webhook endpoint is correctly configured by sending a simulated event to see how it handles a real-world notification.",
+    "examples": [
+      "Can you send a test payment capture completed event to my webhook so I can check if my system logs it properly?",
+      "I need to simulate a PAYMENT.CAPTURE.DENIED event to webhook ID wh_abc123 to verify my error handling works.",
+      "Please trigger a mock webhook event for a completed payment capture to URL https://myshop.com/webhooks/paypal so I can test the integration.",
+      "Did my webhook endpoint receive and process the test payment capture event I just sent?",
+      "How many of my simulated webhook events for denied payments came through successfully last week?"
+    ]
+  },
+  "subscriptions_activate": {
+    "hash": "79361d29fdd5fa61",
+    "purpose": "Allows a merchant to activate a previously canceled or suspended subscription so that billing and service resume.",
+    "examples": [
+      "Please reactivate subscription sub_9kF2mN7qR3 for the premium plan.",
+      "Activate the paused subscription for customer jane@acmecorp.com.",
+      "I need to turn back on subscription ID sub_4xV8pL1zT6 that was canceled last week.",
+      "Why was subscription sub_2bH5wE9yU7 not active when I checked yesterday?",
+      "How many subscriptions did we reactivate in the last 30 days?"
+    ]
+  },
+  "subscriptions_cancel": {
+    "hash": "34fcbe9e8f977794",
+    "purpose": "A business user cancels a subscription and optionally provides a reason for the cancellation.",
+    "examples": [
+      "Cancel subscription sub_abc123 for customer jane@acme.com.",
+      "Please stop the monthly plan for order #ORD-4567, the customer is moving.",
+      "Immediately terminate subscription id sub_xyz789 and refund the last payment.",
+      "Did customer Sam Wilson cancel his premium plan ending in _9988 yesterday?",
+      "How many subscriptions were canceled in the last 30 days due to 'billing issues'?"
+    ]
+  },
+  "subscriptions_capture": {
+    "hash": "40c42e8bba2e0bd3",
+    "purpose": "Captures an authorized payment from a subscriber on a subscription, charging a specified amount to complete the transaction.",
+    "examples": [
+      "Capture the outstanding balance of $49.99 from subscription SUB-8A42K9F3G1.",
+      "Charge the remaining $120.00 on the annual plan for customer ID sub_abc123.",
+      "Please finalize the payment for the overdue amount of €75 on subscription #98765.",
+      "Did the payment for John's monthly subscription go through after the authorization was approved?",
+      "What's the total outstanding balance still waiting to be captured across all subscriptions?"
+    ]
+  },
+  "subscriptions_create": {
+    "hash": "7b7628aea10c1c58",
+    "purpose": "A merchant can create a new subscription for a customer, specifying the plan, start time, quantity, shipping costs, and subscriber details.",
+    "examples": [
+      "Set up a new monthly subscription for customer Jane Smith on the Pro plan P-PRO2024A starting January 15, 2025, with a quantity of 3.",
+      "Create a subscription for plan P-BASIC001 for John Doe, starting right now, with shipping to 123 Main St and a $5.99 shipping fee.",
+      "I need to start a subscription for acme@example.com on the Enterprise plan P-ENT99X, quantity 2, with the first billing cycle beginning February 1st.",
+      "Did the subscription for plan P-PRO2024A get created successfully for the customer who requested it yesterday?",
+      "How many active subscriptions do we have on the Basic plan P-BASIC001 as of this month?"
+    ]
+  },
+  "subscriptions_get": {
+    "hash": "4b361c162c756cfa",
+    "purpose": "A business user retrieves detailed information about a specific subscription using its ID.",
+    "examples": [
+      "Show me the details for subscription sub_8a3f2c1b.",
+      "What plan is associated with subscription sub_7d9e4f5a?",
+      "Pull up the subscription record for sub_2b6c8d1e and tell me if the last payment failed.",
+      "Did the payment for subscription sub_4e5f6a7b go through okay last time?",
+      "What billing plan is customer ID cus_9a1b2c3d on — can you look up their subscription sub_1a2b3c4d?"
+    ]
+  },
+  "subscriptions_patch": {
+    "hash": "a74c1a6259fa3267",
+    "purpose": "Update an existing subscription's attributes, such as plan details, trial settings, or billing terms, for a subscription that is currently active or suspended.",
+    "examples": [
+      "Change my subscription sub_abc123 to the premium plan and set the trial period to 14 days.",
+      "Update subscription sub_xyz789 to disable automatic renewal after the current billing cycle ends.",
+      "Switch the billing interval on subscription sub_def456 from monthly to annual starting next period.",
+      "Can you tell me if my subscription sub_ghi012 was updated to include the add-on pack I requested last week?",
+      "How many active subscriptions were modified to a different plan tier in the last 30 days?"
+    ]
+  },
+  "subscriptions_revise": {
+    "hash": "d0420fbf2ee34594",
+    "purpose": "A business user can modify an existing subscription's plan, quantity, shipping amount, or shipping address.",
+    "examples": [
+      "Update my subscription SA-1234 to 5 licenses instead of 3",
+      "Switch the plan on subscription I-8YVH7F2P1H to the premium tier",
+      "Change the shipping address on my active subscription to 100 Main St, Austin TX",
+      "Did the subscription quantity change for order #SUB-9876 go through yesterday?",
+      "How many units am I currently subscribed for on plan P-5KXH7F2P1H?"
+    ]
+  },
+  "subscriptions_suspend": {
+    "hash": "4628d7390a3fc505",
+    "purpose": "Allows a merchant to suspend a customer's subscription by providing a reason for the suspension.",
+    "examples": [
+      "Please suspend subscription SUB-12345 immediately.",
+      "Can you pause the monthly plan for customer jane@example.com? The reason is 'customer requested cancellation'.",
+      "Suspend the Gold tier subscription ending in 7890 because of a failed payment.",
+      "How many subscriptions were suspended last month due to non-payment?",
+      "Did subscription SUB-67890 get suspended yet? I need to check the status."
+    ]
+  },
+  "subscriptions_transactions": {
+    "hash": "cc2d598cc327d1c7",
+    "purpose": "Lists all transactions for a given subscription within a specified date range.",
+    "examples": [
+      "Show me all transactions for subscription SUB-12345 between January 1, 2025 and March 31, 2025.",
+      "Pull the transaction history for subscription ID sub_abc789 from last month.",
+      "List every payment and refund on subscription SUB-98765 from 2024-12-01 to 2024-12-31.",
+      "How many payments were made on subscription sub_xyz456 in February 2025?",
+      "Did subscription SUB-33442 have any failed transactions between November 1 and November 15, 2024?"
+    ]
+  },
+  "templates_create": {
+    "hash": "16179a6c0bcd1896",
+    "purpose": "A business user creates an invoice template with reusable settings like business info, payment terms, and default fields to speed up future invoice generation.",
+    "examples": [
+      "Create a new invoice template for my consulting services with my business name as 'Smith Consulting' and set 30-day payment terms.",
+      "Can you set up a recurring invoice template for my monthly retainer clients with a rate of $150 per hour?",
+      "Make a new template called 'Freelance Design Work' with my email as designer@example.com and default payment due upon receipt.",
+      "Do I have any room left to create more invoice templates? I already have 40 custom ones.",
+      "What's the default invoice template currently set for my account? I need to make sure the new one I'm creating doesn't conflict."
+    ]
+  },
+  "templates_delete": {
+    "hash": "1ba1405e20faaceb",
+    "purpose": "Delete an unwanted or outdated invoice template from the system.",
+    "examples": [
+      "Remove the invoice template I created last month called 'Standard Services v2'.",
+      "Delete template ID TEMPL-9B3A2F1C from my account.",
+      "Get rid of the 'Consulting Rate 2024' template, I don't need it anymore.",
+      "How many invoice templates do I have saved right now?",
+      "Did I already delete that old 'Freelance Default' template or is it still in my list?"
+    ]
+  },
+  "templates_get": {
+    "hash": "04358bfabc3dbeb1",
+    "purpose": "A merchant can retrieve the full details of a specific invoice template to review or reuse its settings.",
+    "examples": [
+      "Show me the details for invoice template TEMP-123456.",
+      "What are the settings saved in my 'Monthly Retainer' template?",
+      "Pull up template ID tmpl_7a9f2b and tell me the default payment terms.",
+      "Does my 'Standard Invoice' template include a late fee of 5%?",
+      "What email address is set as the default sender on template TEMP-789012?"
+    ]
+  },
+  "templates_list": {
+    "hash": "9011172e6f0bcdbc",
+    "purpose": "Lists all invoice templates a merchant has created, showing details like business name, email, address, and phone number so the user can see what templates are available for sending invoices.",
+    "examples": [
+      "Show me all my invoice templates with the business info included.",
+      "List my invoice templates and tell me which one is set as the default.",
+      "Do I have a template called 'Standard Services' with my support@mybusiness.com email on it?",
+      "How many invoice templates do I have saved right now?",
+      "What business name and address is showing on my default invoice template?"
+    ]
+  },
+  "templates_update": {
+    "hash": "5bae55382e0639f0",
+    "purpose": "A merchant can fully replace an existing invoice template with new content, updating all its fields like business information, payment terms, and default status.",
+    "examples": [
+      "Update my invoice template TEMP-12345 to use net 30 payment terms and set it as the default template.",
+      "Replace the business address on template INV-TPL-987 with 100 Main Street, US, and change the email to billing@myshop.com.",
+      "Please update template TPL-5544 to show a 2% early payment discount if paid within 10 days, and add a note saying 'Thank you for your business.'",
+      "Did my default invoice template get updated to show the new payment terms of net 60?",
+      "What's the current business name and address on template TEMP-67890 — I need to check if it still shows the old LLC name."
+    ]
+  },
+  "trackers-batch_get": {
+    "hash": "fbf0d553a0aa7fa6",
+    "purpose": "Retrieves a list of shipment tracking records matching specific search criteria, such as a PayPal transaction ID, tracking number, or encrypted account ID.",
+    "examples": [
+      "Show me all tracking information for transaction TXN-987654.",
+      "What's the current delivery status for tracking number 1Z999AA10123456784?",
+      "Pull up the tracking details linked to my PayPal account ID 2A3B4C5D6E7F8.",
+      "How many packages from transaction TXN-123456 have been delivered so far?",
+      "Did tracking number 9400111899223456789012 ship out yet or is it still in pre-transit?"
+    ]
+  },
+  "trackers-batch_post": {
+    "hash": "2630f7c013336f33",
+    "purpose": "A merchant can submit tracking information for multiple PayPal transactions at once to update shipment statuses.",
+    "examples": [
+      "Add tracking numbers for these PayPal transactions: TXN-1001 (shipped), TXN-1002 (shipped), and TXN-1003 (pending pickup).",
+      "I need to mark order #ORD-8821 and order #ORD-8822 as shipped with UPS tracking 1Z999AA10123456784.",
+      "Update the status of transaction ID 7XK92E3F9L2A to 'delivered' and transaction ID 4YH73D2G8K1B to 'shipped'.",
+      "How many of my PayPal transactions from last week still show as 'not shipped'?",
+      "Did transaction 5ZT81C4E7M3N ever get marked as delivered, or is it still pending?"
+    ]
+  },
+  "trackers_get": {
+    "hash": "bd264d3d7365fe31",
+    "purpose": "A merchant gets the current delivery status, location, and timeline for a specific shipment on a PayPal transaction.",
+    "examples": [
+      "Can you pull up the tracking for order TRACK-12345 and let me know where it is right now?",
+      "Show me the delivery status for tracker ID 8XG12345ABC67890-9876543210.",
+      "I need the latest shipping update for transaction 8XG12345ABC67890 with tracking number 9876543210.",
+      "Did the package for transaction 8XG12345ABC67890 get delivered yet?",
+      "What's the current status of shipment 9876543210 on order TRACK-12345 — has it left the warehouse?"
+    ]
+  },
+  "trackers_post": {
+    "hash": "5486864048a6b8a0",
+    "purpose": "A merchant provides tracking information (carrier, tracking number, and shipment status) for a PayPal transaction so both they and the buyer can follow the shipment's progress.",
+    "examples": [
+      "Add tracking number 1Z999AA10123456784 to PayPal transaction 7MZ1234567890123.",
+      "Update the shipment status to SHIPPED for PayPal order 8XJ9876543210987.",
+      "Register tracking info for transaction 3VK4567890123456 and mark it as delivered.",
+      "Did my customer's order 6YP1234567890123 get shipped yet?",
+      "How many of my PayPal transactions from last week have tracking numbers attached?"
+    ]
+  },
+  "trackers_put": {
+    "hash": "0bc34939163e01ba",
+    "purpose": "A merchant can update or cancel tracking information for a PayPal transaction, such as changing the shipment status or cancelling a tracking record.",
+    "examples": [
+      "Please update the tracking for transaction 8WJ12345ABC with tracking number 1Z999AA10123456784 to status DELIVERED.",
+      "Cancel the tracking for order 6LJ78901XYZ — set the status to CANCELLED.",
+      "Change the carrier for shipment 3XK45678DEF from USPS to FEDEX and update the tracking number to 7946XXXX7890.",
+      "Did the package for transaction 4RT32167GHI get delivered yet? What's the current status?",
+      "How many shipments are still in transit for transaction 2MN98765JKL as of last week?"
+    ]
+  },
+  "verify-webhook-signature_post": {
+    "hash": "10cedafc3fae521a",
+    "purpose": "Verifies that an incoming webhook notification from PayPal is authentic and hasn't been tampered with.",
+    "examples": [
+      "Verify that the payment notification I just received from PayPal is legitimate.",
+      "Check the signature on the webhook event with transmission ID 8a9b7c6d5e4f3a2b1c0d to make sure it's really from PayPal.",
+      "Validate the authenticity of the webhook notification for webhook ID 3RZ48293E83920.",
+      "Did the webhook notification about the completed payment from customer@example.com actually come from PayPal or could it be a fake?",
+      "Is the order confirmation webhook for transaction 5WX12345ABC67890 authentic and safe to process?"
+    ]
+  },
+  "web-profile_create": {
+    "hash": "0077a0081aaa8148",
+    "purpose": "Creates a new web experience profile that a merchant can use to customize the look, flow, and input fields shown to buyers during PayPal checkout.",
+    "examples": [
+      "Create a new checkout profile named \"Premium Checkout\" for my store.",
+      "Set up a web experience profile with the brand name \"Acme Corp\" and a landing page type of billing.",
+      "I need a temporary payment profile called \"Holiday Sale\" that lasts for 3 hours.",
+      "Did we set up the custom checkout flow that hides the shipping address field?",
+      "Show me how many web experience profiles have been created this month and which ones use a custom logo."
+    ]
+  },
+  "web-profile_delete": {
+    "hash": "679c504e122686a1",
+    "purpose": "Allows a merchant to permanently remove a specific web experience profile used for payment checkout pages.",
+    "examples": [
+      "Delete the web profile with ID ABC123 for my payment page.",
+      "Remove the payment experience profile DEF456 that I set up last month.",
+      "I need to delete my old custom checkout profile GHI789.",
+      "How many active web profiles do I have left after removing the one I just deleted?",
+      "Is the profile JKL012 that was created on March 3rd still active or has it been removed?"
+    ]
+  },
+  "web-profile_get": {
+    "hash": "e9be32f520c4352a",
+    "purpose": "A merchant retrieves the full configuration details of a specific web experience profile, including layout settings, branding options, and payment button preferences, to review or verify how their checkout page is configured.",
+    "examples": [
+      "Show me the details for my web profile with ID PROFILE-8A2B3C4D5E",
+      "What's the configuration of my 'Premium Checkout' web experience profile?",
+      "Pull up the settings for web profile 7f9e1a2b-3c4d-5e6f-7a8b-9c0d1e2f3a4b",
+      "Did my updated payment button layout save correctly on the profile I edited yesterday?",
+      "Which web experience profile is currently assigned to my merchant account and what are its settings?"
+    ]
+  },
+  "web-profile_get-list": {
+    "hash": "62744d29bfe909c3",
+    "purpose": "One plain sentence saying what a business user gets done with this operation.",
+    "examples": [
+      "Show me my latest web experience profiles.",
+      "List my web payment profiles from the last month.",
+      "What are my current web experience profile settings?",
+      "How many active web profiles do I have?",
+      "When was my last web experience profile created?"
+    ]
+  },
+  "web-profile_partial-update": {
+    "hash": "251d2faf18ce2684",
+    "purpose": "A merchant can update specific fields of an existing web experience profile without replacing the entire profile.",
+    "examples": [
+      "Change the greeting message on my checkout profile PROFILE-8A3F2 to \"Welcome back, valued customer!\"",
+      "Add a new payment method option to the web profile for my store so customers can pay with Venmo.",
+      "Remove the shipping address collection step from profile ID PROFILE-8A3F2 for digital goods orders.",
+      "Did the branding color on my checkout profile get updated to the new blue hex code I requested last week?",
+      "How many active web experience profiles do I have that still show the old holiday banner message?"
+    ]
+  },
+  "web-profile_update": {
+    "hash": "d6fa7ec5dc4a02c5",
+    "purpose": "Updates an existing web experience profile to change how the PayPal checkout pages look and behave for customers.",
+    "examples": [
+      "Update my checkout profile 'PremiumStore' to show the billing landing page instead of the login page.",
+      "Change the brand name on my PayPal checkout pages to 'Artisan Goods Co.' and set the logo to https://myartisan.shop/logo.png.",
+      "Please remove the shipping address fields from the checkout experience for profile ID PROFILE-8A93F2.",
+      "Did my checkout profile 'QuickBuy' get updated to use the COMMIT user action so customers see 'Pay Now' instead of 'Continue'?",
+      "What's the current landing page type set on my web profile with ID PROFILE-7B21E — is it login or billing?"
+    ]
+  },
+  "webhooks-event-types_list": {
+    "hash": "6eea80270a120331",
+    "purpose": "Lists all event types that a merchant can subscribe to for webhook notifications, enabling them to choose which activities to monitor.",
+    "examples": [
+      "Show me all the event types I can set up webhooks for.",
+      "What notifications can I subscribe to for my webhooks?",
+      "List the available webhook events for my store.",
+      "Do you support webhook events for new orders and refunds?",
+      "Are there webhook events for when a customer updates their account?"
+    ]
+  },
+  "webhooks-events_get": {
+    "hash": "90ed7d94d78c16c7",
+    "purpose": "Shows the full details of a specific webhook event notification, including its status, payload, and delivery attempts.",
+    "examples": [
+      "Can you pull up the details for webhook event evt_8f3a2b1c? I need to see if the notification was delivered successfully.",
+      "Show me what happened with the payment notification event that was sent to our webhook endpoint yesterday around 3 PM.",
+      "Get the full info for event ID 9kL7x2R4 — I want to check the payload and see if there were any retries.",
+      "Was the order confirmation webhook for order #10492 delivered to our endpoint, or did it fail?",
+      "How many times did the system try to resend the webhook event for the refund on transaction TXN-88231 before it gave up?"
+    ]
+  },
+  "webhooks-events_list": {
+    "hash": "f23896a5390c7400",
+    "purpose": "Lists webhook event notifications so you can review or audit events sent to your webhook endpoints, filtered by time, transaction, or event type.",
+    "examples": [
+      "Show me all webhook events from the last 24 hours.",
+      "Did we receive a payment_intent.succeeded notification for transaction tx_8f3a2b1c yesterday?",
+      "Pull up any failed webhook events between March 1 and March 15.",
+      "How many webhook events of type charge.refunded were sent this week?",
+      "List event notifications for transaction ID 9e4b7c12-f3a8-4d21-9c0e-5b6a7d8e9f01."
+    ]
+  },
+  "webhooks-events_resend": {
+    "hash": "1af162046306fb47",
+    "purpose": "Resends a failed or undelivered webhook event notification to the connected endpoint.",
+    "examples": [
+      "Resend the webhook notification for event evt_XYZ789 that failed last night.",
+      "Please retry sending the event notification for webhook event abc123.",
+      "Send again the notification for order cancellation event evt_456DEF that didn't go through.",
+      "Did the notification for event evt_EVENT01 get delivered to my endpoint yet?",
+      "The webhook for order updates isn't working and we missed some events — can you tell me if evt_LASTEVENT was successfully sent?"
+    ]
+  },
+  "webhooks-lookup_delete": {
+    "hash": "0a55bb480be313ae",
+    "purpose": "Deletes an existing webhook lookup rule so that the chat assistant stops monitoring or notifying about the specified event or data.",
+    "examples": [
+      "Remove the alert for order status updates from customer jane.smith@example.com.",
+      "Delete the webhook lookup entry with ID whl_9k3m2 that's no longer needed.",
+      "Can you remove the notification rule that was tracking refund events from last week?",
+      "How many active webhook lookups do we have right now? I need to clean up old ones.",
+      "Did the webhook lookup for transaction ID 88472-AB still exist, or was it already deleted?"
+    ]
+  },
+  "webhooks-lookup_get": {
+    "hash": "0bcc009beeeadf54",
+    "purpose": "A business user retrieves the details of a specific webhook lookup to see its status, payload, or processing result.",
+    "examples": [
+      "Show me the details for webhook lookup 7a9b3c2d-1e4f-5a6b-7c8d-9e0f1a2b3c4d",
+      "What does webhook lookup abc123-def456-7890 tell us?",
+      "Get the webhook lookup record for notification ID wb-lookup-8472",
+      "Did our system successfully process the webhook from Stripe yesterday?",
+      "What was the status of the payment notification that came in around 3pm?"
+    ]
+  },
+  "webhooks-lookup_list": {
+    "hash": "1ea396bb068a7121",
+    "purpose": "Lists all registered webhook lookups so the user can review, audit, or manage which event-based notification targets are configured.",
+    "examples": [
+      "Can you pull up all the webhook lookups we've registered this month?",
+      "Show me the webhook lookup IDs and their target URLs.",
+      "List all webhook lookups that are currently active for our account.",
+      "How many webhook lookups did we set up last week?",
+      "Did the webhook lookup for order confirmations ever get created? I need to check."
+    ]
+  },
+  "webhooks-lookup_post": {
+    "hash": "3a78a2f0d3845616",
+    "purpose": "A merchant ties their REST API app to an account so that webhook events for that account are delivered to their app.",
+    "examples": [
+      "Set up a webhook to alert me whenever someone calls my support number ending in 3456.",
+      "Create a notification that pushes order updates from my account to my custom app.",
+      "I need to link my backend system to receive real-time payment notifications for account 987654.",
+      "Did any webhook events fire for my account yesterday between 2pm and 4pm?",
+      "How do I get my app notified when a refund is processed on my merchant account?"
+    ]
+  },
+  "webhooks_delete": {
+    "hash": "7b2d32388c43260b",
+    "purpose": "Deletes a webhook notification subscription so the merchant stops receiving automated updates at that endpoint.",
+    "examples": [
+      "Please remove the webhook that sends order updates to https://myapp.com/hooks/orders.",
+      "Cancel the notification endpoint that was set up for refund alerts on March 12.",
+      "I need to delete the webhook with ID wh_8f3a2b1c that's pushing inventory changes to our warehouse system.",
+      "Why am I still getting payment failure alerts at https://example.com/notify? I thought we turned that off last week.",
+      "How many active webhooks do I have right now? I want to clean up the ones I don't use anymore."
+    ]
+  },
+  "webhooks_get": {
+    "hash": "5b8b87bd26262fec",
+    "purpose": "Shows the configuration and subscription details for a specific webhook, identified by its ID.",
+    "examples": [
+      "Show me the details for webhook wh_abc123",
+      "What subscriptions are set up on webhook wh_xyz789?",
+      "Pull up the configuration for my order-notification webhook (ID wh_456def)",
+      "Did the webhook I created last week (wh_789ghi) get set up with the right endpoint?",
+      "What's the current status of webhook wh_321jkl — is it active or paused?"
+    ]
+  },
+  "webhooks_list": {
+    "hash": "24a3199c12b59c4f",
+    "purpose": "Lists all webhook subscriptions configured for an app, allowing a user to review or manage which events trigger notifications.",
+    "examples": [
+      "Show me all the webhooks I've set up for my store.",
+      "What notifications are currently being sent to my order processing system?",
+      "List the webhook endpoints configured for my application.",
+      "How many active webhook subscriptions do I have right now?",
+      "Did I already set up a webhook for new customer sign-ups?"
+    ]
+  },
+  "webhooks_post": {
+    "hash": "7a1aa7899a03148e",
+    "purpose": "Creates a webhook subscription so that a specified URL receives real-time notifications when selected events occur.",
+    "examples": [
+      "Set up a webhook at https://my-shop.example.com/listener to get notified whenever an order is placed or a refund is issued.",
+      "Please subscribe my endpoint https://webhooks.mycompany.io/events to all store events, including any new event types added in the future.",
+      "I need to receive push notifications at https://api.myshop.com/hooks whenever a customer creates an account or updates their profile.",
+      "Did any webhook notifications get sent to my server last night for failed payment events?",
+      "How many active webhook subscriptions do I currently have, and which event types are each one listening for?"
+    ]
+  },
+  "webhooks_update": {
+    "hash": "828d4751962a2221",
+    "purpose": "A business user can update an existing webhook's URL or the list of events it listens for without deleting and recreating the webhook.",
+    "examples": [
+      "Change the callback URL for webhook wh_abc123 to https://myapp.com/notifications/v2.",
+      "Update my order confirmation webhook so it also fires on refund events, not just completed payments.",
+      "Switch the endpoint URL for webhook wh_xyz789 from the staging server to the production server.",
+      "Did my webhook for abandoned carts get updated to include the new checkout events yesterday?",
+      "How many webhooks are currently set to listen for inventory changes instead of payment events?"
+    ]
+  }
+}

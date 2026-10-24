@@ -52,3 +52,118 @@ def ingest() -> None:
     for spec in over:
         typer.echo(f"  {spec.name}: {spec.trimmed_tokens:,}")
     typer.echo(f"report: {REPORT_PATH}")
+
+
+@app.command()
+def enrich() -> None:
+    """Add a purpose and 5 example requests per tool, cached in data/enrichment.json."""
+    from atlas.catalog import CatalogPaths
+    from atlas.llm import build_chat_model
+    from atlas.tools.enrich import Enricher
+    from atlas.tools.spec import load_specs
+    from atlas.tracing import tracing
+
+    settings = get_settings()
+    paths = CatalogPaths(settings)
+    specs = load_specs(paths.tools)
+    enricher = Enricher(
+        build_chat_model(settings), paths.enrichment, settings.atlas_examples_per_tool
+    )
+    done: list[str] = []
+
+    def progress(name: str) -> None:
+        done.append(name)
+        typer.echo(f"  [{len(done)}] {name}")
+
+    with tracing(settings):
+        cache = asyncio.run(enricher.run(specs, progress))
+    typer.echo(f"enriched {len(done)} tools · {len(cache)} cached in {paths.enrichment}")
+
+
+@app.command()
+def index() -> None:
+    """Rebuild the Qdrant tool collection from tools.json and enrichment.json."""
+    from atlas.catalog import load_catalog
+    from atlas.retrieval.factory import get_tool_index
+
+    settings = get_settings()
+    specs = load_catalog(settings)
+    points = asyncio.run(get_tool_index(settings).rebuild(specs))
+    collection = settings.atlas_tools_collection
+    typer.echo(f"indexed {len(specs)} tools as {points} vectors → {collection}")
+
+
+@app.command()
+def search(query: str, k: int = typer.Option(8, help="How many tools to return.")) -> None:
+    """Show the top-k tools for a request."""
+    from atlas.retrieval.factory import get_tool_index
+
+    for hit in asyncio.run(get_tool_index(get_settings()).search(query, k)):
+        typer.echo(f"{hit.rank:>2}. {hit.score:.3f}  {hit.name}")
+
+
+eval_app = typer.Typer(no_args_is_help=True, help="Run evaluations.")
+app.add_typer(eval_app, name="eval")
+
+
+@eval_app.command("retrieval")
+def eval_retrieval(
+    split: str = typer.Option("all", help="dev, test or all"),
+    heads_only: bool = typer.Option(False, help="Search tool descriptions only, no examples."),
+    check_baseline: bool = typer.Option(False, help="Fail if test Recall@8 drops below baseline."),
+    save_baseline: bool = typer.Option(False, help="Store this run's test Recall@8 as baseline."),
+) -> None:
+    """R0: score retrieval alone, with no LLM."""
+    from atlas.catalog import load_catalog
+    from atlas.evals.cases import load_cases
+    from atlas.evals.retrieval import BASELINE_PATH, run_retrieval, save_run
+    from atlas.retrieval.factory import get_tool_index
+
+    settings = get_settings()
+    groups = {s.name: s.group for s in load_catalog(settings)}
+    cases = load_cases(split=split)
+    run = asyncio.run(run_retrieval(get_tool_index(settings), cases, groups, heads_only))
+    config = {"embed_model": settings.atlas_embed_model, "split": split, "heads_only": heads_only}
+    path = save_run(run, config, "r0-heads" if heads_only else "r0")
+
+    keys = ["recall@3", "recall@5", "recall@8", "precision@5", "mrr", "ndcg@5"]
+    typer.echo(f"{'':<14}{'n':>4} " + " ".join(f"{k:>11}" for k in keys))
+    sections = {"all": run.summary, **run.by_split, **run.by_category}
+    for name, row in sections.items():
+        typer.echo(f"{name:<14}{row['n']:>4} " + " ".join(f"{row[k]:>11.3f}" for k in keys))
+    misses = [c for c in run.cases if c["recall@8"] < 1]
+    typer.echo(f"\nmisses at k=8: {len(misses)}")
+    for c in misses:
+        typer.echo(f"  [{c['split']}] {c['id']}: want {c['expected']} got {c['top'][:5]}")
+    typer.echo(f"results: {path}")
+
+    test_recall = run.by_split.get("test", {}).get("recall@8")
+    if save_baseline and test_recall is not None:
+        BASELINE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        BASELINE_PATH.write_text(json.dumps({"test_recall@8": test_recall}, indent=2) + "\n")
+        typer.echo(f"baseline saved: test recall@8 = {test_recall:.4f}")
+    if check_baseline:
+        baseline = json.loads(BASELINE_PATH.read_text())["test_recall@8"]
+        if test_recall is None or test_recall + 1e-9 < baseline:
+            typer.secho(f"test recall@8 {test_recall} < baseline {baseline}", fg="red", err=True)
+            raise typer.Exit(code=1)
+        typer.echo(f"baseline ok: {test_recall:.4f} >= {baseline:.4f}")
+
+
+@eval_app.command("leakage")
+def eval_leakage() -> None:
+    """Flag cases that are near-copies of a stored example request."""
+    from atlas.catalog import load_catalog
+    from atlas.evals.cases import load_cases
+    from atlas.evals.retrieval import LEAKAGE_THRESHOLD, leakage
+    from atlas.retrieval.factory import get_embedder
+
+    settings = get_settings()
+    flagged = leakage(
+        load_cases(), load_catalog(settings), get_embedder(settings.atlas_embed_model)
+    )
+    typer.echo(f"cases above {LEAKAGE_THRESHOLD} similarity to a stored example: {len(flagged)}")
+    for case_id, example, score in flagged:
+        typer.echo(f"  {case_id} ({score:.3f}) ~ {example}")
+    if flagged:
+        raise typer.Exit(code=1)

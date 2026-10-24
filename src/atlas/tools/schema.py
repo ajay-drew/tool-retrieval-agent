@@ -1,8 +1,10 @@
 import json
+import re
 from typing import Any
 
 DROP_KEYS = {"example", "examples", "discriminator", "externalDocs", "xml"}
 NESTED_LISTS = ("allOf", "anyOf", "oneOf")
+HTML_TAG = re.compile(r"<[^>]+>")
 
 
 def approx_tokens(obj: Any) -> int:
@@ -63,7 +65,7 @@ def _placeholder(target: dict) -> dict:
 
 
 def _cut(text: str, limit: int) -> str:
-    text = " ".join(str(text).split())
+    text = " ".join(HTML_TAG.sub(" ", str(text)).split())
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
 
 

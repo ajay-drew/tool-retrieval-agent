@@ -8,7 +8,7 @@ How Atlas is put together, and the contracts its code must keep. When code and t
 flowchart LR
   subgraph Setup["Once, at setup"]
     S[OpenAPI specs] --> I[ingest + trim] --> T[(tools.json)]
-    T --> E[enrich: purpose + 5 examples] --> X[embed: bge-small] --> F[(FAISS tool index)]
+    T --> E[enrich: purpose + 5 examples] --> X[embed: bge-small] --> F[(Qdrant: atlas_tools)]
   end
   subgraph Turn["Every turn: LangChain create_agent"]
     U[user message] --> M[ToolRetrievalMiddleware]
@@ -78,7 +78,9 @@ class Embedder(Protocol):
     def embed_query(self, text: str) -> np.ndarray: ...
 
 class ToolIndex(Protocol):
-    def search(self, query: str, k: int, service: str | None = None) -> list[Hit]: ...
+    async def search(
+        self, query: str, k: int, service: str | None = None, heads_only: bool = False
+    ) -> list[Hit]: ...
 
 @dataclass(frozen=True)
 class Hit:
@@ -88,8 +90,9 @@ class Hit:
 ```
 
 - `BgeEmbedder` normalises its vectors and adds bge's search prefix to queries.
-- `FaissToolIndex` is an `IndexFlatIP` holding one vector for `name + purpose + summary` and one for each example request, about 6 per tool. A tool's score is the highest of its vectors. The results are ranked tools, not vectors, so each tool appears once.
-- The index is saved as `data/tools.faiss` plus `data/tools.ids.json`, and rebuilt by `atlas index`.
+- `QdrantToolIndex` uses a Qdrant server (Docker, `qdrant/qdrant:v1.19.2`) through `AsyncQdrantClient`. Collection `atlas_tools` stores 384-dimension cosine vectors: one point for `name + purpose + description` (`kind=head`) and one per example request (`kind=example`), about 6 per tool. The payload is `{tool, service, kind}`.
+- Search uses `query_points_groups` with `group_by="tool"` and `group_size=1`, so Qdrant returns ranked tools, not vectors. A tool's score is its best vector, and each tool appears once. `service` and `heads_only` become payload filters, so the description-only comparison in R3 needs no second index.
+- Point IDs are `uuid5(tool + text)`. `atlas index` recreates the collection, so a rebuild is clean and repeatable.
 - Always-on tools are **not** in the index.
 
 ### Agent (`agent/`)
@@ -149,7 +152,7 @@ The registry builds an async `StructuredTool` per spec that calls `backend.call`
 
 | Tool | Inputs | Returns |
 |---|---|---|
-| `rag_search` | `question: str, k: int = 4` | `[{text, source, score}]` from `data/kb.faiss`, built from `kb/*.md` in chunks of about 500 tokens |
+| `rag_search` | `question: str, k: int = 4` | `[{text, source, score}]` from the Qdrant collection `atlas_kb`, built from `kb/*.md` in chunks of about 500 tokens |
 | `system_search` | `query: str, scope: "tools" \| "runs"` | `tools`: `[{name, purpose, access}]` from the tool index. `runs`: the latest matching rows from the run log. |
 | `find_tools` | `query: str, k: int = 5` | `[{name, purpose}]`, and adds those names to `state.found_tools` |
 
@@ -176,6 +179,8 @@ The registry builds an async `StructuredTool` per spec that calls `backend.call`
 | `ATLAS_EMBED_MODEL` | `BAAI/bge-small-en-v1.5` |
 | `ATLAS_APPROVE_WRITES` | `true` (evals set it to `false`) |
 | `ATLAS_PRICE_IN_PER_M`, `ATLAS_PRICE_OUT_PER_M` | `0.091`, `0.182` (OpenRouter's v4-flash prices in USD, checked 2026-10-24), used for cost per task |
+| `QDRANT_URL`, `QDRANT_API_KEY` | `http://localhost:6333`, unset |
+| `ATLAS_TOOLS_COLLECTION`, `ATLAS_KB_COLLECTION` | `atlas_tools`, `atlas_kb` |
 | `LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT` | `true`, required for traces, `atlas` |
 
 ## Evals
@@ -190,10 +195,16 @@ The registry builds an async `StructuredTool` per spec that calls `backend.call`
  "expected_tools": ["invoices_create", "invoices_send"],
  "ordered": true,
  "arg_checks": {"invoices_create": {"detail.currency_code": "USD", "items[0].unit_amount.value": "50.00"}},
- "expect_question": false}
+ "expect_question": false,
+ "split": "dev"}
 ```
 
-`category` is one of `single`, `multi`, `rag`, `system` or `clarify`. `arg_checks` use dotted paths and must match exactly.
+- `category` is one of `single`, `multi`, `rag`, `system` or `clarify`.
+- `split` is `dev` (60 cases, the only ones used for tuning) or `test` (90 held-out cases, reported as the result). Tuning on the reported cases would inflate the scores.
+- `alternatives` (optional) maps an expected tool to equivalents that also count, e.g. `{"invoices_search-invoices": ["invoices_list"]}`.
+- `arg_checks` use dotted paths into the call's arguments (`body.items[0].unit_amount.value`). A plain value must match; numbers compare as numbers (`"50"` = `"50.00"`). `{"prefix": "2026-09-01"}` and `{"contains": "jane@"}` are also allowed.
+- `answer_contains` (optional, RAG cases): case-insensitive strings that must all appear in the final answer.
+- Evals run with `ATLAS_TODAY=2026-10-24`, so "last month" always means September 2026.
 
 ### Metrics
 
@@ -237,7 +248,7 @@ Full-agent runs use `langsmith.aevaluate` with `max_concurrency=8`. Every scorer
 3. Trimming never removes a required field.
 4. Write tools pause for approval whenever `approve_writes` is true.
 5. Shared code has no service-specific branches. A new service is data (a spec folder plus a config entry).
-6. R0 runs with no network after the model download.
+6. R0 needs only the local Qdrant container and the embedding model, with no API keys.
 7. No secrets in the repo, and no employer code, names or data.
 
 ## Folder layout
@@ -249,7 +260,8 @@ tool-retrieval-agent/
 ├── .github/workflows/ci.yml
 ├── specs/paypal/              13 OpenAPI files + LICENSE (commit 90e8041)
 ├── kb/                        markdown for rag_search
-├── data/                      generated: tools.json, enrichment.json, *.faiss (gitignored except enrichment.json)
+├── docker-compose.yml         qdrant/qdrant:v1.19.2 on :6333
+├── data/                      generated: tools.json, full_schemas.json, enrichment.json (gitignored except enrichment.json)
 ├── runs/                      runlog.jsonl (gitignored)
 ├── src/atlas/
 │   ├── config.py  cli.py
