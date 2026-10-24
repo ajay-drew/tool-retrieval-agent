@@ -123,6 +123,10 @@ return handler(request)
 - `checkpointer`: `InMemorySaver`
 - `system_prompt`: from `agent/prompt.md`. It tells the model to ask instead of guessing when a required input is missing, and to use `find_tools` when none of the tools fit.
 
+**`ExposureMiddleware`** (innermost) records the tool names in each model request into a per-run `ContextVar` collector opened by `run_turn`. Exposure recall works the same for every tool-selection mode.
+
+**`run_turn` (`agent/turn.py`)** runs one user message, resumes approval pauses through an approver callback (the CLI asks, evals approve everything), and returns the answer, tool calls with their HTTP status, exposed tools, tokens, latency, status and the LangSmith trace URL. Status is `failed`, `limit_hit`, `asked_user` (the answer contains a question and no change was made) or `completed`.
+
 **Run log (`agent/runlog.py`):** one JSON line per finished turn in `runs/runlog.jsonl`:
 `{run_id, thread_id, ts, user_message, tools_exposed, tool_calls:[{name, args, ok, error}], status, latency_ms, tokens_in, tokens_out, langsmith_url}`.
 `status` is one of `completed`, `asked_user`, `failed` or `limit_hit`.

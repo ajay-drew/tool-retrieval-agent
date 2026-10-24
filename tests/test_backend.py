@@ -80,3 +80,10 @@ def test_transactions_filter_by_date(catalog):
     query = {"start_date": "2026-09-01T00:00:00Z", "end_date": "2026-09-30T23:59:59Z"}
     result = asyncio.run(backend.call(spec, {"query": query}))
     assert result.body["total_items"] == 5
+
+
+def test_nested_json_strings_are_parsed():
+    from atlas.tools.registry import coerce_json_strings
+
+    fixed = coerce_json_strings({"query": '{"page": 1}', "path": {"id": "X"}, "note": "{oops"})
+    assert fixed == {"query": {"page": 1}, "path": {"id": "X"}, "note": "{oops"}

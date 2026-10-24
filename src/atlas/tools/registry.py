@@ -1,3 +1,4 @@
+import contextlib
 import json
 
 from jsonschema import Draft202012Validator
@@ -21,6 +22,16 @@ def _shrink(body: object) -> object:
     return body
 
 
+def coerce_json_strings(args: dict) -> dict:
+    """Models sometimes send a nested object as a JSON string; parse those before checking."""
+    fixed = dict(args)
+    for key, value in args.items():
+        if isinstance(value, str) and value.strip().startswith(("{", "[")):
+            with contextlib.suppress(ValueError):
+                fixed[key] = json.loads(value)
+    return fixed
+
+
 def tool_description(spec: ToolSpec) -> str:
     text = f"{spec.summary}. {spec.purpose}".strip(". ") + "."
     if spec.access == "write":
@@ -32,6 +43,7 @@ def make_tool(spec: ToolSpec, backend: Backend) -> StructuredTool:
     validator = Draft202012Validator(spec.params_schema)
 
     async def run(**kwargs: object) -> str:
+        kwargs = coerce_json_strings(kwargs)
         errors = sorted(validator.iter_errors(kwargs), key=lambda e: e.json_path)
         if errors:
             details = [{"field": e.json_path, "issue": e.message[:200]} for e in errors[:5]]

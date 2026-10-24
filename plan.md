@@ -91,18 +91,18 @@ Phase 1 uses PayPal's 115 REST operations, plus `rag_search` and `system_search`
 **Done when** every one of the 115 tools can be called with a valid example input and returns success.
 
 ### 6. Agent
-- [ ] `ToolRetrievalMiddleware` (`wrap_model_call`, using `request.override(tools=…)`)
-- [ ] `build_atlas(config)` uses `create_agent` with our middleware, approval pause, retry and limits, and an `InMemorySaver` checkpointer
-- [ ] A run log row is written for every finished turn
-- [ ] `atlas chat`, an interactive CLI that asks for approval on write tools
-- [ ] Unit tests check that the middleware passes exactly top-k + always-on + found tools
+- [x] `ToolRetrievalMiddleware` (`wrap_model_call`, using `request.override(tools=…)`)
+- [x] `build_atlas(config)` uses `create_agent` with our middleware, approval pause, retry and limits, and an `InMemorySaver` checkpointer
+- [x] A run log row is written for every finished turn
+- [x] `atlas chat`, an interactive CLI that asks for approval on write tools
+- [x] Unit tests check that the middleware passes exactly top-k + always-on + found tools
 
 **Done when** the three sample requests from the brief work in `atlas chat` and each has a LangSmith trace.
 
 ### 7. Extra tools
-- [ ] `rag_search` over `kb/`, with its own Qdrant collection (`atlas_kb`) and source names in results
-- [ ] `system_search` with `scope=tools` (the tool index) and `scope=runs` (the run log)
-- [ ] `find_tools` returns matches and saves them to state
+- [x] `rag_search` over `kb/`, with its own Qdrant collection (`atlas_kb`) and source names in results
+- [x] `system_search` with `scope=tools` (the tool index) and `scope=runs` (the run log)
+- [x] `find_tools` returns matches and saves them to state
 
 **Done when** "what tools manage invoices?", "status of my last request" and one knowledge-base question each get a correct answer.
 
@@ -149,6 +149,7 @@ Revised 2026-10-24 after R0 tuning on the dev split (`reports/r0_tuning.md`). Th
 
 - 2026-10-24: plan created.
 - 2026-10-24: model provider changed to OpenRouter (`deepseek/deepseek-v4-flash`, $0.091 / $0.182 per 1M tokens in / out). `langchain-deepseek` replaced by `langchain-openai`. The 1M context means R1 can also run untrimmed.
+- 2026-10-24: steps 6–7 done. Retrieval runs in `abefore_model` (writes `allowed_tools` to state) and filters in `awrap_model_call`. Exposure is recorded by a separate innermost `ExposureMiddleware` into a per-run ContextVar, so it also works for the all-tools and LLM-selector variants. `atlas ask` was added for one-shot use. Turn status is "asked_user" when the answer contains a question and nothing was changed. The tool wrapper parses nested inputs sent as JSON strings (a DeepSeek quirk seen in traces). The prompt now says not to look up optional details nobody asked for. The model still sometimes wanders on the invoice request, and evals measure how often. The knowledge base is a handbook for a fictional merchant (Northwind Studio), not copied PayPal docs.
 - 2026-10-24: step 5 done. The mock is generic REST routing, with PayPal behaviour as data in seed.json. Seed IDs changed to match spec patterns (order and webhook event IDs), and the eval cases were updated to match. All 115 tools pass a minimal valid call.
 - 2026-10-24: steps 3–4 done. All 151 cases written at once (60 dev, 91 test) instead of 60 then 90. R0 on the test split: Recall@8 0.921, Recall@5 0.849, MRR 0.741, nDCG@5 0.739. That misses the 0.93 Recall@8 target by 0.01. Not tuned further, to keep the test split honest. The CI baseline is 0.9206. Step 3's "invoice tool in top 3" check passes (invoices_list is #1 for the brief's invoice request), but `invoices_create` is outside the top 5 for that query; that's covered by `find_tools` and measured as exposure recall.
 - 2026-10-24: R0 tuning on dev (8 setups): kept bge-small, 5 examples, dense only. Hybrid BM25+dense lost 0.05–0.11 Recall@8; 10 examples and bge-base moved results by ±0.02 (noise). Targets revised (see Phase 1 targets). Eval cases now carry a dev/test split; 11 cases were rewritten after the leakage check flagged them.

@@ -167,3 +167,100 @@ def eval_leakage() -> None:
         typer.echo(f"  {case_id} ({score:.3f}) ~ {example}")
     if flagged:
         raise typer.Exit(code=1)
+
+
+@app.command()
+def kb() -> None:
+    """Rebuild the Qdrant knowledge-base collection from kb/*.md."""
+    from pathlib import Path
+
+    from atlas.retrieval.factory import get_embedder, make_qdrant_client
+    from atlas.tools.rag import KnowledgeBase, load_chunks
+
+    settings = get_settings()
+    knowledge_base = KnowledgeBase(
+        make_qdrant_client(settings),
+        get_embedder(settings.atlas_embed_model),
+        settings.atlas_kb_collection,
+    )
+    count = asyncio.run(knowledge_base.rebuild(load_chunks(Path("kb"))))
+    typer.echo(f"indexed {count} handbook sections → {settings.atlas_kb_collection}")
+
+
+async def _console_approver(requests: list[dict]) -> list[dict]:
+    decisions = []
+    for request in requests:
+        typer.secho(f"\n  {request['name']} wants to run with:", fg=typer.colors.YELLOW)
+        typer.echo("  " + json.dumps(request["args"], indent=2).replace("\n", "\n  "))
+        approved = typer.confirm("  Approve this change?", default=False)
+        decisions.append({"type": "approve" if approved else "reject"})
+    return decisions
+
+
+async def _yes(requests: list[dict]) -> list[dict]:
+    return [{"type": "approve"} for _ in requests]
+
+
+def _print_turn(result) -> None:
+    for call in result.tool_calls:
+        mark = "ok" if call.ok else f"status {call.status}"
+        typer.secho(f"  · {call.name} ({mark})", fg=typer.colors.BRIGHT_BLACK)
+    if result.error:
+        typer.secho(f"  error: {result.error}", fg=typer.colors.RED)
+    typer.echo(f"\n{result.answer}\n")
+    if result.trace_url:
+        typer.secho(f"  trace: {result.trace_url}\n", fg=typer.colors.BRIGHT_BLACK)
+
+
+def _agent_session(settings):
+    from atlas.agent.build import AgentOptions, build_atlas
+    from atlas.agent.factory import make_deps
+
+    deps = make_deps(settings)
+    options = AgentOptions(k=settings.atlas_k, approve_writes=True, today=settings.atlas_today)
+    writes = {s.name for s in deps.specs if s.access == "write"}
+    return build_atlas(deps, options), writes, deps.runlog
+
+
+@app.command()
+def ask(
+    message: str,
+    yes: bool = typer.Option(False, "--yes", help="Approve every change without asking."),
+) -> None:
+    """Send one message to Atlas."""
+    from uuid import uuid4
+
+    from atlas.agent.turn import run_turn
+    from atlas.tracing import tracing
+
+    settings = get_settings()
+    agent, writes, runlog = _agent_session(settings)
+    approver = _yes if yes else _console_approver
+    with tracing(settings):
+        result = asyncio.run(run_turn(agent, message, uuid4().hex, writes, approver, runlog))
+    _print_turn(result)
+
+
+@app.command()
+def chat() -> None:
+    """Chat with Atlas. Changes to your account ask for approval first."""
+    from uuid import uuid4
+
+    from atlas.agent.turn import run_turn
+    from atlas.tracing import tracing
+
+    settings = get_settings()
+    agent, writes, runlog = _agent_session(settings)
+    thread_id = uuid4().hex
+    typer.echo("Atlas is ready. Type 'exit' to quit.\n")
+
+    async def loop() -> None:
+        while True:
+            message = typer.prompt("you").strip()
+            if message.lower() in {"exit", "quit"}:
+                return
+            result = await run_turn(agent, message, thread_id, writes, _console_approver, runlog)
+            _print_turn(result)
+
+    with tracing(settings):
+        asyncio.run(loop())
