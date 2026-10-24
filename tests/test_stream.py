@@ -60,3 +60,14 @@ def test_interrupt_becomes_approval_request():
 
 def test_non_dict_updates_are_ignored():
     assert collect("model", None) == []
+
+
+def test_thread_url_comes_from_the_trace_project():
+    from atlas.tracing import langsmith_thread_url
+
+    trace = "https://smith.langchain.com/o/org1/projects/p/proj1/trace/abc/run/abc?start_time=x"
+    assert (
+        langsmith_thread_url(trace, "t9")
+        == "https://smith.langchain.com/o/org1/projects/p/proj1/t/t9"
+    )
+    assert langsmith_thread_url(None, "t9") is None

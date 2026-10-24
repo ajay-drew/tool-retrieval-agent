@@ -192,8 +192,10 @@ The registry builds an async `StructuredTool` per spec that calls `backend.call`
 | `tool_result` | `id`, `name`, `status`, `body` | The tool returned |
 | `approval` | `requests [{name, args, description}]` | A write tool is paused for approval; the stream ends here |
 | `message` | `text` | The model's reply |
-| `done` | `status`, `trace_url` | Turn finished |
+| `done` | `status`, `trace_url`, `thread_url` | Turn finished. `thread_url` is the LangSmith thread page (`<project URL>/t/<thread_id>`). |
 | `error` | `detail` | Turn failed |
+
+Every run of a turn, the root trace and every model and tool call under it, carries `metadata.thread_id` equal to the chat's thread ID (the one in `/c/<thread-id>`), so LangSmith groups a conversation's turns into one thread. LangSmith needs the key on child runs too, or they drop out of the thread's view and totals.
 
 `ToolRetrievalMiddleware` writes `last_retrieval` (query, scored hits, shown, dropped by the budget) to state in `before_model`; `stream_turn` turns that state update into the `retrieval` event.
 

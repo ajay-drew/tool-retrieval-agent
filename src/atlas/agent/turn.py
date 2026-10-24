@@ -11,6 +11,7 @@ from langsmith.run_helpers import get_current_run_tree
 
 from atlas.agent.runlog import RunLog
 from atlas.tools.registry import coerce_json_strings
+from atlas.tracing import langsmith_thread_url, tag_thread
 
 Approver = Callable[[list[dict]], Awaitable[list[dict]]]
 
@@ -37,6 +38,7 @@ class TurnResult:
     model_calls: int = 0
     error: str | None = None
     trace_url: str | None = None
+    thread_url: str | None = None
 
 
 async def approve_all(requests: list[dict]) -> list[dict]:
@@ -95,7 +97,12 @@ async def run_turn(
     approver: Approver = approve_all,
     runlog: RunLog | None = None,
 ) -> TurnResult:
-    config = {"configurable": {"thread_id": thread_id}, "recursion_limit": 60}
+    config = {
+        "configurable": {"thread_id": thread_id},
+        "metadata": {"thread_id": thread_id},
+        "recursion_limit": 60,
+    }
+    tag_thread(thread_id)
     started = time.perf_counter()
     try:
         state = await agent.ainvoke({"messages": [HumanMessage(message)]}, config)
@@ -108,6 +115,7 @@ async def run_turn(
         result = TurnResult(answer="", status="error", error=f"{type(exc).__name__}: {exc}")
     run = get_current_run_tree()
     result.trace_url = _safe_url(run)
+    result.thread_url = langsmith_thread_url(result.trace_url, thread_id)
     result.latency_ms = int((time.perf_counter() - started) * 1000)
     if runlog:
         runlog.append(

@@ -30,7 +30,12 @@ export function applyEvent(turn: Turn, event: StreamEvent): Turn {
     case "approval":
       return { ...turn, approval: event.requests, status: "awaiting_approval" };
     case "done":
-      return finish({ ...turn, status: event.status, traceUrl: event.trace_url });
+      return finish({
+        ...turn,
+        status: event.status,
+        traceUrl: event.trace_url,
+        threadUrl: event.thread_url ?? turn.threadUrl,
+      });
     case "error":
       return { ...turn, status: "error", error: event.detail };
     default:

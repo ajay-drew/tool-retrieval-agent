@@ -209,7 +209,9 @@ def _print_turn(result) -> None:
         typer.secho(f"  error: {result.error}", fg=typer.colors.RED)
     typer.echo(f"\n{result.answer}\n")
     if result.trace_url:
-        typer.secho(f"  trace: {result.trace_url}\n", fg=typer.colors.BRIGHT_BLACK)
+        typer.secho(f"  trace: {result.trace_url}", fg=typer.colors.BRIGHT_BLACK)
+    if result.thread_url:
+        typer.secho(f"  thread: {result.thread_url}\n", fg=typer.colors.BRIGHT_BLACK)
 
 
 def _agent_session(settings):

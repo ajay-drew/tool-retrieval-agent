@@ -8,6 +8,7 @@ from langsmith.run_helpers import get_current_run_tree
 from atlas.agent.runlog import RunLog
 from atlas.agent.turn import summarize
 from atlas.tools.registry import coerce_json_strings
+from atlas.tracing import langsmith_thread_url, tag_thread
 
 RESULT_PREVIEW_CHARS = 4000
 
@@ -72,7 +73,12 @@ async def stream_turn(
     access: dict[str, str],
     runlog: RunLog | None = None,
 ) -> AsyncIterator[dict]:
-    config = {"configurable": {"thread_id": thread_id}, "recursion_limit": 60}
+    config = {
+        "configurable": {"thread_id": thread_id},
+        "metadata": {"thread_id": thread_id},
+        "recursion_limit": 60,
+    }
+    tag_thread(thread_id)
     step = 0
     paused = False
     async for chunk in agent.astream(payload, config, stream_mode="updates"):
@@ -91,7 +97,12 @@ async def stream_turn(
         except Exception:
             trace_url = None
     if paused:
-        yield {"type": "done", "status": "awaiting_approval", "trace_url": trace_url}
+        yield {
+            "type": "done",
+            "status": "awaiting_approval",
+            "trace_url": trace_url,
+            "thread_url": langsmith_thread_url(trace_url, thread_id),
+        }
         return
     state = await agent.aget_state(config)
     writes = {name for name, kind in access.items() if kind == "write"}
@@ -108,4 +119,9 @@ async def stream_turn(
                 "langsmith_url": trace_url,
             }
         )
-    yield {"type": "done", "status": result.status, "trace_url": trace_url}
+    yield {
+        "type": "done",
+        "status": result.status,
+        "trace_url": trace_url,
+        "thread_url": langsmith_thread_url(trace_url, thread_id),
+    }

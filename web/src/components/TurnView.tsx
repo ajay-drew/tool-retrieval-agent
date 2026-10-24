@@ -139,6 +139,11 @@ export function TurnView({ turn, busy, isLast, onDecide, onInspect }: Props) {
               LangSmith trace ↗
             </a>
           )}
+          {turn.threadUrl && (
+            <a href={turn.threadUrl} target="_blank" rel="noreferrer">
+              LangSmith thread ↗
+            </a>
+          )}
         </p>
       )}
     </article>
