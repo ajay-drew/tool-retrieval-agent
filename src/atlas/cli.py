@@ -264,3 +264,73 @@ def chat() -> None:
 
     with tracing(settings):
         asyncio.run(loop())
+
+
+@eval_app.command("run")
+def eval_run(
+    name: str = typer.Argument(
+        ...,
+        help="r1-all, r1-untrimmed, r2, r3-k3, r3-k5, r3-k12, r3-heads, r3-nofind or r3-llmselect",
+    ),
+    split: str = typer.Option("all", help="dev, test or all"),
+    limit: int = typer.Option(0, help="Only the first N cases (0 = all)."),
+    concurrency: int = typer.Option(8, help="Cases in flight at once."),
+    local: bool = typer.Option(False, help="Skip LangSmith even when a key is set."),
+) -> None:
+    """R1–R3: run the full agent on the eval cases and score it."""
+    from atlas.evals.agent_run import (
+        RUNS,
+        CaseRunner,
+        run_langsmith,
+        run_local,
+        save_agent_run,
+        score_outputs,
+        select_cases,
+    )
+    from atlas.evals.cases import load_cases
+
+    if name not in RUNS:
+        typer.secho(f"unknown run {name!r}; choose from {', '.join(RUNS)}", fg="red", err=True)
+        raise typer.Exit(code=2)
+    settings = get_settings()
+    config = RUNS[name]
+    cases = select_cases(load_cases(split=split), config)
+    if limit:
+        cases = cases[:limit]
+    runner = CaseRunner(settings, config)
+    experiment = None
+    if settings.tracing_enabled and not local:
+        from atlas.tracing import tracing
+
+        with tracing(settings) as client:
+            outputs, experiment = asyncio.run(
+                run_langsmith(runner, cases, name, config, concurrency, client)
+            )
+    else:
+        outputs = asyncio.run(run_local(runner, cases, concurrency))
+    report = score_outputs(cases, outputs, runner.writes, settings)
+    extra = {"split": split, "experiment": experiment, "model": settings.atlas_model}
+    path = save_agent_run(name, config, report, extra)
+
+    keys = [
+        "task_completion",
+        "exposure_recall",
+        "tool_execution_success",
+        "p95_latency_s",
+        "cost_per_task_usd",
+    ]
+    typer.echo(f"{'':<10}{'n':>4} " + " ".join(f"{k[:14]:>15}" for k in keys))
+    sections = {"all": report["summary"], **report["by_split"], **report["by_category"]}
+    for section, row in sections.items():
+        cells = []
+        for k in keys:
+            v = row.get(k)
+            cells.append(f"{'—' if v is None else v:>15}")
+        typer.echo(f"{section:<10}{row['n']:>4} " + " ".join(cells))
+    failed = [c for c in report["cases"] if not c["task_completed"]]
+    typer.echo(f"\nnot completed: {len(failed)}")
+    for c in failed[:40]:
+        typer.echo(f"  [{c['split']}] {c['id']} {c['status']}: {c['calls'][:6]}")
+    if experiment:
+        typer.echo(f"LangSmith experiment: {experiment}")
+    typer.echo(f"results: {path}")

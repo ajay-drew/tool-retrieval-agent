@@ -1,6 +1,6 @@
 {
   "authorizations_capture": {
-    "hash": "4e28a61ccfc0810d",
+    "hash": "c4cb09c1398e9b3d-5",
     "purpose": "A merchant can capture (settle) an authorized payment, either partially or in full, to complete a transaction and receive the funds.",
     "examples": [
       "Capture the full $150.00 authorization from order #AUTH-12345 for customer jane@example.com.",
@@ -11,7 +11,7 @@
     ]
   },
   "authorizations_get": {
-    "hash": "abd7f95eabfd9679",
+    "hash": "bf73d784dd90c014-5",
     "purpose": "Shows details for a specific authorized payment, including its status, amount, and related transaction information.",
     "examples": [
       "Show me the details for authorization ID AUTH-12345ABC67890DEF",
@@ -22,7 +22,7 @@
     ]
   },
   "authorizations_reauthorize": {
-    "hash": "bd79c73813b03221",
+    "hash": "2607aafdabfa5cbf-5",
     "purpose": "A merchant can reauthorize an authorized PayPal payment to extend the hold on funds after the initial three-day honor period expires, ensuring the payment can still be captured within the 29-day authorization window.",
     "examples": [
       "Can you reauthorize the payment for authorization ID 8AA12345KH678901L? The original hold expired and I still need to capture it.",
@@ -33,7 +33,7 @@
     ]
   },
   "authorizations_void": {
-    "hash": "e2790a59fbb63399",
+    "hash": "02df60e71b35a71f-5",
     "purpose": "A merchant can cancel a previously authorized payment before it has been captured, releasing the hold on the buyer's funds.",
     "examples": [
       "Cancel the authorization for order #AUTH12345 from yesterday.",
@@ -44,7 +44,7 @@
     ]
   },
   "balances_get": {
-    "hash": "7d63bdbeadbade6e",
+    "hash": "95ddf6a41784605c-5",
     "purpose": "A business user retrieves current or historical account balances across all currencies as of a specific date and time.",
     "examples": [
       "Show me all our account balances as of March 15, 2024 at noon UTC.",
@@ -55,7 +55,7 @@
     ]
   },
   "captures_get": {
-    "hash": "d73882cbb6081d32",
+    "hash": "797e28b366571b65-5",
     "purpose": "Retrieves the complete details of a specific captured payment, including its status, amount, and transaction timestamps.",
     "examples": [
       "Show me the details for capture 3C948598CS684452D",
@@ -66,7 +66,7 @@
     ]
   },
   "captures_refund": {
-    "hash": "0b0ef93366b22b29",
+    "hash": "914960a791c40e3f-5",
     "purpose": "Allows a merchant to refund a captured payment, either fully or partially, by specifying the capture ID and optionally an amount, invoice ID, or note.",
     "examples": [
       "Refund capture 2GG79123EB602430J in full, the customer cancelled their order.",
@@ -77,7 +77,7 @@
     ]
   },
   "connections_get": {
-    "hash": "0c313b2bdcabaf08",
+    "hash": "1e0fe83d7c9c05af-5",
     "purpose": "Lists all accounting platform connections (e.g., QuickBooks, Xero) that a merchant has set up for syncing invoice data.",
     "examples": [
       "Show me which accounting platforms I'm connected to",
@@ -88,7 +88,7 @@
     ]
   },
   "customer_payment-tokens_get": {
-    "hash": "601c857b214f9b79",
+    "hash": "789249d518514bee-5",
     "purpose": "Lists all stored payment tokens for a specific customer so you can view their saved payment methods.",
     "examples": [
       "Show me all the saved payment methods for customer CUST_abc123.",
@@ -99,7 +99,7 @@
     ]
   },
   "disputes_accept-claim": {
-    "hash": "8cb5ad9ca79fd856",
+    "hash": "78ff5e6fd81399e0-5",
     "purpose": "Accepts liability for a dispute claim, automatically refunding the customer from the merchant's account and closing the dispute in the customer's favor.",
     "examples": [
       "I need to accept the claim on dispute PP-D-29384 and refund the customer.",
@@ -110,7 +110,7 @@
     ]
   },
   "disputes_accept-offer": {
-    "hash": "268f183ff74988d0",
+    "hash": "0086552773fa891b-5",
     "purpose": "A customer accepts a merchant's settlement offer on a dispute, which triggers an automatic refund of the proposed amount to the customer.",
     "examples": [
       "Accept the $250 offer on dispute PP-123-456-789, please.",
@@ -121,7 +121,7 @@
     ]
   },
   "disputes_acknowledge-return-item": {
-    "hash": "2d175237b5cb591a",
+    "hash": "4fc1a5dcd2396ef8-5",
     "purpose": "A merchant submits proof that a customer returned a disputed item, moving the dispute toward resolution.",
     "examples": [
       "I need to confirm that the customer sent back the item for dispute DS-7821.",
@@ -132,7 +132,7 @@
     ]
   },
   "disputes_adjudicate": {
-    "hash": "97381bae3da3d9b8",
+    "hash": "128fb6997e14db95-5",
     "purpose": "A merchant can settle a dispute in either their own favor or the customer's favor for sandbox testing purposes, simulating how PayPal normally resolves disputes.",
     "examples": [
       "Settle dispute PP-001-234-567-890 in the buyer's favor.",
@@ -143,7 +143,7 @@
     ]
   },
   "disputes_appeal": {
-    "hash": "bfe856fc9d7e221a",
+    "hash": "16e1668fd1d54350-5",
     "purpose": "Appeal a dispute by submitting new evidence or notes to support your case.",
     "examples": [
       "I need to appeal dispute DP-78342 with a signed delivery receipt — can you upload the PDF I just attached?",
@@ -154,7 +154,7 @@
     ]
   },
   "disputes_deny-offer": {
-    "hash": "302f8bf1ab11a59b",
+    "hash": "4a9cc4b0b6900f1e-5",
     "purpose": "A business user rejects a settlement offer from the merchant for a specific dispute, optionally adding notes that only PayPal can see.",
     "examples": [
       "Deny the settlement offer for dispute DISP-12345 because they only offered $50 but I'm owed $200.",
@@ -165,7 +165,7 @@
     ]
   },
   "disputes_escalate": {
-    "hash": "450a9f4d3c7f4f71",
+    "hash": "14500dec74e5367b-5",
     "purpose": "Escalate a dispute to a formal PayPal claim when the dispute is still in the inquiry stage.",
     "examples": [
       "Escalate dispute PP-D-12345 to a claim, the customer is not responding to my messages.",
@@ -176,7 +176,7 @@
     ]
   },
   "disputes_get": {
-    "hash": "baa934b471ae301e",
+    "hash": "046d223064203185-5",
     "purpose": "A merchant retrieves the full details of a specific dispute, including its status, reason, and related transaction information, to review or respond to the case.",
     "examples": [
       "Show me the details for dispute DIS-2024-03821.",
@@ -187,7 +187,7 @@
     ]
   },
   "disputes_list": {
-    "hash": "9234fb7437037ce5",
+    "hash": "27dfa9516da32b6f-5",
     "purpose": "Lists disputes for a merchant with summary details like ID, reason, status, amount, and timestamps, with filtering by date range, transaction ID, state, and pagination.",
     "examples": [
       "Show me all disputes from the last 30 days",
@@ -198,7 +198,7 @@
     ]
   },
   "disputes_make-offer": {
-    "hash": "bfd7b0e846553af9",
+    "hash": "87dc51ff071aae0a-5",
     "purpose": "A merchant sends a settlement offer to the other party in a dispute, specifying an amount and optional return shipping address, to try to resolve the case.",
     "examples": [
       "Offer $150 to resolve dispute PP-D-28742 regarding the defective headphones.",
@@ -209,7 +209,7 @@
     ]
   },
   "disputes_patch": {
-    "hash": "020a031d2e7230d5",
+    "hash": "97d008f2cc6052e3-5",
     "purpose": "Partially update a dispute's details, such as adding communication notes or partner action information, without replacing the entire dispute record.",
     "examples": [
       "Update dispute DIS-12345 with the customer's latest email address support@acme.com.",
@@ -220,7 +220,7 @@
     ]
   },
   "disputes_provide-evidence": {
-    "hash": "4ccdcc4ccdaf2d86",
+    "hash": "467633466400ba55-5",
     "purpose": "A merchant or customer can upload supporting evidence files for a specific dispute to help resolve it in their favor.",
     "examples": [
       "Upload the proof of delivery PDF for dispute 8a3f-72b1.",
@@ -231,7 +231,7 @@
     ]
   },
   "disputes_provide-supporting-info": {
-    "hash": "34925c9b83a88913",
+    "hash": "82d71838627879d5-5",
     "purpose": "A merchant or buyer can upload evidence files to support their case in an active dispute.",
     "examples": [
       "I need to upload the signed delivery receipt for dispute DP-2024-0381 to prove the item was delivered.",
@@ -242,7 +242,7 @@
     ]
   },
   "disputes_require-evidence": {
-    "hash": "4062122a3252dac6",
+    "hash": "1a711452811c6e68-5",
     "purpose": "Advances a dispute from under review to the evidence-collection phase, specifying whether the buyer or seller is now required to submit supporting documentation.",
     "examples": [
       "Can you mark dispute DP-3842 as needing buyer response so we can gather their evidence?",
@@ -253,7 +253,7 @@
     ]
   },
   "disputes_send-message": {
-    "hash": "8423530b799e81c4",
+    "hash": "236696bacf18369e-5",
     "purpose": "A merchant or customer sends a message with optional supporting document to the other party in an active dispute that is still in the inquiry stage.",
     "examples": [
       "Send a message to the customer about dispute DP-8842 explaining why the charge is valid.",
@@ -264,7 +264,7 @@
     ]
   },
   "event-types_list": {
-    "hash": "2d44be85c97eee83",
+    "hash": "73d466e761b67c28-5",
     "purpose": "Lists all event types a webhook is currently subscribed to, so you can verify or review which notifications the webhook will receive.",
     "examples": [
       "What events is my webhook wh-abc123 currently subscribed to?",
@@ -275,7 +275,7 @@
     ]
   },
   "find_eligible_methods": {
-    "hash": "356e6390a535789c",
+    "hash": "758d3dc2a9e82515-5",
     "purpose": "A merchant can check which payment methods are available for a customer's purchase based on their location, currency, and other details.",
     "examples": [
       "What payment options can I offer a customer in Germany buying €150 worth of goods?",
@@ -286,7 +286,7 @@
     ]
   },
   "invoice_connection_details_get": {
-    "hash": "963af1a4dbbf9399",
+    "hash": "2a68180e507736d0-5",
     "purpose": "Lists all accounting platform connections and their sync status for a specific invoice, helping merchants verify that their invoice data is reaching the right systems.",
     "examples": [
       "Show me which accounting platforms my invoice INV-2024-001 is connected to",
@@ -297,7 +297,7 @@
     ]
   },
   "invoices_cancel": {
-    "hash": "80ba8f7a50eb6493",
+    "hash": "0690b232b7e8de3c-5",
     "purpose": "A merchant cancels a sent invoice and optionally sends cancellation notifications to the payer, merchant, and additional CC recipients.",
     "examples": [
       "Cancel invoice INV-2024-001 for the Smith project and send a cancellation notice to both myself and the client.",
@@ -308,7 +308,7 @@
     ]
   },
   "invoices_create": {
-    "hash": "3ddfbb4b8d51df3f",
+    "hash": "7f5d20085f2260f2-5",
     "purpose": "Creates a draft invoice with merchant and item details so it can later be sent to a buyer for payment.",
     "examples": [
       "Create a draft invoice for $1,500 to Acme Corp for consulting services this month.",
@@ -319,7 +319,7 @@
     ]
   },
   "invoices_delete": {
-    "hash": "e1e0adc784436ed7",
+    "hash": "7bdd90cd793687ad-5",
     "purpose": "A merchant removes a draft or scheduled invoice that hasn't been sent yet so it won't clutter their records or be processed accidentally.",
     "examples": [
       "Get rid of invoice DRAFT-001 that I messed up.",
@@ -330,7 +330,7 @@
     ]
   },
   "invoices_generate-qr-code": {
-    "hash": "32d603f492aa7bdf",
+    "hash": "9133c93c7bcff340-5",
     "purpose": "Generates a QR code image for an invoice that customers can scan with their mobile devices to view or pay the invoice.",
     "examples": [
       "Generate a QR code for invoice INV-2024-001 so I can add it to the PDF before mailing it to the customer.",
@@ -341,7 +341,7 @@
     ]
   },
   "invoices_get": {
-    "hash": "b554730c00629ff8",
+    "hash": "225c401743a81480-5",
     "purpose": "A merchant retrieves the full details of a specific invoice, including its status, line items, amounts, and customer information, using the invoice ID.",
     "examples": [
       "Show me invoice INV-2024-8932",
@@ -352,7 +352,7 @@
     ]
   },
   "invoices_list": {
-    "hash": "d0f171cde438aa7d",
+    "hash": "92507df816a082fe-5",
     "purpose": "Lists invoices with optional filtering, pagination, and field selection so a merchant can view, search, or manage their invoice records.",
     "examples": [
       "Show me my last 20 invoices.",
@@ -363,7 +363,7 @@
     ]
   },
   "invoices_payments": {
-    "hash": "f7c9b242b20f3a12",
+    "hash": "e48a289adece61b7-5",
     "purpose": "Records a payment against a specific invoice so the system can update the invoice status to PAID or PARTIALLY PAID and track the outstanding balance.",
     "examples": [
       "Can you record a payment of $250 for invoice INV-2024-089 via wire transfer? It came through yesterday.",
@@ -374,7 +374,7 @@
     ]
   },
   "invoices_payments-delete": {
-    "hash": "c6c8f8d17fbc7cab",
+    "hash": "bcbc4002c828e3f8-5",
     "purpose": "Delete a recorded external payment from a draft invoice to correct a mistake or remove an incorrectly applied payment.",
     "examples": [
       "Remove the $250 payment with transaction ID TXN-8842 from invoice INV-2024-039.",
@@ -385,7 +385,7 @@
     ]
   },
   "invoices_refunds": {
-    "hash": "0f4eaabd49218f57",
+    "hash": "1eba31def51e98db-5",
     "purpose": "Records a refund against an invoice and updates the invoice status to REFUNDED or PARTIALLY_REFUNDED based on whether the full amount was returned.",
     "examples": [
       "Refund invoice INV-2024-0891 for $150.00 via bank transfer.",
@@ -396,7 +396,7 @@
     ]
   },
   "invoices_refunds-delete": {
-    "hash": "0164dc28d178703e",
+    "hash": "b206bdfaa62c752f-5",
     "purpose": "Allows a business user to delete a previously recorded external refund from a draft invoice, removing that refund entry from the invoice record.",
     "examples": [
       "Can you delete the refund transaction TXN-8842 from invoice INV-2024-3891?",
@@ -407,7 +407,7 @@
     ]
   },
   "invoices_remind": {
-    "hash": "7175c98344dd0ca9",
+    "hash": "dfcab3d3ce96bafc-5",
     "purpose": "Send a reminder notification to the payer for a specific invoice, optionally including a subject line, a note, and CC recipients.",
     "examples": [
       "Send a reminder to john@example.com about invoice INV-2024-001 that's still unpaid.",
@@ -418,7 +418,7 @@
     ]
   },
   "invoices_search-invoices": {
-    "hash": "3448008e2940c490",
+    "hash": "47dd633f57f7db61-5",
     "purpose": "Search for and filter invoices based on various criteria like recipient details, invoice number, status, amount range, currency, and other fields.",
     "examples": [
       "Find all invoices sent to john@example.com that are still in \"DRAFT\" status.",
@@ -429,7 +429,7 @@
     ]
   },
   "invoices_send": {
-    "hash": "364bd06a8312f499",
+    "hash": "ee7f5d36fdb0ce52-5",
     "purpose": "Send or schedule an invoice to be delivered to a customer, either immediately or on a future date.",
     "examples": [
       "Send invoice INV-2024-0892 to the customer right now.",
@@ -440,7 +440,7 @@
     ]
   },
   "invoices_update": {
-    "hash": "5c0e702061a2da36",
+    "hash": "ea28ce062b9ae953-5",
     "purpose": "A merchant fully replaces all details of an existing invoice, such as its status, recipient, dates, line items, or payment terms, by providing a complete updated invoice object.",
     "examples": [
       "Update invoice INV-2024-089 to show it's been paid in full as of today.",
@@ -451,7 +451,7 @@
     ]
   },
   "invoicing_generate-next-invoice-number": {
-    "hash": "1b04e1832a34797b",
+    "hash": "2b29465bee18cf5b-5",
     "purpose": "Merchants generate the next sequential invoice number so they can assign a unique, properly formatted identifier to their next customer invoice.",
     "examples": [
       "What's the next invoice number I should use for my new order?",
@@ -462,7 +462,7 @@
     ]
   },
   "orders_authorize": {
-    "hash": "c880f56e60b18219",
+    "hash": "1a3e4265e2c3571d-5",
     "purpose": "A merchant authorizes payment for an approved order to capture the funds and complete the transaction.",
     "examples": [
       "Authorize payment for order 8GH12345JKL that the customer just approved.",
@@ -473,7 +473,7 @@
     ]
   },
   "orders_capture": {
-    "hash": "d5e75476c80706d9",
+    "hash": "d6123a0b0203dc16-5",
     "purpose": "Captures payment for an approved order so the merchant can complete the transaction and receive funds.",
     "examples": [
       "Capture the payment for order 8FJ48203KH901234L.",
@@ -484,7 +484,7 @@
     ]
   },
   "orders_confirm": {
-    "hash": "cee5241a36595460",
+    "hash": "ca566cd019423603-5",
     "purpose": "A merchant or payer confirms their intent to pay for an order using a specific payment source like a card, PayPal, or a saved token.",
     "examples": [
       "Confirm my payment with card ending 4321 for order ORD-5A8B2C",
@@ -495,7 +495,7 @@
     ]
   },
   "orders_create": {
-    "hash": "e388288055a1c6ab",
+    "hash": "cd043cc24e7eb2cf-5",
     "purpose": "Creates a new order for a customer, specifying payment intent, payer details, and purchase items.",
     "examples": [
       "Create an order for $49.99 from customer jane@example.com with intent to capture payment immediately.",
@@ -506,7 +506,7 @@
     ]
   },
   "orders_get": {
-    "hash": "cc50cfb4fca81742",
+    "hash": "864ad21a8352e91a-5",
     "purpose": "Allows a business user to retrieve the full details of a specific order by its ID, including payment source, amounts, and line items.",
     "examples": [
       "Show me the details for order 8WH12345KU",
@@ -517,7 +517,7 @@
     ]
   },
   "orders_patch": {
-    "hash": "138b2676ff7b912d",
+    "hash": "07a43e16b0cf8068-5",
     "purpose": "Update the details of an existing order that hasn't been completed yet, such as changing the shipping address, items, or amounts.",
     "examples": [
       "Can you update order #5A3B2C1 to change the shipping address to 123 Oak Street, Austin, TX 78701?",
@@ -528,7 +528,7 @@
     ]
   },
   "orders_track_create": {
-    "hash": "6d08c464555d4ff7",
+    "hash": "1c9c92dafdde7ce0-5",
     "purpose": "Add shipment tracking information (carrier and tracking number) to an existing order so the merchant and buyer can monitor delivery progress.",
     "examples": [
       "Add tracking number DHL9832 to order 45GH7 using DHL carrier.",
@@ -539,7 +539,7 @@
     ]
   },
   "orders_trackers_patch": {
-    "hash": "2e17dd9bdb795ea4",
+    "hash": "e83c33b9f088259d-5",
     "purpose": "A merchant can update or cancel tracking information for a customer's order, such as changing the tracking number, carrier, or shipment status.",
     "examples": [
       "Update the tracking number for order 8WH12345ABC to 1Z999AA10123456784 with UPS.",
@@ -550,7 +550,7 @@
     ]
   },
   "partner-referrals_create": {
-    "hash": "08e877bead726ad5",
+    "hash": "a7b71870a60b8b80-5",
     "purpose": "A business user creates a partner referral to onboard a new seller by sharing their personal, business, and financial details with PayPal.",
     "examples": [
       "I need to submit a referral for a new seller, Jane Smith, with her business email jane@smithco.com and a tracking ID of REF-2024-001.",
@@ -561,7 +561,7 @@
     ]
   },
   "partner-referrals_read": {
-    "hash": "3a6929dca6a26b00",
+    "hash": "e13144bd792df18d-5",
     "purpose": "Shows the full details of a specific partner referral record by its ID, so the merchant can review the referral's status, shared data, and history.",
     "examples": [
       "Show me the details for partner referral ID pref_9a8b7c6d5e.",
@@ -572,7 +572,7 @@
     ]
   },
   "payment-tokens_create": {
-    "hash": "34e1058303cc20c3",
+    "hash": "84395eeb660f00c7-5",
     "purpose": "Allows a merchant to store a customer's payment source (e.g., credit or debit card) in the PayPal Vault for future use in repeat transactions.",
     "examples": [
       "Save my customer's Visa card ending in 1234 to their vault so I don't have to ask for it again.",
@@ -583,7 +583,7 @@
     ]
   },
   "payment-tokens_delete": {
-    "hash": "35d125d837cae253",
+    "hash": "0faf7cf88ae8ad9b-5",
     "purpose": "Deletes a specific saved payment token so the merchant can remove outdated, expired, or unwanted payment methods from a customer's vault.",
     "examples": [
       "Delete payment token tok_7H9kL2mN4pQ for customer order #4821.",
@@ -594,7 +594,7 @@
     ]
   },
   "payment-tokens_get": {
-    "hash": "367ee1419d0b8404",
+    "hash": "157e739b2388592a-5",
     "purpose": "A business user can look up the full details of a vaulted payment source — such as card type, last four digits, expiration date, or PayPal account email — using the token ID stored for that customer.",
     "examples": [
       "Show me the vaulted payment source for token ID abc123_def456",
@@ -605,7 +605,7 @@
     ]
   },
   "payouts-item_cancel": {
-    "hash": "758ba1858b314ec2",
+    "hash": "47be876b022304ee-5",
     "purpose": "A merchant can cancel an unclaimed payout item before the automatic 30-day refund period ends, returning the funds to the sender.",
     "examples": [
       "Cancel payout item 8F468793WP654321L that's still unclaimed from last week.",
@@ -616,7 +616,7 @@
     ]
   },
   "payouts-item_get": {
-    "hash": "772c4d33dbff9d4d",
+    "hash": "dce25f4ba6851455-5",
     "purpose": "A merchant can look up the current status and details of a specific payout item to check whether a payment was completed, denied, or still processing.",
     "examples": [
       "Show me the details for payout item 8DXF7G2H3K",
@@ -627,7 +627,7 @@
     ]
   },
   "payouts_get": {
-    "hash": "c99df1c1ce1b28bc",
+    "hash": "76f24aa9b85d2a63-5",
     "purpose": "Shows the current status and details of a specific payout batch, including individual transaction results.",
     "examples": [
       "Show me the status of payout batch P-1234567890.",
@@ -638,7 +638,7 @@
     ]
   },
   "payouts_post": {
-    "hash": "98acfdfc347e3d56",
+    "hash": "e3e71623e375543a-5",
     "purpose": "Create a batch payout to send payments to one or more recipients in a single request.",
     "examples": [
       "Send out $500 to sarah@company.com for the Q3 marketing bonus.",
@@ -649,7 +649,7 @@
     ]
   },
   "plans_activate": {
-    "hash": "129cdd40795d22e0",
+    "hash": "d0b359ba4c5ad621-5",
     "purpose": "Reactivates a previously paused or canceled subscription so billing and service resume for the customer.",
     "examples": [
       "Activate the paused subscription plan for customer ID sub_8f3a2b1c.",
@@ -660,7 +660,7 @@
     ]
   },
   "plans_create": {
-    "hash": "87cf4d671682e0c7",
+    "hash": "bdbb662ae4b6c693-5",
     "purpose": "A merchant creates a billing plan with pricing, billing cycles, and payment preferences for a product subscription.",
     "examples": [
       "Create a monthly subscription plan for $29.99 called \"Pro Tier\" with a 7-day free trial, and link it to my product PROD-ABC123XYZ.",
@@ -671,7 +671,7 @@
     ]
   },
   "plans_deactivate": {
-    "hash": "28f81fb8e817b992",
+    "hash": "3c389c41387379fd-5",
     "purpose": "Allows a merchant to deactivate a specific billing plan so it can no longer be used for new subscriptions.",
     "examples": [
       "Please deactivate the 'Premium Monthly' plan with ID plan_8f3a2b.",
@@ -682,7 +682,7 @@
     ]
   },
   "plans_get": {
-    "hash": "55a1ec45bef5644e",
+    "hash": "45bca99ec4a665f9-5",
     "purpose": "Retrieves the details of a specific billing plan so a merchant can review its features, pricing, and terms.",
     "examples": [
       "Show me the details for the Professional plan.",
@@ -693,7 +693,7 @@
     ]
   },
   "plans_list": {
-    "hash": "85affa751d20d931",
+    "hash": "9062a599d69915b0-5",
     "purpose": "Lists available billing plans with optional filtering, pagination, and totals so business users can browse pricing options and plan offerings.",
     "examples": [
       "Show me all the billing plans we offer",
@@ -704,7 +704,7 @@
     ]
   },
   "plans_patch": {
-    "hash": "a21bb2c532dc268d",
+    "hash": "e355f2c747850668-5",
     "purpose": "Updates an existing billing plan's settings, such as pricing, taxes, or payment preferences, while the plan is in a draft or active state.",
     "examples": [
       "Change the tax percentage on my Professional plan (plan_ABC123) from 8% to 9.5%.",
@@ -715,7 +715,7 @@
     ]
   },
   "plans_update-pricing-schemes": {
-    "hash": "3f85058b6d911562",
+    "hash": "0d2b4b5026de6e46-5",
     "purpose": "Updates the pricing amounts and billing cycle structure for a specific subscription plan.",
     "examples": [
       "Change the monthly subscription from $5 to $7 starting next cycle for plan 12345.",
@@ -726,7 +726,7 @@
     ]
   },
   "products_create": {
-    "hash": "1bfa3da08ebec374",
+    "hash": "f4191b042095ddd9-5",
     "purpose": "Creates a new product in the catalog so it can be listed, searched, and sold through the chat agent.",
     "examples": [
       "Add a new product called 'Premium Yoga Mat' with a description 'Extra-thick non-slip mat for home practice', set it as a physical item, and use the image from https://example.com/yoga-mat.jpg.",
@@ -737,7 +737,7 @@
     ]
   },
   "products_get": {
-    "hash": "8cc263a2f2103b23",
+    "hash": "13d75b746ec52281-5",
     "purpose": "A merchant can look up full details for a specific product in their catalog using its product ID.",
     "examples": [
       "Show me the details for product PROD-8842.",
@@ -748,7 +748,7 @@
     ]
   },
   "products_list": {
-    "hash": "fa9a7c3dc181db4f",
+    "hash": "2fffa65332b3dbbc-5",
     "purpose": "A business user can browse or paginate through their product catalog to find items, check inventory, or review product listings.",
     "examples": [
       "Show me the first 10 products in my catalog.",
@@ -759,7 +759,7 @@
     ]
   },
   "products_patch": {
-    "hash": "bceabbee8a2ca9cc",
+    "hash": "a1f8451e74a5a087-5",
     "purpose": "Update specific fields on an existing product listing without replacing the entire record.",
     "examples": [
       "Change the category for product 5543 from \"Winter Gear\" to \"Clearance Winter Gear\".",
@@ -770,7 +770,7 @@
     ]
   },
   "refunds_get": {
-    "hash": "358165ff5282f874",
+    "hash": "6465cc26a762fbb7-5",
     "purpose": "Shows details for a specific refund, including its status, amount, and associated transaction information.",
     "examples": [
       "Show me the details for refund 8F323373CV8455808",
@@ -781,7 +781,7 @@
     ]
   },
   "search_get": {
-    "hash": "b2e9480a0ab73468",
+    "hash": "67ce3a2d88202a77-5",
     "purpose": "Lists a merchant's PayPal transactions with optional filters like date range, transaction ID, type, status, amount, currency, and pagination.",
     "examples": [
       "Show me all my PayPal transactions from last week",
@@ -792,7 +792,7 @@
     ]
   },
   "server_callback": {
-    "hash": "d42f0c5e58e3e65b",
+    "hash": "3100ef39a7a26f8e-5",
     "purpose": "A merchant receives and processes updated order information—such as shipping address changes, shipping option selections, and associated cost updates—sent by PayPal via a callback, so they can adjust the order details and respond with the correct shipping options.",
     "examples": [
       "I need to update the shipping options for order #8FJ293045K after PayPal sent the callback with the corrected address.",
@@ -803,7 +803,7 @@
     ]
   },
   "setup-tokens_create": {
-    "hash": "aa2b105c1d01f492",
+    "hash": "7ac18077bc17ee1e-5",
     "purpose": "Creates a setup token to vault a customer's payment source (e.g., credit or debit card) and store it in the Vault for future transactions.",
     "examples": [
       "Save this Visa ending in 1234 with expiry 2027-03 to our vault for customer CUST-abc123.",
@@ -814,7 +814,7 @@
     ]
   },
   "setup-tokens_get": {
-    "hash": "700dfbdbcbbe7574",
+    "hash": "e6ebe0d312ea5017-5",
     "purpose": "Retrieve the details of a temporarily stored payment source using its setup token ID.",
     "examples": [
       "Show me the payment method saved under setup token tok_9kL3mN7xQ2",
@@ -825,7 +825,7 @@
     ]
   },
   "simulate-event_post": {
-    "hash": "a8c36de00b55d641",
+    "hash": "f84ad0353e896ef5-5",
     "purpose": "A merchant can test whether their webhook endpoint is correctly configured by sending a simulated event to see how it handles a real-world notification.",
     "examples": [
       "Can you send a test payment capture completed event to my webhook so I can check if my system logs it properly?",
@@ -836,7 +836,7 @@
     ]
   },
   "subscriptions_activate": {
-    "hash": "79361d29fdd5fa61",
+    "hash": "e7a71be073ee0971-5",
     "purpose": "Allows a merchant to activate a previously canceled or suspended subscription so that billing and service resume.",
     "examples": [
       "Please reactivate subscription sub_9kF2mN7qR3 for the premium plan.",
@@ -847,7 +847,7 @@
     ]
   },
   "subscriptions_cancel": {
-    "hash": "34fcbe9e8f977794",
+    "hash": "18b91079359c07e7-5",
     "purpose": "A business user cancels a subscription and optionally provides a reason for the cancellation.",
     "examples": [
       "Cancel subscription sub_abc123 for customer jane@acme.com.",
@@ -858,7 +858,7 @@
     ]
   },
   "subscriptions_capture": {
-    "hash": "40c42e8bba2e0bd3",
+    "hash": "a026c439b3171c3b-5",
     "purpose": "Captures an authorized payment from a subscriber on a subscription, charging a specified amount to complete the transaction.",
     "examples": [
       "Capture the outstanding balance of $49.99 from subscription SUB-8A42K9F3G1.",
@@ -869,7 +869,7 @@
     ]
   },
   "subscriptions_create": {
-    "hash": "7b7628aea10c1c58",
+    "hash": "c831b283aff9c574-5",
     "purpose": "A merchant can create a new subscription for a customer, specifying the plan, start time, quantity, shipping costs, and subscriber details.",
     "examples": [
       "Set up a new monthly subscription for customer Jane Smith on the Pro plan P-PRO2024A starting January 15, 2025, with a quantity of 3.",
@@ -880,7 +880,7 @@
     ]
   },
   "subscriptions_get": {
-    "hash": "4b361c162c756cfa",
+    "hash": "a40f25a52c5193fe-5",
     "purpose": "A business user retrieves detailed information about a specific subscription using its ID.",
     "examples": [
       "Show me the details for subscription sub_8a3f2c1b.",
@@ -891,7 +891,7 @@
     ]
   },
   "subscriptions_patch": {
-    "hash": "a74c1a6259fa3267",
+    "hash": "8c178a360b329373-5",
     "purpose": "Update an existing subscription's attributes, such as plan details, trial settings, or billing terms, for a subscription that is currently active or suspended.",
     "examples": [
       "Change my subscription sub_abc123 to the premium plan and set the trial period to 14 days.",
@@ -902,7 +902,7 @@
     ]
   },
   "subscriptions_revise": {
-    "hash": "d0420fbf2ee34594",
+    "hash": "bff516c7796f4fb9-5",
     "purpose": "A business user can modify an existing subscription's plan, quantity, shipping amount, or shipping address.",
     "examples": [
       "Update my subscription SA-1234 to 5 licenses instead of 3",
@@ -913,7 +913,7 @@
     ]
   },
   "subscriptions_suspend": {
-    "hash": "4628d7390a3fc505",
+    "hash": "1ad65afd69dba37e-5",
     "purpose": "Allows a merchant to suspend a customer's subscription by providing a reason for the suspension.",
     "examples": [
       "Please suspend subscription SUB-12345 immediately.",
@@ -924,7 +924,7 @@
     ]
   },
   "subscriptions_transactions": {
-    "hash": "cc2d598cc327d1c7",
+    "hash": "b25009488860ea91-5",
     "purpose": "Lists all transactions for a given subscription within a specified date range.",
     "examples": [
       "Show me all transactions for subscription SUB-12345 between January 1, 2025 and March 31, 2025.",
@@ -935,7 +935,7 @@
     ]
   },
   "templates_create": {
-    "hash": "16179a6c0bcd1896",
+    "hash": "fd9c15f21ac2b211-5",
     "purpose": "A business user creates an invoice template with reusable settings like business info, payment terms, and default fields to speed up future invoice generation.",
     "examples": [
       "Create a new invoice template for my consulting services with my business name as 'Smith Consulting' and set 30-day payment terms.",
@@ -946,7 +946,7 @@
     ]
   },
   "templates_delete": {
-    "hash": "1ba1405e20faaceb",
+    "hash": "ddf96a71ab3d5e06-5",
     "purpose": "Delete an unwanted or outdated invoice template from the system.",
     "examples": [
       "Remove the invoice template I created last month called 'Standard Services v2'.",
@@ -957,7 +957,7 @@
     ]
   },
   "templates_get": {
-    "hash": "04358bfabc3dbeb1",
+    "hash": "96c9a5bb13603da3-5",
     "purpose": "A merchant can retrieve the full details of a specific invoice template to review or reuse its settings.",
     "examples": [
       "Show me the details for invoice template TEMP-123456.",
@@ -968,7 +968,7 @@
     ]
   },
   "templates_list": {
-    "hash": "9011172e6f0bcdbc",
+    "hash": "280e8ecaac7e6a8e-5",
     "purpose": "Lists all invoice templates a merchant has created, showing details like business name, email, address, and phone number so the user can see what templates are available for sending invoices.",
     "examples": [
       "Show me all my invoice templates with the business info included.",
@@ -979,7 +979,7 @@
     ]
   },
   "templates_update": {
-    "hash": "5bae55382e0639f0",
+    "hash": "8ddb6177ea18b0b2-5",
     "purpose": "A merchant can fully replace an existing invoice template with new content, updating all its fields like business information, payment terms, and default status.",
     "examples": [
       "Update my invoice template TEMP-12345 to use net 30 payment terms and set it as the default template.",
@@ -990,7 +990,7 @@
     ]
   },
   "trackers-batch_get": {
-    "hash": "fbf0d553a0aa7fa6",
+    "hash": "e5125fa4bd2fc3c8-5",
     "purpose": "Retrieves a list of shipment tracking records matching specific search criteria, such as a PayPal transaction ID, tracking number, or encrypted account ID.",
     "examples": [
       "Show me all tracking information for transaction TXN-987654.",
@@ -1001,7 +1001,7 @@
     ]
   },
   "trackers-batch_post": {
-    "hash": "2630f7c013336f33",
+    "hash": "d7edead0d56ebf23-5",
     "purpose": "A merchant can submit tracking information for multiple PayPal transactions at once to update shipment statuses.",
     "examples": [
       "Add tracking numbers for these PayPal transactions: TXN-1001 (shipped), TXN-1002 (shipped), and TXN-1003 (pending pickup).",
@@ -1012,7 +1012,7 @@
     ]
   },
   "trackers_get": {
-    "hash": "bd264d3d7365fe31",
+    "hash": "af3bce4555023312-5",
     "purpose": "A merchant gets the current delivery status, location, and timeline for a specific shipment on a PayPal transaction.",
     "examples": [
       "Can you pull up the tracking for order TRACK-12345 and let me know where it is right now?",
@@ -1023,7 +1023,7 @@
     ]
   },
   "trackers_post": {
-    "hash": "5486864048a6b8a0",
+    "hash": "1c7683cbe804d56e-5",
     "purpose": "A merchant provides tracking information (carrier, tracking number, and shipment status) for a PayPal transaction so both they and the buyer can follow the shipment's progress.",
     "examples": [
       "Add tracking number 1Z999AA10123456784 to PayPal transaction 7MZ1234567890123.",
@@ -1034,7 +1034,7 @@
     ]
   },
   "trackers_put": {
-    "hash": "0bc34939163e01ba",
+    "hash": "45cf9874f3d4a5ef-5",
     "purpose": "A merchant can update or cancel tracking information for a PayPal transaction, such as changing the shipment status or cancelling a tracking record.",
     "examples": [
       "Please update the tracking for transaction 8WJ12345ABC with tracking number 1Z999AA10123456784 to status DELIVERED.",
@@ -1045,7 +1045,7 @@
     ]
   },
   "verify-webhook-signature_post": {
-    "hash": "10cedafc3fae521a",
+    "hash": "dd6c103387789cb2-5",
     "purpose": "Verifies that an incoming webhook notification from PayPal is authentic and hasn't been tampered with.",
     "examples": [
       "Verify that the payment notification I just received from PayPal is legitimate.",
@@ -1056,7 +1056,7 @@
     ]
   },
   "web-profile_create": {
-    "hash": "0077a0081aaa8148",
+    "hash": "abb0dca59b2291e3-5",
     "purpose": "Creates a new web experience profile that a merchant can use to customize the look, flow, and input fields shown to buyers during PayPal checkout.",
     "examples": [
       "Create a new checkout profile named \"Premium Checkout\" for my store.",
@@ -1067,7 +1067,7 @@
     ]
   },
   "web-profile_delete": {
-    "hash": "679c504e122686a1",
+    "hash": "3190ae3e99489c18-5",
     "purpose": "Allows a merchant to permanently remove a specific web experience profile used for payment checkout pages.",
     "examples": [
       "Delete the web profile with ID ABC123 for my payment page.",
@@ -1078,7 +1078,7 @@
     ]
   },
   "web-profile_get": {
-    "hash": "e9be32f520c4352a",
+    "hash": "bc99596656d68c9b-5",
     "purpose": "A merchant retrieves the full configuration details of a specific web experience profile, including layout settings, branding options, and payment button preferences, to review or verify how their checkout page is configured.",
     "examples": [
       "Show me the details for my web profile with ID PROFILE-8A2B3C4D5E",
@@ -1089,7 +1089,7 @@
     ]
   },
   "web-profile_get-list": {
-    "hash": "62744d29bfe909c3",
+    "hash": "07ff12ef232d9064-5",
     "purpose": "One plain sentence saying what a business user gets done with this operation.",
     "examples": [
       "Show me my latest web experience profiles.",
@@ -1100,7 +1100,7 @@
     ]
   },
   "web-profile_partial-update": {
-    "hash": "251d2faf18ce2684",
+    "hash": "c89dd9b9535451b9-5",
     "purpose": "A merchant can update specific fields of an existing web experience profile without replacing the entire profile.",
     "examples": [
       "Change the greeting message on my checkout profile PROFILE-8A3F2 to \"Welcome back, valued customer!\"",
@@ -1111,7 +1111,7 @@
     ]
   },
   "web-profile_update": {
-    "hash": "d6fa7ec5dc4a02c5",
+    "hash": "8c3558d9686997ef-5",
     "purpose": "Updates an existing web experience profile to change how the PayPal checkout pages look and behave for customers.",
     "examples": [
       "Update my checkout profile 'PremiumStore' to show the billing landing page instead of the login page.",
@@ -1122,7 +1122,7 @@
     ]
   },
   "webhooks-event-types_list": {
-    "hash": "6eea80270a120331",
+    "hash": "56dd81b341b66580-5",
     "purpose": "Lists all event types that a merchant can subscribe to for webhook notifications, enabling them to choose which activities to monitor.",
     "examples": [
       "Show me all the event types I can set up webhooks for.",
@@ -1133,7 +1133,7 @@
     ]
   },
   "webhooks-events_get": {
-    "hash": "90ed7d94d78c16c7",
+    "hash": "0d7d496e781d9bb6-5",
     "purpose": "Shows the full details of a specific webhook event notification, including its status, payload, and delivery attempts.",
     "examples": [
       "Can you pull up the details for webhook event evt_8f3a2b1c? I need to see if the notification was delivered successfully.",
@@ -1144,7 +1144,7 @@
     ]
   },
   "webhooks-events_list": {
-    "hash": "f23896a5390c7400",
+    "hash": "3ae7ee743db6cd63-5",
     "purpose": "Lists webhook event notifications so you can review or audit events sent to your webhook endpoints, filtered by time, transaction, or event type.",
     "examples": [
       "Show me all webhook events from the last 24 hours.",
@@ -1155,7 +1155,7 @@
     ]
   },
   "webhooks-events_resend": {
-    "hash": "1af162046306fb47",
+    "hash": "8653db4a34bcc455-5",
     "purpose": "Resends a failed or undelivered webhook event notification to the connected endpoint.",
     "examples": [
       "Resend the webhook notification for event evt_XYZ789 that failed last night.",
@@ -1166,7 +1166,7 @@
     ]
   },
   "webhooks-lookup_delete": {
-    "hash": "0a55bb480be313ae",
+    "hash": "6b13e75c99b0396d-5",
     "purpose": "Deletes an existing webhook lookup rule so that the chat assistant stops monitoring or notifying about the specified event or data.",
     "examples": [
       "Remove the alert for order status updates from customer jane.smith@example.com.",
@@ -1177,7 +1177,7 @@
     ]
   },
   "webhooks-lookup_get": {
-    "hash": "0bcc009beeeadf54",
+    "hash": "4ea1e26d6cc9a273-5",
     "purpose": "A business user retrieves the details of a specific webhook lookup to see its status, payload, or processing result.",
     "examples": [
       "Show me the details for webhook lookup 7a9b3c2d-1e4f-5a6b-7c8d-9e0f1a2b3c4d",
@@ -1188,7 +1188,7 @@
     ]
   },
   "webhooks-lookup_list": {
-    "hash": "1ea396bb068a7121",
+    "hash": "c4ecfc21e62b3641-5",
     "purpose": "Lists all registered webhook lookups so the user can review, audit, or manage which event-based notification targets are configured.",
     "examples": [
       "Can you pull up all the webhook lookups we've registered this month?",
@@ -1199,7 +1199,7 @@
     ]
   },
   "webhooks-lookup_post": {
-    "hash": "3a78a2f0d3845616",
+    "hash": "8c6dca5c401dd32c-5",
     "purpose": "A merchant ties their REST API app to an account so that webhook events for that account are delivered to their app.",
     "examples": [
       "Set up a webhook to alert me whenever someone calls my support number ending in 3456.",
@@ -1210,7 +1210,7 @@
     ]
   },
   "webhooks_delete": {
-    "hash": "7b2d32388c43260b",
+    "hash": "6e297952be4fc7e1-5",
     "purpose": "Deletes a webhook notification subscription so the merchant stops receiving automated updates at that endpoint.",
     "examples": [
       "Please remove the webhook that sends order updates to https://myapp.com/hooks/orders.",
@@ -1221,7 +1221,7 @@
     ]
   },
   "webhooks_get": {
-    "hash": "5b8b87bd26262fec",
+    "hash": "f4a495c57420c09e-5",
     "purpose": "Shows the configuration and subscription details for a specific webhook, identified by its ID.",
     "examples": [
       "Show me the details for webhook wh_abc123",
@@ -1232,7 +1232,7 @@
     ]
   },
   "webhooks_list": {
-    "hash": "24a3199c12b59c4f",
+    "hash": "840176804f5ada04-5",
     "purpose": "Lists all webhook subscriptions configured for an app, allowing a user to review or manage which events trigger notifications.",
     "examples": [
       "Show me all the webhooks I've set up for my store.",
@@ -1243,7 +1243,7 @@
     ]
   },
   "webhooks_post": {
-    "hash": "7a1aa7899a03148e",
+    "hash": "119adacff3a6e216-5",
     "purpose": "Creates a webhook subscription so that a specified URL receives real-time notifications when selected events occur.",
     "examples": [
       "Set up a webhook at https://my-shop.example.com/listener to get notified whenever an order is placed or a refund is issued.",
@@ -1254,7 +1254,7 @@
     ]
   },
   "webhooks_update": {
-    "hash": "828d4751962a2221",
+    "hash": "f454956f66756f90-5",
     "purpose": "A business user can update an existing webhook's URL or the list of events it listens for without deleting and recreating the webhook.",
     "examples": [
       "Change the callback URL for webhook wh_abc123 to https://myapp.com/notifications/v2.",

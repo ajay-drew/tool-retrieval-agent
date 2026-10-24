@@ -1,0 +1,3 @@
+{"ts": "2026-10-24T08:02:11+00:00", "user_message": "Pay out $150 to raj@example.com", "status": "completed", "tool_calls": [{"name": "payouts_post", "ok": true, "status": 201}]}
+{"ts": "2026-10-24T08:40:37+00:00", "user_message": "Send invoice INV2-K9L8-M7N6-P5Q4-R3S2 to bob@acme.io", "status": "failed", "tool_calls": [{"name": "invoices_send", "ok": false, "status": 422}], "error": "invoice is missing a due date"}
+{"ts": "2026-10-24T09:15:02+00:00", "user_message": "Refund $15 on capture CAP-9XK12345", "status": "completed", "tool_calls": [{"name": "captures_refund", "ok": true, "status": 201}]}

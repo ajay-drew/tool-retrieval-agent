@@ -11,6 +11,7 @@ from langsmith.run_helpers import get_current_run_tree
 
 from atlas.agent.exposure import record_exposure
 from atlas.agent.runlog import RunLog
+from atlas.tools.registry import coerce_json_strings
 
 Approver = Callable[[list[dict]], Awaitable[list[dict]]]
 
@@ -68,7 +69,7 @@ def summarize(messages: list, writes: set[str]) -> TurnResult:
             result.tokens_in += usage.get("input_tokens", 0)
             result.tokens_out += usage.get("output_tokens", 0)
             for call in message.tool_calls:
-                calls[call["id"]] = ToolCallRecord(call["name"], call["args"])
+                calls[call["id"]] = ToolCallRecord(call["name"], coerce_json_strings(call["args"]))
             if message.text:
                 result.answer = message.text
         elif isinstance(message, ToolMessage) and message.tool_call_id in calls:

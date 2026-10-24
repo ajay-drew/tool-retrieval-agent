@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     openrouter_api_key: SecretStr | None = None
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     atlas_model: str = "deepseek/deepseek-v4-flash"
+    atlas_max_output_tokens: int = 4096
     atlas_k: int = 8
     atlas_embed_model: str = "BAAI/bge-small-en-v1.5"
     atlas_examples_per_tool: int = 5

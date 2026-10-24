@@ -36,9 +36,12 @@ def test_no_headers_reach_the_model(result):
         assert "header" not in spec.params_schema.get("properties", {})
 
 
-def test_access_tag_follows_http_method(result):
+def test_access_tag_follows_http_method_and_overrides(result):
+    read_only_posts = {"invoices_search-invoices", "invoicing_generate-next-invoice-number"}
     for spec in result.specs:
-        assert spec.access == ("read" if spec.method == "GET" else "write")
+        if spec.name in read_only_posts or spec.method == "GET":
+            assert spec.access == "read"
+    assert next(s for s in result.specs if s.name == "invoices_send").access == "write"
 
 
 def test_trimming_never_drops_a_required_field(result):

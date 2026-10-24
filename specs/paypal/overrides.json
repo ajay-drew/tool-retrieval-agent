@@ -1,0 +1,9 @@
+{
+  "read_only": [
+    "invoices.search-invoices",
+    "invoicing.generate-next-invoice-number",
+    "invoices.generate-qr-code",
+    "find.eligible.methods",
+    "verify-webhook-signature.post"
+  ]
+}

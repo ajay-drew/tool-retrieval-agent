@@ -42,7 +42,7 @@ One record per API operation. Everything after ingest reads this record, never t
 | `group` | str | The spec file the operation came from, e.g. `invoicing_v2` |
 | `method`, `path` | str | HTTP method and path template |
 | `summary`, `description` | str | From the spec, description cut to 300 characters |
-| `access` | `read` \| `write` | `GET` means read. Anything else is write. |
+| `access` | `read` \| `write` | `GET` means read, as do operations listed under `read_only` in `specs/<service>/overrides.json` (POSTs that only search or compute, such as invoice search or the next invoice number). Anything else is write. |
 | `params_schema` | dict | Trimmed JSON Schema with properties `path`, `query` and `body` |
 | `full_schema_ref` | str | Where to find the untrimmed schema, used by the mock to check inputs |
 | `purpose`, `examples` | str, list[str] | Added by the enrich step |
