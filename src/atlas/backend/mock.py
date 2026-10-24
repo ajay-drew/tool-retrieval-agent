@@ -52,9 +52,15 @@ def _apply_patch(item: dict, operations: list) -> None:
         if not isinstance(op, dict) or op.get("op") not in ("add", "replace"):
             continue
         keys = [k for k in str(op.get("path", "")).split("/") if k]
-        target = item
+        target: object = item
         for key in keys[:-1]:
-            target = target.setdefault(key, {})
+            if isinstance(target, dict):
+                target = target.setdefault(key, {})
+            elif isinstance(target, list) and key.isdigit() and int(key) < len(target):
+                target = target[int(key)]
+            else:
+                target = None
+                break
         if keys and isinstance(target, dict):
             target[keys[-1]] = op.get("value")
 

@@ -125,7 +125,7 @@ return handler(request)
 
 **`ExposureMiddleware`** (innermost) records the tool names in each model request into a per-run `ContextVar` collector opened by `run_turn`. Exposure recall works the same for every tool-selection mode.
 
-**`run_turn` (`agent/turn.py`)** runs one user message, resumes approval pauses through an approver callback (the CLI asks, evals approve everything), and returns the answer, tool calls with their HTTP status, exposed tools, tokens, latency, status and the LangSmith trace URL. Status is `failed`, `limit_hit`, `asked_user` (the answer contains a question and no change was made) or `completed`.
+**`run_turn` (`agent/turn.py`)** runs one user message, resumes approval pauses through an approver callback (the CLI asks, evals approve everything), and returns the answer, tool calls with their HTTP status, exposed tools, tokens, latency, status and the LangSmith trace URL. Status is `error` (an exception such as an API or network failure), `limit_hit`, `asked_user` (the answer contains a question and no change was made) or `completed`. Evals leave `error` cases out of every metric and report them separately, so an outage can't look like a weak agent.
 
 **Run log (`agent/runlog.py`):** one JSON line per finished turn in `runs/runlog.jsonl`:
 `{run_id, thread_id, ts, user_message, tools_exposed, tool_calls:[{name, args, ok, error}], status, latency_ms, tokens_in, tokens_out, langsmith_url}`.
@@ -262,22 +262,24 @@ Full-agent runs use `langsmith.aevaluate` with `max_concurrency=8`. Every scorer
 ```
 tool-retrieval-agent/
 ├── README.md  LICENSE  plan.md  architecture.md
-├── pyproject.toml  uv.lock  .env.example  .gitignore
-├── .github/workflows/ci.yml
-├── specs/paypal/              13 OpenAPI files + LICENSE (commit 90e8041)
-├── kb/                        markdown for rag_search
-├── docker-compose.yml         qdrant/qdrant:v1.19.2 on :6333
-├── data/                      generated: tools.json, full_schemas.json, enrichment.json (gitignored except enrichment.json)
-├── runs/                      runlog.jsonl (gitignored)
+├── pyproject.toml  uv.lock  .env.example  .gitignore  docker-compose.yml
+├── .github/workflows/ci.yml       ruff, pytest, ingest, index, R0 against baseline (Qdrant service)
+├── specs/paypal/                  13 OpenAPI files + LICENSE + SOURCE.md + overrides.json
+├── kb/                            handbook markdown for rag_search
+├── data/                          generated tools.json, full_schemas.json; committed enrichment.json
+├── runs/                          runlog.jsonl (gitignored)
+├── reports/                       ingest_sizes.md, r0_tuning.md
 ├── src/atlas/
-│   ├── config.py  cli.py
-│   ├── tools/      spec.py  ingest.py  enrich.py  registry.py  rag.py  system.py  find.py
-│   ├── retrieval/  embedder.py  index.py
-│   ├── agent/      middleware.py  build.py  prompt.md  runlog.py
-│   └── backend/    base.py  mock.py  seed.json
+│   ├── config.py  llm.py  tracing.py  catalog.py  jsonpath.py  smoke.py  cli.py
+│   ├── commands/   ingest.py
+│   ├── tools/      spec.py  schema.py  ingest.py  enrich.py  registry.py  sample.py  rag.py  system.py  find.py
+│   ├── retrieval/  embedder.py  index.py  factory.py
+│   ├── agent/      state.py  middleware.py  exposure.py  build.py  turn.py  runlog.py  factory.py  prompt.md
+│   ├── backend/    base.py  mock.py  seed.json
+│   └── evals/      cases.py  scorers.py  retrieval.py  trajectory.py  agent_run.py  report.py
 ├── evals/
-│   ├── cases.jsonl
-│   ├── runner.py  scorers.py  report.py  leakage.py
-│   └── results/
-└── tests/
+│   ├── cases.jsonl  baselines/r0.json  fixtures/runlog.jsonl
+│   ├── results/                   one JSON per run
+│   └── report.html
+└── tests/                         config, ingest, scorers, backend, middleware
 ```

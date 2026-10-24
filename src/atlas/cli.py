@@ -334,3 +334,22 @@ def eval_run(
     if experiment:
         typer.echo(f"LangSmith experiment: {experiment}")
     typer.echo(f"results: {path}")
+    if report["errors"]:
+        kinds = sorted({e["error"][:120] for e in report["errors"]})
+        typer.secho(
+            f"\n{len(report['errors'])} cases hit harness errors and are left out of the scores:",
+            fg="red",
+            err=True,
+        )
+        for kind in kinds[:5]:
+            typer.secho(f"  {kind}", fg="red", err=True)
+        raise typer.Exit(code=1)
+
+
+@eval_app.command("report")
+def eval_report() -> None:
+    """Write evals/report.html and the README results table from the latest results."""
+    from atlas.evals.report import write_report
+
+    path, readme = write_report()
+    typer.echo(f"report: {path}" + (" · README updated" if readme else ""))

@@ -19,7 +19,7 @@ def get_bm25() -> Bm25Embedder:
 
 def make_qdrant_client(settings: Settings) -> AsyncQdrantClient:
     api_key = settings.qdrant_api_key.get_secret_value() if settings.qdrant_api_key else None
-    return AsyncQdrantClient(url=settings.qdrant_url, api_key=api_key)
+    return AsyncQdrantClient(url=settings.qdrant_url, api_key=api_key, timeout=30)
 
 
 def get_tool_index(settings: Settings, client: AsyncQdrantClient | None = None) -> QdrantToolIndex:

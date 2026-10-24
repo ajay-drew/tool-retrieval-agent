@@ -108,7 +108,7 @@ async def run_turn(
                 state = await agent.ainvoke(Command(resume={"decisions": decisions}), config)
             result = summarize(state["messages"], writes)
         except Exception as exc:
-            result = TurnResult(answer="", status="failed", error=f"{type(exc).__name__}: {exc}")
+            result = TurnResult(answer="", status="error", error=f"{type(exc).__name__}: {exc}")
     result.exposed = list(exposed)
     run = get_current_run_tree()
     result.trace_url = _safe_url(run)

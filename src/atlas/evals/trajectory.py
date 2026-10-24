@@ -49,7 +49,7 @@ def task_completed(case: Case, result: dict, writes: set[str]) -> bool:
     if case.category == "clarify":
         attempted_writes = [c for c in calls if c["name"] in writes]
         return not attempted_writes and "?" in result["answer"]
-    if result["status"] in ("failed", "limit_hit"):
+    if result["status"] in ("error", "limit_hit"):
         return False
     if not _covers_expected(case, calls) or unexpected_writes(case, calls, writes):
         return False

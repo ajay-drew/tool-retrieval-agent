@@ -210,13 +210,13 @@ def score_outputs(
     cases: list[Case], outputs: dict[str, dict], writes: set[str], settings: Settings
 ) -> dict:
     always_on = set(ALWAYS_ON)
-    rows, per_case = [], []
+    rows, per_case, errors = [], [], []
     for case in cases:
         result = outputs.get(case.id) or {
             "answer": "",
             "tool_calls": [],
             "exposed": [],
-            "status": "failed",
+            "status": "error",
             "latency_ms": 0,
             "tokens_in": 0,
             "tokens_out": 0,
@@ -224,7 +224,10 @@ def score_outputs(
             "error": "no output",
         }
         scores = case_scores(case, result, writes, always_on)
-        rows.append((case, scores))
+        if result["status"] == "error":
+            errors.append({"id": case.id, "error": (result.get("error") or "")[:300]})
+        else:
+            rows.append((case, scores))
         per_case.append(
             {
                 "id": case.id,
@@ -248,6 +251,7 @@ def score_outputs(
         return {k: summarize_run(v, *price) for k, v in sorted(buckets.items())}
 
     return {
+        "errors": errors,
         "summary": summarize_run([s for _, s in rows], *price),
         "by_split": group(lambda c: c.split),
         "by_category": group(lambda c: c.category),

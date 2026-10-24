@@ -87,3 +87,13 @@ def test_nested_json_strings_are_parsed():
 
     fixed = coerce_json_strings({"query": '{"page": 1}', "path": {"id": "X"}, "note": "{oops"})
     assert fixed == {"query": {"page": 1}, "path": {"id": "X"}, "note": "{oops"}
+
+
+def test_patch_into_a_list_does_not_crash(catalog):
+    backend = MockPayPal(catalog.full_schemas)
+    spec = next(s for s in catalog.specs if s.name == "plans_patch")
+    ops = [{"op": "replace", "path": "/billing_cycles/0/pricing_scheme", "value": {"x": 1}}]
+    result = asyncio.run(
+        backend.call(spec, {"path": {"id": "P-5ML4271244454362WXNWU5NQ"}, "body": ops})
+    )
+    assert result.ok

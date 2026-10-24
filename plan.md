@@ -107,8 +107,8 @@ Phase 1 uses PayPal's 115 REST operations, plus `rag_search` and `system_search`
 **Done when** "what tools manage invoices?", "status of my last request" and one knowledge-base question each get a correct answer.
 
 ### 8. Full evals and report
-- [ ] 150 cases: 80 single-tool, 30 multi-step, 15 RAG, 10 system, 15 that should get a question back
-- [ ] Cases are synced to the LangSmith dataset `atlas-paypal-v1`
+- [x] 150 cases: 80 single-tool, 30 multi-step, 15 RAG, 10 system, 15 that should get a question back
+- [x] Cases are synced to the LangSmith dataset `atlas-paypal-v1`
 - [ ] R1: baseline with all tools in the prompt, both trimmed (about 50k tokens) and untrimmed (about 400k, which fits in v4-flash's 1M context)
 - [ ] R2: Atlas with k = 8
 - [ ] R3: k sweep; description-only vs. with examples; `find_tools` on vs. off; LangChain's `LLMToolSelectorMiddleware` vs. Qdrant retrieval
@@ -149,6 +149,7 @@ Revised 2026-10-24 after R0 tuning on the dev split (`reports/r0_tuning.md`). Th
 
 - 2026-10-24: plan created.
 - 2026-10-24: model provider changed to OpenRouter (`deepseek/deepseek-v4-flash`, $0.091 / $0.182 per 1M tokens in / out). `langchain-deepseek` replaced by `langchain-openai`. The 1M context means R1 can also run untrimmed.
+- 2026-10-24: step 8 eval harness built (trajectory scorers, LangSmith experiments, report). The first full runs were invalid: OpenRouter refused every call with "Insufficient credits. This account never purchased credits" after about $0.20 of usage, and the harness counted those as agent failures. Results were deleted. Exceptions are now status `error`, left out of scores, and fail the command. Also fixed: Qdrant 408 timeouts under load (client timeout 30 s) and a mock crash on PATCH into a list. R1–R3 are blocked on credits. Decisions and problems are logged in docs/decisions.md.
 - 2026-10-24: steps 6–7 done. Retrieval runs in `abefore_model` (writes `allowed_tools` to state) and filters in `awrap_model_call`. Exposure is recorded by a separate innermost `ExposureMiddleware` into a per-run ContextVar, so it also works for the all-tools and LLM-selector variants. `atlas ask` was added for one-shot use. Turn status is "asked_user" when the answer contains a question and nothing was changed. The tool wrapper parses nested inputs sent as JSON strings (a DeepSeek quirk seen in traces). The prompt now says not to look up optional details nobody asked for. The model still sometimes wanders on the invoice request, and evals measure how often. The knowledge base is a handbook for a fictional merchant (Northwind Studio), not copied PayPal docs.
 - 2026-10-24: step 5 done. The mock is generic REST routing, with PayPal behaviour as data in seed.json. Seed IDs changed to match spec patterns (order and webhook event IDs), and the eval cases were updated to match. All 115 tools pass a minimal valid call.
 - 2026-10-24: steps 3–4 done. All 151 cases written at once (60 dev, 91 test) instead of 60 then 90. R0 on the test split: Recall@8 0.921, Recall@5 0.849, MRR 0.741, nDCG@5 0.739. That misses the 0.93 Recall@8 target by 0.01. Not tuned further, to keep the test split honest. The CI baseline is 0.9206. Step 3's "invoice tool in top 3" check passes (invoices_list is #1 for the brief's invoice request), but `invoices_create` is outside the top 5 for that query; that's covered by `find_tools` and measured as exposure recall.
