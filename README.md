@@ -55,7 +55,7 @@ cd web && npm install && npm run build && cd ..
 uv run atlas serve                                # web UI at http://127.0.0.1:8000
 ```
 
-The web UI streams each turn live: which tools retrieval picked (with scores), each tool call and result, Approve/Reject for changes, and LangSmith links. Each chat has its own URL, `/atlas/<thread-id>`, and the same ID groups its turns into one LangSmith thread.
+The web UI streams each turn live: which tools retrieval picked (with scores), each tool call and result, the answer word by word, Approve/Reject for changes, and LangSmith links. Tool results that try to instruct the model are flagged and never acted on. Each chat has its own URL, `/atlas/<thread-id>`, and the same ID groups its turns into one LangSmith thread.
 
 ## HTTP API
 
@@ -110,7 +110,7 @@ web/         React UI          kb/  handbook for rag_search
 docs/        decisions log, diagrams
 ```
 
-More detail: [plan.md](plan.md) · [architecture.md](architecture.md) · [docs/decisions.md](docs/decisions.md) (every decision and every problem hit, with its fix).
+More detail: [docs/design.md](docs/design.md) (the design against the brief: structure, routing, state, scalability, errors, frameworks) · [plan.md](plan.md) · [architecture.md](architecture.md) · [docs/decisions.md](docs/decisions.md) (every decision and every problem hit, with its fix).
 
 ## License
 
