@@ -44,6 +44,7 @@ class CaseRunner:
             client, get_embedder(settings.atlas_embed_model), settings.atlas_kb_collection
         )
         self._k = settings.atlas_k
+        self._max_request_tokens = settings.atlas_max_request_tokens
         self.specs = load_catalog(settings)
         self.writes = {s.name for s in self.specs if s.access == "write"}
 
@@ -61,9 +62,13 @@ class CaseRunner:
                 knowledge_base=self._kb,
                 runlog=RunLog(runlog_path),
             )
-            agent = build_atlas(
-                deps, AgentOptions(k=self._k, approve_writes=False, today=EVAL_TODAY)
+            options = AgentOptions(
+                k=self._k,
+                max_request_tokens=self._max_request_tokens,
+                approve_writes=False,
+                today=EVAL_TODAY,
             )
+            agent = build_atlas(deps, options)
             result = await run_turn(agent, case.query, f"eval-{case.id}", self.writes)
             return as_dict(result)
         finally:

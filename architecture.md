@@ -98,17 +98,21 @@ class Hit:
 
 ### Agent (`agent/`)
 
-**`ToolRetrievalMiddleware`** (`wrap_model_call`):
+**`ToolRetrievalMiddleware`** (`before_model` + `wrap_model_call`):
 
 ```
 query   = the last 2 user messages, joined
 hits    = index.search(query, k=config.k)
-allowed = {hit.name for hit in hits} ∪ ALWAYS_ON ∪ state.found_tools
+candidates = state.found_tools (newest first), then hits by rank
+if max_request_tokens: keep candidates in that order while
+    prompt + always-on tools + messages + output reserve + chosen tools ≤ max_request_tokens
+allowed = chosen ∪ ALWAYS_ON
 request = request.override(tools=[t for t in request.tools if t.name in allowed])
 return handler(request)
 ```
 
 - `ALWAYS_ON = {rag_search, system_search, find_tools}`
+- Tool sizes are measured once from each tool's real OpenAI-format definition. Message sizes are estimated as characters / 4. The budget exists for providers that cap request size (Groq's free tier: 8,000 tokens per request and per minute).
 - The middleware's state adds `found_tools: list[str]`, which only `find_tools` writes to (through `Command(update=…)`).
 
 **`build_atlas(config) -> agent`** calls `create_agent` with:
@@ -177,7 +181,9 @@ The registry builds an async `StructuredTool` per spec that calls `backend.call`
 
 | Env var | Default |
 |---|---|
-| `ATLAS_LLM_PROVIDER` | `gemini` (native client) or `openai` (any OpenAI-compatible endpoint) |
+| `ATLAS_LLM_PROVIDER` | `gemini` (native client) or `openai` (any OpenAI-compatible endpoint; used for Groq) |
+| `ATLAS_MAX_REQUEST_TOKENS` | unset (no limit); `7000` for Groq's free tier |
+| `ATLAS_REASONING_EFFORT` | unset; `low` for gpt-oss on Groq (reasoning tokens count toward the per-minute cap) |
 | `LLM_API_KEY` | required for the agent, enrichment and the agent eval |
 | `LLM_BASE_URL` | `https://generativelanguage.googleapis.com/v1beta/openai/` (Gemini) |
 | `ATLAS_MODEL` | `gemini-3.5-flash` |

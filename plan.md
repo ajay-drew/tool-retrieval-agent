@@ -21,7 +21,7 @@ Phase 1 uses PayPal's 115 REST operations, plus `rag_search` and `system_search`
 | Name | Atlas. The repo is `tool-retrieval-agent` and the package is `atlas`. |
 | Approach | Single agent with tool retrieval: the top 8 tools per model call, plus 3 tools that are always available |
 | Framework | LangChain 1.4.7 `create_agent` with custom middleware |
-| Model | Google `gemini-3.5-flash` on the Gemini API free tier, temperature 0, using `ChatOpenAI` against Gemini's OpenAI-compatible endpoint. The client is provider-agnostic (`LLM_API_KEY`, `LLM_BASE_URL`, `ATLAS_MODEL`), so OpenRouter, Mistral or a local Ollama is a settings change. Free-tier limit: 250k input tokens per minute; 429s are retried with backoff. |
+| Model | **Groq `openai/gpt-oss-120b`** (free tier, `reasoning_effort=low`) through the OpenAI-compatible client; Gemini kept as a second provider. Previously Google `gemini-3.5-flash` on the Gemini API free tier, temperature 0, using `ChatOpenAI` against Gemini's OpenAI-compatible endpoint. The client is provider-agnostic (`LLM_API_KEY`, `LLM_BASE_URL`, `ATLAS_MODEL`), so OpenRouter, Mistral or a local Ollama is a settings change. Free-tier limit: 250k input tokens per minute; 429s are retried with backoff. |
 | Embeddings | `BAAI/bge-small-en-v1.5`, run locally through sentence-transformers |
 | Vector index | Qdrant server in Docker (`qdrant/qdrant:v1.19.2`), with `qdrant-client` 1.19.1 through `AsyncQdrantClient`. Grouped search returns one result per tool. |
 | Tool source | PayPal OpenAPI specs, commit `90e8041`, copied into `specs/paypal/` with their Apache-2.0 LICENSE |
@@ -109,9 +109,9 @@ Phase 1 uses PayPal's 115 REST operations, plus `rag_search` and `system_search`
 ### 8. Evals
 - [x] 151 cases: 81 single-tool, 30 multi-step, 15 RAG, 10 system, 15 that should get a question back (60 dev, 91 test)
 - [x] Retrieval metrics (R0): Recall@k, Precision@k, MRR, nDCG@k, plus the leakage check and the CI baseline
-- [ ] One agent run, `atlas eval agent`: tool execution success, task completion, p95 latency, cost per task. Built and unit-tested; it needs a model key with credits to run.
+- [ ] One agent run, `atlas eval agent`, on at most 10 cases (Ajay's limit): tool execution success, task completion, p95 latency, cost per task.
 
-**Done when** the README shows the R0 numbers and one agent run on the test split.
+**Done when** the README shows the R0 numbers and the 10-case agent run.
 
 ## Phase 1 targets
 
@@ -145,6 +145,7 @@ Revised 2026-10-24 after R0 tuning on the dev split (`reports/r0_tuning.md`). Th
 
 - 2026-10-24: plan created.
 - 2026-10-24: model provider changed to OpenRouter (`deepseek/deepseek-v4-flash`, $0.091 / $0.182 per 1M tokens in / out). `langchain-deepseek` replaced by `langchain-openai`. The 1M context means R1 can also run untrimmed.
+- 2026-10-24: provider changed to Groq (`openai/gpt-oss-120b`), Ajay's call after Gemini's 20 requests a day. Groq's free tier caps a single request at 8,000 tokens (7,000 input tokens on Qwen), so `ToolRetrievalMiddleware` gained a request token budget (`ATLAS_MAX_REQUEST_TOKENS`): tools are added in priority order (found_tools, then by retrieval rank) until the request would exceed the budget. It's unset (no limit) for other providers. The agent eval is capped at 10 cases, run one at a time.
 - 2026-10-24: Gemini follow-ups. A native `ChatGoogleGenerativeAI` client was added behind a provider registry, because the OpenAI-compatible endpoint loses Gemini 3 thought signatures and the second tool call fails. Daily-quota 429s are no longer retried (a test turn hung waiting on one). The free tier for `gemini-3.5-flash` turned out to be 20 requests a day, too few for the agent eval.
 - 2026-10-24: model provider changed to Gemini (`gemini-3.5-flash`, free tier) because the OpenRouter account had no purchased credits. Ajay picked 3.5-flash from four models that passed a tool-call probe; the 2.5 models are retired for new users. Gemini rejected PayPal schemas where `required` sits outside `allOf` branches, so ingest now merges `allOf` into one object (trimmed size ~57k → ~50.6k tokens, required fields still proven kept). The enrichment cache key no longer includes the schema, so trimming tweaks don't regenerate examples; the existing examples were re-keyed, not regenerated. `ModelRetryMiddleware` retries 429s (15 s initial, up to 60 s). Settings renamed to provider-neutral `LLM_API_KEY`/`LLM_BASE_URL`; prices default to 0 on the free tier, and the agent eval also reports input tokens per task.
 - 2026-10-24: evals cut back on Ajay's call (the full matrix was overkill for this use case). Kept: R0 retrieval metrics (Recall/Precision/MRR/nDCG), the dev/test split, the leakage check, the CI baseline, and one plain agent run (`atlas eval agent`) for tool execution success, task completion, p95 latency and cost. Removed: the 9 run configs, LangSmith experiments and dataset sync, the HTML report, the agent's "all tools" and "LLM selector" modes, `ExposureMiddleware`, and the exposure-recall and first-call metrics. Agent runs are still traced in LangSmith.

@@ -65,6 +65,8 @@ def _placeholder(target: dict) -> dict:
 
 
 def _cut(text: str, limit: int) -> str:
+    if limit <= 0:
+        return ""
     text = " ".join(HTML_TAG.sub(" ", str(text)).split())
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
 

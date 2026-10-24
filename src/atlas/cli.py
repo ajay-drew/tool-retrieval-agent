@@ -217,7 +217,12 @@ def _agent_session(settings):
     from atlas.agent.factory import make_deps
 
     deps = make_deps(settings)
-    options = AgentOptions(k=settings.atlas_k, approve_writes=True, today=settings.atlas_today)
+    options = AgentOptions(
+        k=settings.atlas_k,
+        max_request_tokens=settings.atlas_max_request_tokens,
+        approve_writes=True,
+        today=settings.atlas_today,
+    )
     writes = {s.name for s in deps.specs if s.access == "write"}
     return build_atlas(deps, options), writes, deps.runlog
 
@@ -270,6 +275,7 @@ def chat() -> None:
 def eval_agent(
     split: str = typer.Option("test", help="dev, test or all"),
     limit: int = typer.Option(0, help="Only the first N cases (0 = all)."),
+    ids: str = typer.Option("", help="Comma-separated case IDs to run instead of a split."),
     concurrency: int = typer.Option(2, help="Cases in flight at once."),
 ) -> None:
     """Run Atlas once per case: tool execution success, task completion, p95 latency, cost."""
@@ -278,7 +284,10 @@ def eval_agent(
     from atlas.tracing import tracing
 
     settings = get_settings()
-    cases = load_cases(split=split)
+    cases = load_cases(split="all" if ids else split)
+    if ids:
+        wanted = [i.strip() for i in ids.split(",") if i.strip()]
+        cases = [c for c in cases if c.id in wanted]
     if limit:
         cases = cases[:limit]
     runner = CaseRunner(settings)

@@ -98,3 +98,22 @@ def test_summarize_tracks_tool_status_and_writes():
     result = summarize(messages, writes={"invoices_create"})
     assert result.tool_calls[0].ok
     assert result.status == "completed"
+
+
+def test_budget_keeps_found_tools_first_and_drops_the_rest():
+    from atlas.agent.middleware import fit_to_budget
+
+    sizes = {"found": 300, "t1": 500, "t2": 900, "t3": 200}
+    assert fit_to_budget(["found", "t1", "t2", "t3"], sizes, 1000) == ["found", "t1", "t3"]
+    assert fit_to_budget(["t2"], sizes, 100) == []
+
+
+def test_request_budget_limits_tools_shown():
+    index = FakeIndex(["t5", "t2", "t9"])
+    middleware = ToolRetrievalMiddleware(
+        index, 3, ALWAYS_ON, {"t5": 400, "t2": 400, "t9": 400}, max_request_tokens=1000
+    )
+    update = asyncio.run(
+        middleware.abefore_model({"messages": [HumanMessage("refund a capture")]}, None)
+    )
+    assert update["allowed_tools"] == ["t5", "t2", *ALWAYS_ON]

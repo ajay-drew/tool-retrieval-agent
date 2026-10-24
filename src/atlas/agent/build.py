@@ -12,6 +12,7 @@ from langchain.agents.middleware import (
     ToolRetryMiddleware,
 )
 from langchain_core.language_models import BaseChatModel
+from langchain_core.utils.function_calling import convert_to_openai_tool
 from langgraph.checkpoint.memory import InMemorySaver
 
 from atlas.agent.middleware import ToolRetrievalMiddleware
@@ -22,6 +23,7 @@ from atlas.retrieval.index import ToolIndex
 from atlas.tools.find import make_find_tools
 from atlas.tools.rag import KnowledgeBase, make_rag_tool
 from atlas.tools.registry import build_tools
+from atlas.tools.schema import approx_tokens
 from atlas.tools.spec import ToolSpec
 from atlas.tools.system import make_system_tool
 
@@ -33,6 +35,8 @@ TOOL_CALL_LIMIT = 12
 @dataclass(frozen=True)
 class AgentOptions:
     k: int = 8
+    max_request_tokens: int | None = None
+    output_reserve: int = 1024
     approve_writes: bool = True
     today: str | None = None
 
@@ -62,8 +66,13 @@ def build_atlas(deps: AgentDeps, options: AgentOptions):
     always_on = [t.name for t in extra]
     tools = [*build_tools(deps.specs, deps.backend), *extra]
 
+    sizes = {t.name: approx_tokens(convert_to_openai_tool(t)) for t in tools}
+    prompt = system_prompt(options.today)
+    fixed = approx_tokens(prompt) + sum(sizes[n] for n in always_on) + options.output_reserve
     middleware: list[AgentMiddleware] = [
-        ToolRetrievalMiddleware(deps.tool_index, options.k, always_on)
+        ToolRetrievalMiddleware(
+            deps.tool_index, options.k, always_on, sizes, options.max_request_tokens, fixed
+        )
     ]
     if options.approve_writes:
         writes = [s.name for s in deps.specs if s.access == "write"]
@@ -92,7 +101,7 @@ def build_atlas(deps: AgentDeps, options: AgentOptions):
     return create_agent(
         deps.model,
         tools=tools,
-        system_prompt=system_prompt(options.today),
+        system_prompt=prompt,
         middleware=middleware,
         checkpointer=InMemorySaver(),
         name="atlas",

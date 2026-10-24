@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     llm_base_url: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
     atlas_model: str = "gemini-3.5-flash"
     atlas_max_output_tokens: int = 4096
+    atlas_max_request_tokens: int | None = None
+    atlas_reasoning_effort: str | None = None
     atlas_k: int = 8
     atlas_embed_model: str = "BAAI/bge-small-en-v1.5"
     atlas_examples_per_tool: int = 5

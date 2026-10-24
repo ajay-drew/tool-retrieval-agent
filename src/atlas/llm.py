@@ -27,6 +27,7 @@ def _gemini(settings: Settings) -> BaseChatModel:
 def _openai_compatible(settings: Settings) -> BaseChatModel:
     from langchain_openai import ChatOpenAI
 
+    extra = {"reasoning_effort": settings.atlas_reasoning_effort}
     return ChatOpenAI(
         model=settings.atlas_model,
         api_key=settings.llm_api_key,
@@ -35,6 +36,7 @@ def _openai_compatible(settings: Settings) -> BaseChatModel:
         max_retries=0,
         max_tokens=settings.atlas_max_output_tokens,
         timeout=120,
+        **{k: v for k, v in extra.items() if v},
     )
 
 
