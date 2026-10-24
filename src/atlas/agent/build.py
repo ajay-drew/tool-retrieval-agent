@@ -1,13 +1,11 @@
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Literal
 
 from langchain.agents import create_agent
 from langchain.agents.middleware import (
     AgentMiddleware,
     HumanInTheLoopMiddleware,
-    LLMToolSelectorMiddleware,
     ModelCallLimitMiddleware,
     ToolCallLimitMiddleware,
     ToolRetryMiddleware,
@@ -15,7 +13,6 @@ from langchain.agents.middleware import (
 from langchain_core.language_models import BaseChatModel
 from langgraph.checkpoint.memory import InMemorySaver
 
-from atlas.agent.exposure import ExposureMiddleware
 from atlas.agent.middleware import ToolRetrievalMiddleware
 from atlas.agent.runlog import RunLog
 from atlas.backend.base import Backend, BackendTransientError
@@ -30,14 +27,10 @@ PROMPT_PATH = Path(__file__).with_name("prompt.md")
 MODEL_CALL_LIMIT = 8
 TOOL_CALL_LIMIT = 12
 
-Mode = Literal["retrieval", "all", "llm_selector"]
-
 
 @dataclass(frozen=True)
 class AgentOptions:
-    mode: Mode = "retrieval"
     k: int = 8
-    use_find_tools: bool = True
     approve_writes: bool = True
     today: str | None = None
 
@@ -57,30 +50,19 @@ def system_prompt(today: str | None) -> str:
     return PROMPT_PATH.read_text().format(today=day)
 
 
-def _selection_middleware(deps: AgentDeps, options: AgentOptions, always_on: list[str]):
-    if options.mode == "retrieval":
-        return [ToolRetrievalMiddleware(deps.tool_index, options.k, always_on)]
-    if options.mode == "llm_selector":
-        return [
-            LLMToolSelectorMiddleware(
-                model=deps.model, max_tools=options.k, always_include=always_on
-            )
-        ]
-    return []
-
-
 def build_atlas(deps: AgentDeps, options: AgentOptions):
     purposes = {s.name: s.purpose or s.summary for s in deps.specs}
     extra = [
         make_rag_tool(deps.knowledge_base),
         make_system_tool(deps.tool_index, deps.specs, deps.runlog),
+        make_find_tools(deps.tool_index, purposes),
     ]
-    if options.use_find_tools and options.mode == "retrieval":
-        extra.append(make_find_tools(deps.tool_index, purposes))
     always_on = [t.name for t in extra]
     tools = [*build_tools(deps.specs, deps.backend), *extra]
 
-    middleware: list[AgentMiddleware] = _selection_middleware(deps, options, always_on)
+    middleware: list[AgentMiddleware] = [
+        ToolRetrievalMiddleware(deps.tool_index, options.k, always_on)
+    ]
     if options.approve_writes:
         writes = [s.name for s in deps.specs if s.access == "write"]
         middleware.append(
@@ -97,7 +79,6 @@ def build_atlas(deps: AgentDeps, options: AgentOptions):
         ),
         ModelCallLimitMiddleware(run_limit=MODEL_CALL_LIMIT, exit_behavior="end"),
         ToolCallLimitMiddleware(run_limit=TOOL_CALL_LIMIT, exit_behavior="continue"),
-        ExposureMiddleware(),
     ]
     return create_agent(
         deps.model,

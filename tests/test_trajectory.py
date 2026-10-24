@@ -1,5 +1,5 @@
 from atlas.evals.cases import Case
-from atlas.evals.trajectory import exposure_recall, p95, task_completed, unexpected_writes
+from atlas.evals.trajectory import p95, task_completed, unexpected_writes
 
 WRITES = {"invoices_create", "invoices_send", "invoices_cancel"}
 
@@ -13,8 +13,8 @@ def call(name, ok=True, args=None):
     return {"name": name, "args": args or {}, "status": 201 if ok else 422, "ok": ok}
 
 
-def result(calls, answer="Done.", status="completed", exposed=None):
-    return {"tool_calls": calls, "answer": answer, "status": status, "exposed": exposed or []}
+def result(calls, answer="Done.", status="completed"):
+    return {"tool_calls": calls, "answer": answer, "status": status}
 
 
 def test_ordered_multi_step_with_arg_check():
@@ -61,13 +61,6 @@ def test_rag_answer_must_contain_facts():
 def test_limit_hit_is_never_complete():
     case = make_case(expected_tools=["invoices_create"])
     assert not task_completed(case, result([call("invoices_create")], status="limit_hit"), WRITES)
-
-
-def test_exposure_recall_uses_every_model_call():
-    case = make_case(expected_tools=["invoices_create", "invoices_send"])
-    assert exposure_recall(case, [["invoices_create"], ["invoices_send", "x"]]) == 1.0
-    assert exposure_recall(case, [["invoices_create"]]) == 0.5
-    assert exposure_recall(make_case(category="rag", expected_tools=["rag_search"]), []) is None
 
 
 def test_p95():

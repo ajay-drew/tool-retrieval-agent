@@ -62,37 +62,26 @@ uv run atlas chat             # or: uv run atlas ask "Is there a dispute open fr
 ## Evals
 
 ```bash
-uv run atlas eval retrieval            # R0: retrieval only, no LLM, about 10 s
+uv run atlas eval retrieval            # Recall@k, Precision@k, MRR, nDCG@k; no LLM, about 10 s
 uv run atlas eval leakage              # cases too close to stored example requests
-uv run atlas eval run r2               # full agent; also r1-all, r3-k3, r3-k5, r3-k12, r3-heads, r3-nofind, r3-llmselect, r1-untrimmed
-uv run atlas eval report               # evals/report.html + the table below
+uv run atlas eval agent                # one Atlas run per test case: tool execution success, task completion, p95 latency, cost
 ```
 
 - **151 hand-written cases:** 81 single-tool, 30 multi-step, 15 knowledge-base, 10 system and 15 that should get a question back. They are split 60 **dev** (the only cases used for tuning) and 91 **test** (held out, reported below).
-- **Retrieval metrics:** Recall@k, Precision@k, MRR and nDCG@k.
-- **Agent metrics:** task completion, exposure recall (did the model ever see the tools the task needs), tool execution success, p95 latency and cost per task.
-- **LangSmith:** with a key set, every run is a LangSmith experiment on a synced dataset.
-- **CI:** runs lint, tests and R0 against a committed baseline on every push.
+- **Retrieval (no LLM):** Recall@k, Precision@k, MRR and nDCG@k at k = 3, 5, 8, 10. CI runs it on every push against a committed baseline.
+- **Agent run:** tool execution success, task completion, p95 latency and cost per task. Each case runs against a fresh mock, and its LangSmith trace link is saved with the results. Runs that hit an API error are left out of the scores and flagged.
 
 ## Results
 
-<!-- results:start -->
+**Retrieval only (held-out test split, 63 cases that need an indexed tool)**
 
-**Full agent, held-out test split**
+| Recall@3 | Recall@5 | Recall@8 | Precision@5 | MRR | nDCG@5 |
+|---:|---:|---:|---:|---:|---:|
+| 0.778 | 0.857 | 0.921 | 0.213 | 0.743 | 0.745 |
 
-| Run | n | Task completion | Exposure recall | Tool exec. success | p95 latency (s) | Cost / task ($) | Input tokens / task | Max tools shown |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
+Precision@5 is capped at 0.2 on single-tool cases (one right answer in five slots), so it compares setups rather than meeting a target. Most Recall@8 misses are multi-step requests, where one query has to surface two tools; inside the agent `find_tools` picks up the second one.
 
-**Retrieval only (R0, no LLM)**
-
-| Split | n | recall@3 | recall@5 | recall@8 | precision@5 | mrr | ndcg@5 |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| dev | 48 | 0.750 | 0.885 | 0.948 | 0.217 | 0.720 | 0.728 |
-| test | 63 | 0.778 | 0.857 | 0.921 | 0.213 | 0.743 | 0.745 |
-
-<!-- results:end -->
-
-Full report with per-case traces: `evals/report.html` (run `atlas eval report`).
+**Agent run:** pending a model key with credits (see [docs/decisions.md](docs/decisions.md), problem 21).
 
 ## Layout
 

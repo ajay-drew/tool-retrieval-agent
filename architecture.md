@@ -91,7 +91,7 @@ class Hit:
 
 - `BgeEmbedder` normalises its vectors and adds bge's search prefix to queries.
 - `QdrantToolIndex` uses a Qdrant server (Docker, `qdrant/qdrant:v1.19.2`) through `AsyncQdrantClient`. Collection `atlas_tools` stores 384-dimension cosine vectors: one point for `name + purpose + description` (`kind=head`) and one per example request (`kind=example`), about 6 per tool. The payload is `{tool, service, kind}`.
-- Search uses `query_points_groups` with `group_by="tool"` and `group_size=1`, so Qdrant returns ranked tools, not vectors. A tool's score is its best vector, and each tool appears once. `service` and `heads_only` become payload filters, so the description-only comparison in R3 needs no second index.
+- Search uses `query_points_groups` with `group_by="tool"` and `group_size=1`, so Qdrant returns ranked tools, not vectors. A tool's score is its best vector, and each tool appears once. `service` and `heads_only` become payload filters, so a description-only search needs no second index.
 - Point IDs are `uuid5(tool + text)`. `atlas index` recreates the collection, so a rebuild is clean and repeatable.
 - Always-on tools are **not** in the index.
 
@@ -104,7 +104,6 @@ query   = the last 2 user messages, joined
 hits    = index.search(query, k=config.k)
 allowed = {hit.name for hit in hits} ∪ ALWAYS_ON ∪ state.found_tools
 request = request.override(tools=[t for t in request.tools if t.name in allowed])
-record allowed tool names on the run (for the exposure metrics)
 return handler(request)
 ```
 
@@ -123,9 +122,7 @@ return handler(request)
 - `checkpointer`: `InMemorySaver`
 - `system_prompt`: from `agent/prompt.md`. It tells the model to ask instead of guessing when a required input is missing, and to use `find_tools` when none of the tools fit.
 
-**`ExposureMiddleware`** (innermost) records the tool names in each model request into a per-run `ContextVar` collector opened by `run_turn`. Exposure recall works the same for every tool-selection mode.
-
-**`run_turn` (`agent/turn.py`)** runs one user message, resumes approval pauses through an approver callback (the CLI asks, evals approve everything), and returns the answer, tool calls with their HTTP status, exposed tools, tokens, latency, status and the LangSmith trace URL. Status is `error` (an exception such as an API or network failure), `limit_hit`, `asked_user` (the answer contains a question and no change was made) or `completed`. Evals leave `error` cases out of every metric and report them separately, so an outage can't look like a weak agent.
+**`run_turn` (`agent/turn.py`)** runs one user message, resumes approval pauses through an approver callback (the CLI asks, evals approve everything), and returns the answer, tool calls with their HTTP status, tokens, latency, status and the LangSmith trace URL. Status is `error` (an exception such as an API or network failure), `limit_hit`, `asked_user` (the answer contains a question and no change was made) or `completed`. Evals leave `error` cases out of every metric and report them separately, so an outage can't look like a weak agent.
 
 **Run log (`agent/runlog.py`):** one JSON line per finished turn in `runs/runlog.jsonl`:
 `{run_id, thread_id, ts, user_message, tools_exposed, tool_calls:[{name, args, ok, error}], status, latency_ms, tokens_in, tokens_out, langsmith_url}`.
@@ -222,25 +219,21 @@ The registry builds an async `StructuredTool` per spec that calls `backend.call`
 | Precision@k | `|E ∩ R_k| / k` |
 | MRR | `1 / rank of the first tool in E`, or 0 if none is in the top 10 |
 | nDCG@k | Relevance is 1 for tools in `E`, 0 otherwise. `DCG = Σ rel_i / log2(i+1)` divided by the best possible DCG. |
-| Exposure recall | Recall measured on the tools the model actually saw across the run (`tools_exposed`) |
 | Tool execution success | Tool calls that pass the schema check and return 2xx, divided by all tool calls |
 | Task completion | Every tool in `expected_tools` called (in order if `ordered`), every `arg_check` passes, no writes outside `expected_tools`, and status `completed`. For `clarify` cases: no write calls and status `asked_user`. |
 | p95 latency | The 95th percentile of `latency_ms` across cases |
 | Cost per task | `(tokens_in × price_in + tokens_out × price_out) / 1e6`, averaged |
 
-Retrieval metrics are reported at k = 3, 5, 8 and 10, overall and per `group`.
+Retrieval metrics are reported at k = 3, 5, 8 and 10, overall, per split and per `group`. Agent metrics are reported overall, per split and per category.
 
 ### Runs
 
-| Run | What runs | Needs an API key |
+| Command | What runs | Needs a model key |
 |---|---|---|
-| R0 | `ToolIndex.search` per case. Retrieval metrics only. | No |
-| R1 | The agent with retrieval off and every trimmed tool in the prompt | Yes |
-| R2 | Atlas with k = 8 | Yes |
-| R3 | k sweep, index variants, `find_tools` on/off, `LLMToolSelectorMiddleware` | Yes |
-| R4 | R2 with 117 / 500 / 1,000 / 2,000 tools (phase 2) | Yes |
+| `atlas eval retrieval` (R0) | `ToolIndex.search` per case; retrieval metrics only | No |
+| `atlas eval agent` | Atlas (k = 8, approval off) once per case, against a fresh mock and run log; agent metrics | Yes |
 
-Full-agent runs use `langsmith.aevaluate` with `max_concurrency=8`. Every scorer is a LangSmith evaluator, written as a plain function so R0 can use it without LangSmith. The backend resets before each case. Each run writes `evals/results/<timestamp>-<run>.json`, which records the config, the metrics and the result for each case.
+The agent run takes `--split` and `--limit`, runs a few cases at a time, and writes `evals/results/<timestamp>-agent.json` with the metrics and each case's tool calls, status and LangSmith trace link. A turn that raised an exception is status `error`: it's left out of the metrics, listed separately, and makes the command exit non-zero.
 
 ### Rules for the eval data
 - Test requests are written by hand, never copied from the stored example requests.
@@ -274,12 +267,11 @@ tool-retrieval-agent/
 │   ├── commands/   ingest.py
 │   ├── tools/      spec.py  schema.py  ingest.py  enrich.py  registry.py  sample.py  rag.py  system.py  find.py
 │   ├── retrieval/  embedder.py  index.py  factory.py
-│   ├── agent/      state.py  middleware.py  exposure.py  build.py  turn.py  runlog.py  factory.py  prompt.md
+│   ├── agent/      state.py  middleware.py  build.py  turn.py  runlog.py  factory.py  prompt.md
 │   ├── backend/    base.py  mock.py  seed.json
-│   └── evals/      cases.py  scorers.py  retrieval.py  trajectory.py  agent_run.py  report.py
+│   └── evals/      cases.py  scorers.py  retrieval.py  trajectory.py  agent_run.py
 ├── evals/
 │   ├── cases.jsonl  baselines/r0.json  fixtures/runlog.jsonl
-│   ├── results/                   one JSON per run
-│   └── report.html
+│   └── results/                   one JSON per run
 └── tests/                         config, ingest, scorers, backend, middleware
 ```

@@ -266,90 +266,45 @@ def chat() -> None:
         asyncio.run(loop())
 
 
-@eval_app.command("run")
-def eval_run(
-    name: str = typer.Argument(
-        ...,
-        help="r1-all, r1-untrimmed, r2, r3-k3, r3-k5, r3-k12, r3-heads, r3-nofind or r3-llmselect",
-    ),
-    split: str = typer.Option("all", help="dev, test or all"),
+@eval_app.command("agent")
+def eval_agent(
+    split: str = typer.Option("test", help="dev, test or all"),
     limit: int = typer.Option(0, help="Only the first N cases (0 = all)."),
-    concurrency: int = typer.Option(8, help="Cases in flight at once."),
-    local: bool = typer.Option(False, help="Skip LangSmith even when a key is set."),
+    concurrency: int = typer.Option(4, help="Cases in flight at once."),
 ) -> None:
-    """R1–R3: run the full agent on the eval cases and score it."""
-    from atlas.evals.agent_run import (
-        RUNS,
-        CaseRunner,
-        run_langsmith,
-        run_local,
-        save_agent_run,
-        score_outputs,
-        select_cases,
-    )
+    """Run Atlas once per case: tool execution success, task completion, p95 latency, cost."""
+    from atlas.evals.agent_run import CaseRunner, run_cases, save_agent_run, score_outputs
     from atlas.evals.cases import load_cases
+    from atlas.tracing import tracing
 
-    if name not in RUNS:
-        typer.secho(f"unknown run {name!r}; choose from {', '.join(RUNS)}", fg="red", err=True)
-        raise typer.Exit(code=2)
     settings = get_settings()
-    config = RUNS[name]
-    cases = select_cases(load_cases(split=split), config)
+    cases = load_cases(split=split)
     if limit:
         cases = cases[:limit]
-    runner = CaseRunner(settings, config)
-    experiment = None
-    if settings.tracing_enabled and not local:
-        from atlas.tracing import tracing
-
-        with tracing(settings) as client:
-            outputs, experiment = asyncio.run(
-                run_langsmith(runner, cases, name, config, concurrency, client)
-            )
-    else:
-        outputs = asyncio.run(run_local(runner, cases, concurrency))
+    runner = CaseRunner(settings)
+    with tracing(settings):
+        outputs = asyncio.run(run_cases(runner, cases, concurrency))
     report = score_outputs(cases, outputs, runner.writes, settings)
-    extra = {"split": split, "experiment": experiment, "model": settings.atlas_model}
-    path = save_agent_run(name, config, report, extra)
+    path = save_agent_run(report, {"split": split, "model": settings.atlas_model})
 
-    keys = [
-        "task_completion",
-        "exposure_recall",
-        "tool_execution_success",
-        "p95_latency_s",
-        "cost_per_task_usd",
-    ]
-    typer.echo(f"{'':<10}{'n':>4} " + " ".join(f"{k[:14]:>15}" for k in keys))
-    sections = {"all": report["summary"], **report["by_split"], **report["by_category"]}
+    keys = ["task_completion", "tool_execution_success", "p95_latency_s", "cost_per_task_usd"]
+    typer.echo(f"{'':<10}{'n':>4} " + " ".join(f"{k[:16]:>17}" for k in keys))
+    sections = {"all": report["summary"], **report["by_category"]}
     for section, row in sections.items():
-        cells = []
-        for k in keys:
-            v = row.get(k)
-            cells.append(f"{'—' if v is None else v:>15}")
-        typer.echo(f"{section:<10}{row['n']:>4} " + " ".join(cells))
-    failed = [c for c in report["cases"] if not c["task_completed"]]
-    typer.echo(f"\nnot completed: {len(failed)}")
-    for c in failed[:40]:
-        typer.echo(f"  [{c['split']}] {c['id']} {c['status']}: {c['calls'][:6]}")
-    if experiment:
-        typer.echo(f"LangSmith experiment: {experiment}")
+        cells = " ".join(f"{'—' if row.get(k) is None else row[k]:>17}" for k in keys)
+        typer.echo(f"{section:<10}{row['n']:>4} " + cells)
+    missed = [c for c in report["cases"] if not c["task_completed"] and c["status"] != "error"]
+    typer.echo(f"\nnot completed: {len(missed)}")
+    for c in missed:
+        typer.echo(f"  {c['id']} ({c['status']}): {c['calls'][:6]}")
     typer.echo(f"results: {path}")
     if report["errors"]:
         kinds = sorted({e["error"][:120] for e in report["errors"]})
         typer.secho(
-            f"\n{len(report['errors'])} cases hit harness errors and are left out of the scores:",
+            f"\n{len(report['errors'])} cases hit errors and are left out of the scores:",
             fg="red",
             err=True,
         )
         for kind in kinds[:5]:
             typer.secho(f"  {kind}", fg="red", err=True)
         raise typer.Exit(code=1)
-
-
-@eval_app.command("report")
-def eval_report() -> None:
-    """Write evals/report.html and the README results table from the latest results."""
-    from atlas.evals.report import write_report
-
-    path, readme = write_report()
-    typer.echo(f"report: {path}" + (" · README updated" if readme else ""))

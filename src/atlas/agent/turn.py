@@ -9,7 +9,6 @@ from langgraph.types import Command
 from langsmith import traceable
 from langsmith.run_helpers import get_current_run_tree
 
-from atlas.agent.exposure import record_exposure
 from atlas.agent.runlog import RunLog
 from atlas.tools.registry import coerce_json_strings
 
@@ -31,7 +30,6 @@ class ToolCallRecord:
 class TurnResult:
     answer: str
     tool_calls: list[ToolCallRecord] = field(default_factory=list)
-    exposed: list[list[str]] = field(default_factory=list)
     status: str = "completed"
     latency_ms: int = 0
     tokens_in: int = 0
@@ -99,17 +97,15 @@ async def run_turn(
 ) -> TurnResult:
     config = {"configurable": {"thread_id": thread_id}, "recursion_limit": 60}
     started = time.perf_counter()
-    with record_exposure() as exposed:
-        try:
-            state = await agent.ainvoke({"messages": [HumanMessage(message)]}, config)
-            while state.get("__interrupt__"):
-                requests = state["__interrupt__"][0].value["action_requests"]
-                decisions = await approver(requests)
-                state = await agent.ainvoke(Command(resume={"decisions": decisions}), config)
-            result = summarize(state["messages"], writes)
-        except Exception as exc:
-            result = TurnResult(answer="", status="error", error=f"{type(exc).__name__}: {exc}")
-    result.exposed = list(exposed)
+    try:
+        state = await agent.ainvoke({"messages": [HumanMessage(message)]}, config)
+        while state.get("__interrupt__"):
+            requests = state["__interrupt__"][0].value["action_requests"]
+            decisions = await approver(requests)
+            state = await agent.ainvoke(Command(resume={"decisions": decisions}), config)
+        result = summarize(state["messages"], writes)
+    except Exception as exc:
+        result = TurnResult(answer="", status="error", error=f"{type(exc).__name__}: {exc}")
     run = get_current_run_tree()
     result.trace_url = _safe_url(run)
     result.latency_ms = int((time.perf_counter() - started) * 1000)

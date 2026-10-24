@@ -4,7 +4,6 @@ from langchain.agents.middleware import ModelRequest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_core.tools import tool
 
-from atlas.agent.exposure import ExposureMiddleware, record_exposure
 from atlas.agent.middleware import ToolRetrievalMiddleware, search_text
 from atlas.agent.turn import summarize
 from atlas.retrieval.index import Hit
@@ -78,18 +77,6 @@ def test_search_text_uses_last_two_user_messages():
         HumanMessage("third"),
     ]
     assert search_text(messages) == "second third"
-
-
-def test_exposure_records_what_the_model_saw():
-    middleware = ExposureMiddleware()
-
-    async def handler(request):
-        return AIMessage("ok")
-
-    request = ModelRequest(model=None, messages=[], tools=make_tools(["a", "b"]))
-    with record_exposure() as calls:
-        asyncio.run(middleware.awrap_model_call(request, handler))
-    assert calls == [["a", "b"]]
 
 
 def test_summarize_marks_questions_without_writes_as_asked_user():

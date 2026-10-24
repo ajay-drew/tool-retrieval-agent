@@ -29,7 +29,7 @@ Phase 1 uses PayPal's 115 REST operations, plus `rag_search` and `system_search`
 | Fallback | A `find_tools(query)` tool whose results are saved to agent state |
 | Approval pause | `HumanInTheLoopMiddleware` on write tools in the CLI. Off in evals, where a scorer checks write calls instead. |
 | Tracing | LangSmith, project `atlas`, turned on by env vars |
-| Evals | LangSmith dataset plus `aevaluate`; local JSON results and an HTML report as well |
+| Evals | Retrieval metrics with no LLM (R0) plus one plain agent run; results as local JSON; agent runs traced in LangSmith |
 | Python | 3.12, managed with `uv` |
 | License | MIT for our code |
 
@@ -106,39 +106,35 @@ Phase 1 uses PayPal's 115 REST operations, plus `rag_search` and `system_search`
 
 **Done when** "what tools manage invoices?", "status of my last request" and one knowledge-base question each get a correct answer.
 
-### 8. Full evals and report
-- [x] 150 cases: 80 single-tool, 30 multi-step, 15 RAG, 10 system, 15 that should get a question back
-- [x] Cases are synced to the LangSmith dataset `atlas-paypal-v1`
-- [ ] R1: baseline with all tools in the prompt, both trimmed (about 50k tokens) and untrimmed (about 400k, which fits in v4-flash's 1M context)
-- [ ] R2: Atlas with k = 8
-- [ ] R3: k sweep; description-only vs. with examples; `find_tools` on vs. off; LangChain's `LLMToolSelectorMiddleware` vs. Qdrant retrieval
-- [ ] `atlas eval report` writes `evals/report.html` and the README results table
+### 8. Evals
+- [x] 151 cases: 81 single-tool, 30 multi-step, 15 RAG, 10 system, 15 that should get a question back (60 dev, 91 test)
+- [x] Retrieval metrics (R0): Recall@k, Precision@k, MRR, nDCG@k, plus the leakage check and the CI baseline
+- [ ] One agent run, `atlas eval agent`: tool execution success, task completion, p95 latency, cost per task. Built and unit-tested; it needs a model key with credits to run.
 
-**Done when** the README shows R0–R3 next to the targets below.
+**Done when** the README shows the R0 numbers and one agent run on the test split.
 
 ## Phase 1 targets
 
 | Metric | Target | Measured on |
 |---|---|---|
-| Recall@8, retrieval only (R0) | ≥ 0.93 | test split |
-| Recall@8, tools the model actually saw (exposure recall) | ≥ 0.95 | test split, full agent |
-| Recall@5 | Reported, no target | |
-| Precision@5 | Compare across k (at most 0.2 on single-tool cases) | |
+| Recall@5 | Reported, no target | test split, R0 |
+| Recall@8 | ≥ 0.93 | test split, R0 |
+| Precision@5 | Reported (at most 0.2 on single-tool cases) | test split, R0 |
 | MRR | ≥ 0.75 | test split, R0 |
 | nDCG@5 | ≥ 0.70 | test split, R0 |
-| Tool execution success | ≥ 0.95 | |
-| Task completion rate | ≥ 0.85 | |
-| p95 latency, cost per task | Lower than the R1 baseline | |
+| Tool execution success | ≥ 0.95 | test split, agent run |
+| Task completion rate | ≥ 0.85 | test split, agent run |
+| p95 latency, cost per task | Reported, no target | test split, agent run |
 
-Revised 2026-10-24 after R0 tuning on the dev split (`reports/r0_tuning.md`). The first guesses (Recall@5 ≥ 0.95, MRR ≥ 0.85) are out of reach for a single search: most misses are multi-step requests, where one query has to surface two tools. Inside the agent, `find_tools` covers that, so the 0.95 bar moves to exposure recall, which counts every tool the model saw during the run.
+Revised 2026-10-24 after R0 tuning on the dev split (`reports/r0_tuning.md`). The first guesses (Recall@5 ≥ 0.95, MRR ≥ 0.85) are out of reach for a single search: most misses are multi-step requests, where one query has to surface two tools. Inside the agent, `find_tools` covers those, and task completion shows whether it worked.
 
 ## Phase 2: scale to 2,000 tools
 
 - [ ] Add more public OpenAPI specs through the same ingest. Stripe and Square go first because they are the hardest lookalikes.
 - [ ] Prefix tool names with their service (`stripe__invoices_create`) and filter by service when the user names one
-- [ ] R4: scaling curve at 117, 500, 1,000 and 2,000 tools
+- [ ] Scaling check: R0 at 117, 500, 1,000 and 2,000 tools
 - [ ] Optional: a multi-agent version on the same cases for comparison
-- [ ] If recall drops, decide between a reranker, bge-base or a service filter, based on the R4 numbers
+- [ ] If recall drops, decide between a reranker, bge-base or a service filter, based on those numbers
 
 ## Open questions
 
@@ -149,6 +145,7 @@ Revised 2026-10-24 after R0 tuning on the dev split (`reports/r0_tuning.md`). Th
 
 - 2026-10-24: plan created.
 - 2026-10-24: model provider changed to OpenRouter (`deepseek/deepseek-v4-flash`, $0.091 / $0.182 per 1M tokens in / out). `langchain-deepseek` replaced by `langchain-openai`. The 1M context means R1 can also run untrimmed.
+- 2026-10-24: evals cut back on Ajay's call (the full matrix was overkill for this use case). Kept: R0 retrieval metrics (Recall/Precision/MRR/nDCG), the dev/test split, the leakage check, the CI baseline, and one plain agent run (`atlas eval agent`) for tool execution success, task completion, p95 latency and cost. Removed: the 9 run configs, LangSmith experiments and dataset sync, the HTML report, the agent's "all tools" and "LLM selector" modes, `ExposureMiddleware`, and the exposure-recall and first-call metrics. Agent runs are still traced in LangSmith.
 - 2026-10-24: step 8 eval harness built (trajectory scorers, LangSmith experiments, report). The first full runs were invalid: OpenRouter refused every call with "Insufficient credits. This account never purchased credits" after about $0.20 of usage, and the harness counted those as agent failures. Results were deleted. Exceptions are now status `error`, left out of scores, and fail the command. Also fixed: Qdrant 408 timeouts under load (client timeout 30 s) and a mock crash on PATCH into a list. R1–R3 are blocked on credits. Decisions and problems are logged in docs/decisions.md.
 - 2026-10-24: steps 6–7 done. Retrieval runs in `abefore_model` (writes `allowed_tools` to state) and filters in `awrap_model_call`. Exposure is recorded by a separate innermost `ExposureMiddleware` into a per-run ContextVar, so it also works for the all-tools and LLM-selector variants. `atlas ask` was added for one-shot use. Turn status is "asked_user" when the answer contains a question and nothing was changed. The tool wrapper parses nested inputs sent as JSON strings (a DeepSeek quirk seen in traces). The prompt now says not to look up optional details nobody asked for. The model still sometimes wanders on the invoice request, and evals measure how often. The knowledge base is a handbook for a fictional merchant (Northwind Studio), not copied PayPal docs.
 - 2026-10-24: step 5 done. The mock is generic REST routing, with PayPal behaviour as data in seed.json. Seed IDs changed to match spec patterns (order and webhook event IDs), and the eval cases were updated to match. All 115 tools pass a minimal valid call.
