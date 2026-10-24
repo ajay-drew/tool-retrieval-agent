@@ -270,7 +270,7 @@ def chat() -> None:
 def eval_agent(
     split: str = typer.Option("test", help="dev, test or all"),
     limit: int = typer.Option(0, help="Only the first N cases (0 = all)."),
-    concurrency: int = typer.Option(4, help="Cases in flight at once."),
+    concurrency: int = typer.Option(2, help="Cases in flight at once."),
 ) -> None:
     """Run Atlas once per case: tool execution success, task completion, p95 latency, cost."""
     from atlas.evals.agent_run import CaseRunner, run_cases, save_agent_run, score_outputs
@@ -287,7 +287,13 @@ def eval_agent(
     report = score_outputs(cases, outputs, runner.writes, settings)
     path = save_agent_run(report, {"split": split, "model": settings.atlas_model})
 
-    keys = ["task_completion", "tool_execution_success", "p95_latency_s", "cost_per_task_usd"]
+    keys = [
+        "task_completion",
+        "tool_execution_success",
+        "p95_latency_s",
+        "cost_per_task_usd",
+        "input_tokens_per_task",
+    ]
     typer.echo(f"{'':<10}{'n':>4} " + " ".join(f"{k[:16]:>17}" for k in keys))
     sections = {"all": report["summary"], **report["by_category"]}
     for section, row in sections.items():

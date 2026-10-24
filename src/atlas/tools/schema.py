@@ -69,11 +69,37 @@ def _cut(text: str, limit: int) -> str:
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
 
 
+def merge_all_of(node: dict) -> dict:
+    """Fold allOf branches into one object so `required` and `properties` sit together."""
+    parts = node.get("allOf")
+    if not parts or not all(isinstance(p, dict) for p in parts):
+        return node
+    merged = {k: v for k, v in node.items() if k != "allOf"}
+    props = dict(merged.get("properties", {}))
+    required = list(merged.get("required", []))
+    for part in parts:
+        part = merge_all_of(part)
+        if "allOf" in part or any(k in part for k in ("oneOf", "anyOf")):
+            return node
+        props.update(part.get("properties", {}))
+        required += [r for r in part.get("required", []) if r not in required]
+        for key in ("type", "description"):
+            if key in part and key not in merged:
+                merged[key] = part[key]
+    if props:
+        merged["properties"] = props
+        merged.setdefault("type", "object")
+    if required:
+        merged["required"] = required
+    return merged
+
+
 def trim(node: Any, desc_limit: int = 120, enum_limit: int = 20) -> Any:
     if isinstance(node, list):
         return [trim(item, desc_limit, enum_limit) for item in node]
     if not isinstance(node, dict):
         return node
+    node = merge_all_of(node)
     out: dict = {}
     required = list(node.get("required", []))
     for key, value in node.items():
@@ -101,7 +127,7 @@ def trim(node: Any, desc_limit: int = 120, enum_limit: int = 20) -> Any:
         else:
             out[key] = value
     if required:
-        kept = set(out.get("properties", {})) if "properties" in out else set(required)
+        kept = set(out.get("properties", {}))
         out["required"] = [name for name in required if name in kept]
         if not out["required"]:
             out.pop("required")

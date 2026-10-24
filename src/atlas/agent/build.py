@@ -7,6 +7,7 @@ from langchain.agents.middleware import (
     AgentMiddleware,
     HumanInTheLoopMiddleware,
     ModelCallLimitMiddleware,
+    ModelRetryMiddleware,
     ToolCallLimitMiddleware,
     ToolRetryMiddleware,
 )
@@ -16,6 +17,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from atlas.agent.middleware import ToolRetrievalMiddleware
 from atlas.agent.runlog import RunLog
 from atlas.backend.base import Backend, BackendTransientError
+from atlas.llm import is_retryable_model_error
 from atlas.retrieval.index import ToolIndex
 from atlas.tools.find import make_find_tools
 from atlas.tools.rag import KnowledgeBase, make_rag_tool
@@ -71,6 +73,13 @@ def build_atlas(deps: AgentDeps, options: AgentOptions):
             )
         )
     middleware += [
+        ModelRetryMiddleware(
+            max_retries=5,
+            retry_on=is_retryable_model_error,
+            initial_delay=15.0,
+            max_delay=60.0,
+            on_failure="error",
+        ),
         ToolRetryMiddleware(
             max_retries=3,
             retry_on=(BackendTransientError,),

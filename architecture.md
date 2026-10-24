@@ -58,6 +58,7 @@ Spec files → `list[ToolSpec]` → `data/tools.json`. Trimming rules, applied i
 2. Drop `readOnly` properties, `example`/`examples` and `x-*` keys.
 3. Drop every header parameter. In the PayPal specs all 7 are auth or transport (`Authorization`, `PayPal-Request-Id`, `PayPal-Auth-Assertion`, `Prefer`, `PayPal-Client-Metadata-Id`, `User-Agent`, `PayPal-Partner-Attribution-Id`), so the harness owns them and the model never sees them.
 7. Request body: use the `application/json` schema when there is one, otherwise the first content type's schema.
+10. `allOf` branches are merged into one object, and `required` only lists properties defined at the same level. Gemini rejects a schema whose `required` names a property defined only inside an `allOf` branch, and a flat object is easier for any model to fill in.
 9. Token budget (`ATLAS_MAX_TOOL_TOKENS`, 1,500). A tool over budget is trimmed again at depth 2 with 120-character descriptions, then depth 2 with 60. Depth 2 is the floor: depth 1 strips fields like `items` and `primary_recipients` from `invoices_create`, which the call needs. Tools still over budget are listed in `reports/ingest_sizes.md`.
 8. The full schema (for the mock's input checks) is resolved to depth 8 with only examples and `x-*` keys removed.
 4. Cut property descriptions to 120 characters.
@@ -68,7 +69,7 @@ A new service is a new folder under `specs/` plus an entry in `SERVICES` in `con
 
 ### Enrich (`tools/enrich.py`)
 
-One DeepSeek call per tool returns `{purpose, examples[5]}` as checked JSON. The result is cached in `data/enrichment.json`, keyed by a hash of the trimmed spec, so a tool is only re-enriched when its spec changes.
+One model call per tool returns `{purpose, examples[5]}` as checked JSON. The result is cached in `data/enrichment.json`, keyed by a hash of the prompt and the operation's name, summary and description (not its schema), so trimming changes don't regenerate the examples behind the retrieval baseline.
 
 ### Retrieval (`retrieval/`)
 
@@ -111,14 +112,15 @@ return handler(request)
 - The middleware's state adds `found_tools: list[str]`, which only `find_tools` writes to (through `Command(update=…)`).
 
 **`build_atlas(config) -> agent`** calls `create_agent` with:
-- `model`: `ChatOpenAI(model=config.atlas_model, base_url=config.openrouter_base_url, temperature=0)`, built by `atlas.llm.build_chat_model`. OpenRouter is the only provider, and every caller goes through that one function.
+- `model`: built by `atlas.llm.build_chat_model` from the `PROVIDERS` registry, picked by `ATLAS_LLM_PROVIDER`. `gemini` (the default) is the native `ChatGoogleGenerativeAI`, which carries Gemini 3's thought signatures between tool calls; the OpenAI-compatible endpoint drops them, and the second call then fails with 400. `openai` is `ChatOpenAI` against any OpenAI-compatible `LLM_BASE_URL` (OpenRouter, Mistral, a local Ollama). Temperature 0, 4,096 output tokens, no client-side retries. Adding a provider means adding a registry entry.
 - `tools`: every tool in the registry plus the 3 always-on tools
 - `middleware`, in this order:
   1. `ToolRetrievalMiddleware`
   2. `HumanInTheLoopMiddleware` on `access == write` tools (only when `config.approve_writes`)
-  3. `ToolRetryMiddleware` (429 and 5xx only)
-  4. `ModelCallLimitMiddleware` (8)
-  5. `ToolCallLimitMiddleware`
+  3. `ModelRetryMiddleware` (per-minute 429s and server errors: 5 retries, 15 s initial delay, doubling up to 60 s, then raise). A daily-quota 429 is never retried (`is_retryable_model_error`), because waiting a minute can't clear it.
+  4. `ToolRetryMiddleware` (backend 429 and 5xx only)
+  5. `ModelCallLimitMiddleware` (8)
+  6. `ToolCallLimitMiddleware`
 - `checkpointer`: `InMemorySaver`
 - `system_prompt`: from `agent/prompt.md`. It tells the model to ask instead of guessing when a required input is missing, and to use `find_tools` when none of the tools fit.
 
@@ -168,20 +170,21 @@ The registry builds an async `StructuredTool` per spec that calls `backend.call`
 | 429 / 5xx | `ToolRetryMiddleware` | Up to 3 retries with a growing wait, without calling the model |
 | A tool name that doesn't exist | Tool execution | An error naming `find_tools` as the fix |
 | Step limit reached | Limit middleware | The run ends with `status=limit_hit` and a message to the user |
-| OpenRouter / model API error | Model retry | Retried, then shown as `failed` |
+| Model API error (429 quota, 5xx) | `ModelRetryMiddleware` | Retried with backoff, then the turn is `error` and left out of eval scores |
 | Write tool without approval | `HumanInTheLoopMiddleware` | Pauses the run; continues on yes, gives up on no |
 
 ## Config (`config.py`, pydantic-settings)
 
 | Env var | Default |
 |---|---|
-| `OPENROUTER_API_KEY` | required for the agent and full evals |
-| `OPENROUTER_BASE_URL` | `https://openrouter.ai/api/v1` |
-| `ATLAS_MODEL` | `deepseek/deepseek-v4-flash` |
+| `ATLAS_LLM_PROVIDER` | `gemini` (native client) or `openai` (any OpenAI-compatible endpoint) |
+| `LLM_API_KEY` | required for the agent, enrichment and the agent eval |
+| `LLM_BASE_URL` | `https://generativelanguage.googleapis.com/v1beta/openai/` (Gemini) |
+| `ATLAS_MODEL` | `gemini-3.5-flash` |
 | `ATLAS_K` | `8` |
 | `ATLAS_EMBED_MODEL` | `BAAI/bge-small-en-v1.5` |
 | `ATLAS_APPROVE_WRITES` | `true` (evals set it to `false`) |
-| `ATLAS_PRICE_IN_PER_M`, `ATLAS_PRICE_OUT_PER_M` | `0.091`, `0.182` (OpenRouter's v4-flash prices in USD, checked 2026-10-24), used for cost per task |
+| `ATLAS_PRICE_IN_PER_M`, `ATLAS_PRICE_OUT_PER_M` | `0`, `0` (Gemini free tier). Set them to a paid price to get cost per task in dollars; input tokens per task are always reported. |
 | `QDRANT_URL`, `QDRANT_API_KEY` | `http://localhost:6333`, unset |
 | `ATLAS_TOOLS_COLLECTION`, `ATLAS_KB_COLLECTION` | `atlas_tools`, `atlas_kb` |
 | `LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT` | `true`, required for traces, `atlas` |

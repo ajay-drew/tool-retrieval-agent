@@ -4,37 +4,37 @@ Approximate tokens (JSON characters / 4) for each tool's input schema.
 
 - Tools: 115
 - All tools, untrimmed: 369,383
-- All tools, trimmed: 57,238
-- Over the 1,500-token limit after trimming: 11
+- All tools, trimmed: 50,582
+- Over the 1,500-token limit after trimming: 9
 
   Reason: still over budget at the depth-2 floor; trimming deeper removes fields the call needs.
 
 | Tool | Group | Untrimmed | Trimmed | Over budget |
 |---|---|---:|---:|---|
-| `orders_create` | checkout_orders_v2 | 64,330 | 4,927 | yes |
-| `orders_confirm` | checkout_orders_v2 | 42,686 | 3,062 | yes |
-| `orders_capture` | checkout_orders_v2 | 41,624 | 3,000 | yes |
-| `orders_authorize` | checkout_orders_v2 | 41,435 | 2,762 | yes |
-| `invoices_update` | invoicing_v2 | 18,013 | 2,341 | yes |
-| `invoices_create` | invoicing_v2 | 17,877 | 2,210 | yes |
-| `server_callback` | checkout_orders_v2 | 19,113 | 2,139 | yes |
-| `setup-tokens_create` | vault_payment_tokens_v3 | 8,147 | 1,805 | yes |
-| `templates_update` | invoicing_v2 | 13,643 | 1,624 | yes |
-| `templates_create` | invoicing_v2 | 13,590 | 1,572 | yes |
-| `partner-referrals_create` | customer_partner_referrals_v2 | 14,212 | 1,525 | yes |
-| `subscriptions_create` | billing_subscriptions_v1 | 7,024 | 1,494 |  |
+| `orders_create` | checkout_orders_v2 | 64,330 | 3,287 | yes |
+| `invoices_update` | invoicing_v2 | 18,013 | 2,143 | yes |
+| `invoices_create` | invoicing_v2 | 17,877 | 2,012 | yes |
+| `orders_confirm` | checkout_orders_v2 | 42,686 | 1,985 | yes |
+| `server_callback` | checkout_orders_v2 | 19,113 | 1,810 | yes |
+| `setup-tokens_create` | vault_payment_tokens_v3 | 8,147 | 1,753 | yes |
+| `orders_capture` | checkout_orders_v2 | 41,624 | 1,689 | yes |
+| `orders_authorize` | checkout_orders_v2 | 41,435 | 1,686 | yes |
+| `templates_update` | invoicing_v2 | 13,643 | 1,510 | yes |
 | `invoices_search-invoices` | invoicing_v2 | 2,639 | 1,479 |  |
-| `invoices_payments` | invoicing_v2 | 2,250 | 1,391 |  |
+| `templates_create` | invoicing_v2 | 13,590 | 1,458 |  |
+| `partner-referrals_create` | customer_partner_referrals_v2 | 14,212 | 1,444 |  |
+| `subscriptions_create` | billing_subscriptions_v1 | 7,024 | 1,432 |  |
+| `invoices_payments` | invoicing_v2 | 2,250 | 1,368 |  |
+| `find_eligible_methods` | payments_payment_v2 | 4,427 | 1,364 |  |
 | `subscriptions_revise` | billing_subscriptions_v1 | 4,191 | 1,346 |  |
-| `authorizations_capture` | payments_payment_v2 | 2,018 | 1,259 |  |
-| `find_eligible_methods` | payments_payment_v2 | 4,427 | 1,213 |  |
 | `disputes_make-offer` | customer_disputes_v1 | 1,646 | 1,159 |  |
 | `plans_create` | billing_subscriptions_v1 | 2,440 | 1,049 |  |
 | `payment-tokens_create` | vault_payment_tokens_v3 | 1,314 | 1,006 |  |
-| `captures_refund` | payments_payment_v2 | 1,687 | 904 |  |
+| `authorizations_capture` | payments_payment_v2 | 2,018 | 955 |  |
 | `payouts_post` | payments_payouts_batch_v1 | 2,096 | 879 |  |
-| `orders_track_create` | checkout_orders_v2 | 5,613 | 835 |  |
 | `trackers_put` | shipping_shipment_tracking_v1 | 4,203 | 828 |  |
+| `captures_refund` | payments_payment_v2 | 1,687 | 781 |  |
+| `orders_track_create` | checkout_orders_v2 | 5,613 | 759 |  |
 | `search_get` | reporting_transactions_v1 | 1,894 | 750 |  |
 | `web-profile_update` | payment-experience_web_experience_profiles_v1 | 1,224 | 706 |  |
 | `web-profile_create` | payment-experience_web_experience_profiles_v1 | 1,186 | 669 |  |
@@ -45,10 +45,10 @@ Approximate tokens (JSON characters / 4) for each tool's input schema.
 | `verify-webhook-signature_post` | notifications_webhooks_v1 | 1,059 | 460 |  |
 | `invoices_refunds` | invoicing_v2 | 647 | 454 |  |
 | `products_create` | catalogs_products_v1 | 3,098 | 402 |  |
-| `orders_trackers_patch` | checkout_orders_v2 | 427 | 340 |  |
+| `orders_trackers_patch` | checkout_orders_v2 | 427 | 336 |  |
 | `subscriptions_capture` | billing_subscriptions_v1 | 377 | 312 |  |
-| `authorizations_reauthorize` | payments_payment_v2 | 524 | 303 |  |
-| `orders_patch` | checkout_orders_v2 | 384 | 296 |  |
+| `orders_patch` | checkout_orders_v2 | 384 | 292 |  |
+| `authorizations_reauthorize` | payments_payment_v2 | 524 | 282 |  |
 | `disputes_patch` | customer_disputes_v1 | 350 | 266 |  |
 | `webhooks_update` | notifications_webhooks_v1 | 302 | 254 |  |
 | `web-profile_partial-update` | payment-experience_web_experience_profiles_v1 | 293 | 245 |  |

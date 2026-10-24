@@ -76,4 +76,5 @@ def summarize_run(rows: list[dict], price_in: float, price_out: float) -> dict:
         else None,
         "p95_latency_s": p95([r["latency_ms"] / 1000 for r in rows]),
         "cost_per_task_usd": round(mean(costs), 6),
+        "input_tokens_per_task": round(mean(r["tokens_in"] for r in rows)),
     }

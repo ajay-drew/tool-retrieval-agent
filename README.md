@@ -2,7 +2,7 @@
 
 A chat agent that stays accurate with 100+ API tools. On every model call, Atlas searches its tool catalog and gives the model only the tools that match the request, instead of all of them. Phase 1 uses PayPal's 115 REST operations plus two extra tools (knowledge-base search and system search), and an eval harness measures how well it picks tools and fills in their inputs.
 
-Built on LangChain `create_agent`, DeepSeek v4-flash through OpenRouter, local bge-small embeddings and Qdrant, with LangSmith for tracing and evals.
+Built on LangChain `create_agent`, Gemini 3.5 Flash (free tier, through its OpenAI-compatible endpoint), local bge-small embeddings and Qdrant, with LangSmith for tracing and evals.
 
 ## The problem
 
@@ -18,7 +18,7 @@ flowchart LR
   subgraph Turn["Every model call (LangChain create_agent)"]
     U[user message] --> M[ToolRetrievalMiddleware: top 8 + 3 always-on]
     Q -.grouped search.-> M
-    M --> L[DeepSeek v4-flash]
+    M --> L[Gemini 3.5 Flash]
     L -- tool call --> H[approval pause for writes] --> T[tools]
     T --> M
     L -- answer --> R[reply + run log]
@@ -49,7 +49,7 @@ flowchart LR
 ```bash
 uv sync
 docker compose up -d          # Qdrant on :6333
-cp .env.example .env          # add OPENROUTER_API_KEY and (optional) LANGSMITH_API_KEY
+cp .env.example .env          # add LLM_API_KEY (a Gemini API key) and, optionally, LANGSMITH_API_KEY
 uv run atlas ingest           # specs → data/tools.json
 uv run atlas enrich           # purposes + example requests (cached in data/enrichment.json)
 uv run atlas index            # tool vectors → Qdrant

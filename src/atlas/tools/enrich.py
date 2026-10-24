@@ -34,9 +34,8 @@ class Enrichment(BaseModel):
 
 
 def spec_hash(spec: ToolSpec) -> str:
-    payload = json.dumps(
-        [PROMPT, spec.name, spec.summary, spec.description, spec.params_schema], sort_keys=True
-    )
+    """Keyed on what the operation does, not its schema, so trimming tweaks keep examples."""
+    payload = json.dumps([PROMPT, spec.name, spec.summary, spec.description], sort_keys=True)
     return hashlib.sha256(payload.encode()).hexdigest()[:16]
 
 
