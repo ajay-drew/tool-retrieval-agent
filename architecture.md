@@ -1,0 +1,261 @@
+# Atlas architecture
+
+How Atlas is put together, and the contracts its code must keep. When code and this file disagree, either the code is wrong or this file is updated first, in its own edit.
+
+## Overview
+
+```mermaid
+flowchart LR
+  subgraph Setup["Once, at setup"]
+    S[OpenAPI specs] --> I[ingest + trim] --> T[(tools.json)]
+    T --> E[enrich: purpose + 5 examples] --> X[embed: bge-small] --> F[(FAISS tool index)]
+  end
+  subgraph Turn["Every turn: LangChain create_agent"]
+    U[user message] --> M[ToolRetrievalMiddleware]
+    F -.search.-> M
+    M --> L[ChatDeepSeek]
+    L -- no tool call --> R[reply + run log row]
+    L -- tool call --> H[HumanInTheLoop: write tools only]
+    H --> N[tool execution]
+    N --> M
+  end
+  N --> B[Backend: MockPayPal]
+  N --> K[rag_search: KB index]
+  N --> Y[system_search: tool index, run log]
+  N --> Q[find_tools: tool index, writes state]
+  Turn -. traces .-> LS[(LangSmith)]
+```
+
+All 118 tools are registered with `create_agent` once. Before every model call, the middleware cuts that list down to the tools that match the request. Tool results go back through the middleware, so each step of the loop gets its own search.
+
+## Components
+
+### ToolSpec (`tools/spec.py`)
+
+One record per API operation. Everything after ingest reads this record, never the raw spec.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `name` | str | A name DeepSeek accepts (`^[a-zA-Z0-9_-]{1,64}$`), e.g. `invoices_create` |
+| `original_id` | str | The `operationId` from the spec, e.g. `invoices.create` |
+| `service` | str | e.g. `paypal` (`stripe` in phase 2) |
+| `group` | str | The spec file the operation came from, e.g. `invoicing_v2` |
+| `method`, `path` | str | HTTP method and path template |
+| `summary`, `description` | str | From the spec, description cut to 300 characters |
+| `access` | `read` \| `write` | `GET` means read. Anything else is write. |
+| `params_schema` | dict | Trimmed JSON Schema with properties `path`, `query` and `body` |
+| `full_schema_ref` | str | Where to find the untrimmed schema, used by the mock to check inputs |
+| `purpose`, `examples` | str, list[str] | Added by the enrich step |
+| `raw_tokens`, `trimmed_tokens` | int | Size before and after trimming |
+
+In phase 2, names get a service prefix (`stripe__invoices_create`). The ingest step guarantees every name is unique.
+
+### Ingest (`tools/ingest.py`)
+
+Spec files → `list[ToolSpec]` → `data/tools.json`. Trimming rules, applied in this order:
+
+1. Resolve internal `$ref`s to depth 3. Anything deeper becomes `{"type": "object"}` with its description kept.
+2. Drop `readOnly` properties, `example`/`examples` and `x-*` keys.
+3. Drop the headers the harness sets: `Authorization`, `PayPal-Request-Id`, `PayPal-Partner-Attribution-Id`, `Prefer`, `Content-Type`.
+4. Cut property descriptions to 120 characters.
+5. Keep at most 20 enum values. If there are more, add a note listing how many were dropped.
+6. **Never drop a property that is in `required`**, at any depth.
+
+A new service is a new folder under `specs/` plus an entry in `SERVICES` in `config.py`. No code changes.
+
+### Enrich (`tools/enrich.py`)
+
+One DeepSeek call per tool returns `{purpose, examples[5]}` as checked JSON. The result is cached in `data/enrichment.json`, keyed by a hash of the trimmed spec, so a tool is only re-enriched when its spec changes.
+
+### Retrieval (`retrieval/`)
+
+```python
+class Embedder(Protocol):
+    def embed_docs(self, texts: list[str]) -> np.ndarray: ...
+    def embed_query(self, text: str) -> np.ndarray: ...
+
+class ToolIndex(Protocol):
+    def search(self, query: str, k: int, service: str | None = None) -> list[Hit]: ...
+
+@dataclass(frozen=True)
+class Hit:
+    name: str
+    score: float
+    rank: int
+```
+
+- `BgeEmbedder` normalises its vectors and adds bge's search prefix to queries.
+- `FaissToolIndex` is an `IndexFlatIP` holding one vector for `name + purpose + summary` and one for each example request, about 6 per tool. A tool's score is the highest of its vectors. The results are ranked tools, not vectors, so each tool appears once.
+- The index is saved as `data/tools.faiss` plus `data/tools.ids.json`, and rebuilt by `atlas index`.
+- Always-on tools are **not** in the index.
+
+### Agent (`agent/`)
+
+**`ToolRetrievalMiddleware`** (`wrap_model_call`):
+
+```
+query   = the last 2 user messages, joined
+hits    = index.search(query, k=config.k)
+allowed = {hit.name for hit in hits} ∪ ALWAYS_ON ∪ state.found_tools
+request = request.override(tools=[t for t in request.tools if t.name in allowed])
+record allowed tool names on the run (for the exposure metrics)
+return handler(request)
+```
+
+- `ALWAYS_ON = {rag_search, system_search, find_tools}`
+- The middleware's state adds `found_tools: list[str]`, which only `find_tools` writes to (through `Command(update=…)`).
+
+**`build_atlas(config) -> agent`** calls `create_agent` with:
+- `model`: `ChatDeepSeek(model=config.model, temperature=0)`
+- `tools`: every tool in the registry plus the 3 always-on tools
+- `middleware`, in this order:
+  1. `ToolRetrievalMiddleware`
+  2. `HumanInTheLoopMiddleware` on `access == write` tools (only when `config.approve_writes`)
+  3. `ToolRetryMiddleware` (429 and 5xx only)
+  4. `ModelCallLimitMiddleware` (8)
+  5. `ToolCallLimitMiddleware`
+- `checkpointer`: `InMemorySaver`
+- `system_prompt`: from `agent/prompt.md`. It tells the model to ask instead of guessing when a required input is missing, and to use `find_tools` when none of the tools fit.
+
+**Run log (`agent/runlog.py`):** one JSON line per finished turn in `runs/runlog.jsonl`:
+`{run_id, thread_id, ts, user_message, tools_exposed, tool_calls:[{name, args, ok, error}], status, latency_ms, tokens_in, tokens_out, langsmith_url}`.
+`status` is one of `completed`, `asked_user`, `failed` or `limit_hit`.
+
+### Backend (`backend/`)
+
+```python
+class Backend(Protocol):
+    async def call(self, spec: ToolSpec, args: dict) -> BackendResult: ...
+    def reset(self) -> None: ...
+
+@dataclass
+class BackendResult:
+    status: int
+    body: dict
+```
+
+`MockPayPal`:
+- Checks `args` against the **full** schema and returns a 422 with the failing paths if they don't match.
+- Keeps state, seeded from `backend/seed.json`, for invoices, transactions, disputes, orders, subscriptions and products. Creating something gives it a new ID, and later reads return it.
+- Every other operation returns a placeholder in the shape of the spec's 2xx response.
+- Fake errors (429, 500) can be switched on through settings, so the error handling gets tested.
+
+The registry builds an async `StructuredTool` per spec that calls `backend.call`. A real sandbox backend in phase 2 would be another `Backend` implementation, with no changes to the agent.
+
+### Extra tools (`tools/`)
+
+| Tool | Inputs | Returns |
+|---|---|---|
+| `rag_search` | `question: str, k: int = 4` | `[{text, source, score}]` from `data/kb.faiss`, built from `kb/*.md` in chunks of about 500 tokens |
+| `system_search` | `query: str, scope: "tools" \| "runs"` | `tools`: `[{name, purpose, access}]` from the tool index. `runs`: the latest matching rows from the run log. |
+| `find_tools` | `query: str, k: int = 5` | `[{name, purpose}]`, and adds those names to `state.found_tools` |
+
+## Errors
+
+| Error | Where it's handled | What happens |
+|---|---|---|
+| Input fails the schema check | Tool wrapper | The error goes back to the model as the tool result. The model may retry once. |
+| 4xx from the backend | Tool wrapper | Goes back to the model so it can explain to the user or correct itself |
+| 429 / 5xx | `ToolRetryMiddleware` | Up to 3 retries with a growing wait, without calling the model |
+| A tool name that doesn't exist | Tool execution | An error naming `find_tools` as the fix |
+| Step limit reached | Limit middleware | The run ends with `status=limit_hit` and a message to the user |
+| DeepSeek API error | Model retry | Retried, then shown as `failed` |
+| Write tool without approval | `HumanInTheLoopMiddleware` | Pauses the run; continues on yes, gives up on no |
+
+## Config (`config.py`, pydantic-settings)
+
+| Env var | Default |
+|---|---|
+| `DEEPSEEK_API_KEY` | required for the agent and full evals |
+| `ATLAS_MODEL` | `deepseek-chat` |
+| `ATLAS_K` | `8` |
+| `ATLAS_EMBED_MODEL` | `BAAI/bge-small-en-v1.5` |
+| `ATLAS_APPROVE_WRITES` | `true` (evals set it to `false`) |
+| `ATLAS_PRICE_IN_PER_M`, `ATLAS_PRICE_OUT_PER_M` | DeepSeek's prices in USD, used for cost per task |
+| `LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT` | `true`, required for traces, `atlas` |
+
+## Evals
+
+### Case format (`evals/cases.jsonl`)
+
+```json
+{"id": "inv-001",
+ "query": "Send an invoice for $50 to jane@example.com for logo design",
+ "history": [],
+ "category": "single",
+ "expected_tools": ["invoices_create", "invoices_send"],
+ "ordered": true,
+ "arg_checks": {"invoices_create": {"detail.currency_code": "USD", "items[0].unit_amount.value": "50.00"}},
+ "expect_question": false}
+```
+
+`category` is one of `single`, `multi`, `rag`, `system` or `clarify`. `arg_checks` use dotted paths and must match exactly.
+
+### Metrics
+
+`E` is the set of expected tools in the index for a case, and `R_k` is the top-k results. Cases where `E` is empty (always-on tools only, or clarify cases) are left out of the retrieval metrics.
+
+| Metric | Formula |
+|---|---|
+| Recall@k | `|E ∩ R_k| / |E|` |
+| Precision@k | `|E ∩ R_k| / k` |
+| MRR | `1 / rank of the first tool in E`, or 0 if none is in the top 10 |
+| nDCG@k | Relevance is 1 for tools in `E`, 0 otherwise. `DCG = Σ rel_i / log2(i+1)` divided by the best possible DCG. |
+| Exposure recall | Recall measured on the tools the model actually saw across the run (`tools_exposed`) |
+| Tool execution success | Tool calls that pass the schema check and return 2xx, divided by all tool calls |
+| Task completion | Every tool in `expected_tools` called (in order if `ordered`), every `arg_check` passes, no writes outside `expected_tools`, and status `completed`. For `clarify` cases: no write calls and status `asked_user`. |
+| p95 latency | The 95th percentile of `latency_ms` across cases |
+| Cost per task | `(tokens_in × price_in + tokens_out × price_out) / 1e6`, averaged |
+
+Retrieval metrics are reported at k = 3, 5, 8 and 10, overall and per `group`.
+
+### Runs
+
+| Run | What runs | Needs an API key |
+|---|---|---|
+| R0 | `ToolIndex.search` per case. Retrieval metrics only. | No |
+| R1 | The agent with retrieval off and every trimmed tool in the prompt | Yes |
+| R2 | Atlas with k = 8 | Yes |
+| R3 | k sweep, index variants, `find_tools` on/off, `LLMToolSelectorMiddleware` | Yes |
+| R4 | R2 with 117 / 500 / 1,000 / 2,000 tools (phase 2) | Yes |
+
+Full-agent runs use `langsmith.aevaluate` with `max_concurrency=8`. Every scorer is a LangSmith evaluator, written as a plain function so R0 can use it without LangSmith. The backend resets before each case. Each run writes `evals/results/<timestamp>-<run>.json`, which records the config, the metrics and the result for each case.
+
+### Rules for the eval data
+- Test requests are written by hand, never copied from the stored example requests.
+- The leakage check fails any case with cosine similarity > 0.9 to a stored example request.
+- A change that lowers R0 Recall@8 below the last committed result fails CI.
+
+## Invariants
+
+1. The model never sees more than `k + 3 + len(found_tools)` tools in one call.
+2. Every tool name is unique and matches `^[a-zA-Z0-9_-]{1,64}$`.
+3. Trimming never removes a required field.
+4. Write tools pause for approval whenever `approve_writes` is true.
+5. Shared code has no service-specific branches. A new service is data (a spec folder plus a config entry).
+6. R0 runs with no network after the model download.
+7. No secrets in the repo, and no employer code, names or data.
+
+## Folder layout
+
+```
+tool-retrieval-agent/
+├── README.md  LICENSE  plan.md  architecture.md
+├── pyproject.toml  uv.lock  .env.example  .gitignore
+├── .github/workflows/ci.yml
+├── specs/paypal/              13 OpenAPI files + LICENSE (commit 90e8041)
+├── kb/                        markdown for rag_search
+├── data/                      generated: tools.json, enrichment.json, *.faiss (gitignored except enrichment.json)
+├── runs/                      runlog.jsonl (gitignored)
+├── src/atlas/
+│   ├── config.py  cli.py
+│   ├── tools/      spec.py  ingest.py  enrich.py  registry.py  rag.py  system.py  find.py
+│   ├── retrieval/  embedder.py  index.py
+│   ├── agent/      middleware.py  build.py  prompt.md  runlog.py
+│   └── backend/    base.py  mock.py  seed.json
+├── evals/
+│   ├── cases.jsonl
+│   ├── runner.py  scorers.py  report.py  leakage.py
+│   └── results/
+└── tests/
+```
