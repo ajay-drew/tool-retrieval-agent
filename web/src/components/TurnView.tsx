@@ -95,6 +95,16 @@ export function TurnView({ turn, busy, isLast, onDecide, onInspect }: Props) {
       <div className="bubble bubble--user">
         <p>{turn.user}</p>
       </div>
+      <div className="agent-head">
+        <img
+          src="/atlas.svg"
+          alt=""
+          width={22}
+          height={22}
+          className={`agent-mark ${turn.status === "running" ? "is-working" : ""}`}
+        />
+        <span>Atlas</span>
+      </div>
       {turn.items.length > 0 && (
         <ol className="timeline">
           {turn.items.map((item, i) => (
@@ -108,7 +118,7 @@ export function TurnView({ turn, busy, isLast, onDecide, onInspect }: Props) {
       )}
       {turn.status === "running" && (
         <p className="live-status" role="status">
-          <span className="spinner" aria-hidden="true" />
+          <img src="/atlas.svg" alt="" width={18} height={18} className="agent-mark is-working" />
           Atlas is working…
         </p>
       )}
