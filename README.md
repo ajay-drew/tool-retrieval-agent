@@ -1,4 +1,6 @@
-# Atlas
+<p align="center">
+  <img src="docs/brand/atlas-logo.svg" alt="Atlas: operate. sell. grow." width="240">
+</p>
 
 A chat agent that stays accurate with 100+ API tools. Atlas registers all 115 PayPal REST operations but shows the model only the ~11 tools that match each request, found by vector search.
 
