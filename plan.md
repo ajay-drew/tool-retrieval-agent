@@ -77,7 +77,7 @@ Phase 1 uses PayPal's 115 REST operations, plus `rag_search` and `system_search`
 - [x] A leakage check flags any case with cosine similarity > 0.9 to a stored example request
 - [x] Recall@k, Precision@k, MRR and nDCG@k at k = 3, 5, 8 and 10, broken down by spec file
 - [x] `atlas eval retrieval` writes `evals/results/<timestamp>-r0.json`
-- [x] CI runs ruff and R0 on every push, and fails if Recall@8 drops below the last committed result
+- [x] CI runs ruff and R0 on every push, and fails if Recall@8 drops below the last committed result (the workflow file is kept locally, not on GitHub yet: the personal GitHub token lacks the `workflow` scope)
 - [x] Tune the index with R0 before building the agent
 
 **Done when** R0 runs in under 30 seconds with no API key and Recall@8 ≥ 0.95 on the 60 cases.
@@ -158,6 +158,7 @@ Penny's (sandbox/procurement-agent) look and patterns, rebuilt in React.
 
 - 2026-10-24: plan created.
 - 2026-10-24: model provider changed to OpenRouter (`deepseek/deepseek-v4-flash`, $0.091 / $0.182 per 1M tokens in / out). `langchain-deepseek` replaced by `langchain-openai`. The 1M context means R1 can also run untrimmed.
+- 2026-10-24: first push to GitHub. The personal gh token lacks the `workflow` scope, so GitHub refused `.github/workflows/ci.yml`. On Ajay's call, the 11 unpushed commits were rewritten to leave that file out (backup branch `backup/pre-ci-strip` kept locally). The file stays on disk, excluded via `.git/info/exclude`, until the scope is added.
 - 2026-10-24: web UI built and checked in the browser on Groq. A read request streamed two retrieval steps (the second dropped one tool for the token budget) and an answer with its trace link. An approval paused `subscriptions_suspend`, Approve resumed it, and the mock shows SUSPENDED. Catalog search and phone width were checked too. Two display bugs from resuming were fixed in the UI reducer: the resumed stream re-sends the paused tool call (now skipped by ID), and each stream numbered its steps from 1 (now numbered within the turn).
 - 2026-10-24: web UI planned (Phase 1.5), on Ajay's picks: Vite + React + TypeScript with Penny's CSS, FastAPI serving the build, and three screens (chat timeline, approvals, retrieval inspector). Groq eval: 10 cases, 6/9 completed, 100% tool execution success, p95 114 s (rate-limit waits), $0; m04 errored because Groq rejects a tool call server-side when an argument breaks the schema's `pattern`.
 - 2026-10-24: provider changed to Groq (`openai/gpt-oss-120b`), Ajay's call after Gemini's 20 requests a day. Groq's free tier caps a single request at 8,000 tokens (7,000 input tokens on Qwen), so `ToolRetrievalMiddleware` gained a request token budget (`ATLAS_MAX_REQUEST_TOKENS`): tools are added in priority order (found_tools, then by retrieval rank) until the request would exceed the budget. It's unset (no limit) for other providers. The agent eval is capped at 10 cases, run one at a time.

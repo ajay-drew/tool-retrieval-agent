@@ -95,7 +95,7 @@ uv run atlas eval agent                # one Atlas run per test case: tool execu
 ```
 
 - **151 hand-written cases:** 81 single-tool, 30 multi-step, 15 knowledge-base, 10 system and 15 that should get a question back. They are split 60 **dev** (the only cases used for tuning) and 91 **test** (held out, reported below).
-- **Retrieval (no LLM):** Recall@k, Precision@k, MRR and nDCG@k at k = 3, 5, 8, 10. CI runs it on every push against a committed baseline.
+- **Retrieval (no LLM):** Recall@k, Precision@k, MRR and nDCG@k at k = 3, 5, 8, 10. `atlas eval retrieval --check-baseline` fails if test Recall@8 drops below the committed baseline.
 - **Agent run:** tool execution success, task completion, p95 latency and cost per task. Each case runs against a fresh mock, and its LangSmith trace link is saved with the results. Runs that hit an API error are left out of the scores and flagged.
 
 ## Results
