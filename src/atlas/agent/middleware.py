@@ -6,7 +6,7 @@ from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.runtime import Runtime
 
 from atlas.agent.state import AtlasState
-from atlas.retrieval.index import ToolIndex
+from atlas.retrieval.index import Hit, ToolIndex
 
 
 def search_text(messages: Sequence[BaseMessage], last_n: int = 2) -> str:
@@ -60,23 +60,33 @@ class ToolRetrievalMiddleware(AgentMiddleware[AtlasState]):
         self._tool_tokens = tool_tokens or {}
         self._max_request_tokens = max_request_tokens
         self._fixed_tokens = fixed_tokens
-        self._cache: dict[str, list[str]] = {}
+        self._cache: dict[str, list[Hit]] = {}
 
-    async def _top_k(self, query: str) -> list[str]:
+    async def _top_k(self, query: str) -> list[Hit]:
         if query not in self._cache:
-            self._cache[query] = [h.name for h in await self._index.search(query, self._k)]
+            self._cache[query] = await self._index.search(query, self._k)
         return self._cache[query]
 
     async def abefore_model(self, state: AtlasState, runtime: Runtime) -> dict:
-        retrieved = await self._top_k(search_text(state["messages"]))
-        candidates = _unique([*reversed(state.get("found_tools", [])), *retrieved])
-        candidates = [c for c in candidates if c not in self._always_on]
+        query = search_text(state["messages"])
+        hits = await self._top_k(query)
+        found = list(state.get("found_tools", []))
+        wanted = _unique([*reversed(found), *(h.name for h in hits)])
+        wanted = [name for name in wanted if name not in self._always_on]
+        chosen = wanted
         if self._max_request_tokens:
             used = self._fixed_tokens + estimate_tokens(state["messages"])
-            candidates = fit_to_budget(
-                candidates, self._tool_tokens, self._max_request_tokens - used
-            )
-        return {"allowed_tools": _unique([*candidates, *self._always_on])}
+            chosen = fit_to_budget(wanted, self._tool_tokens, self._max_request_tokens - used)
+        return {
+            "allowed_tools": _unique([*chosen, *self._always_on]),
+            "last_retrieval": {
+                "query": query,
+                "hits": [{"name": h.name, "score": round(h.score, 4)} for h in hits],
+                "shown": chosen,
+                "dropped": [name for name in wanted if name not in chosen],
+                "found": found,
+            },
+        }
 
     async def awrap_model_call(
         self,

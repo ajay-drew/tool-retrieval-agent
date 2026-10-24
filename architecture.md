@@ -165,6 +165,36 @@ The registry builds an async `StructuredTool` per spec that calls `backend.call`
 | `system_search` | `query: str, scope: "tools" \| "runs"` | `tools`: `[{name, purpose, access}]` from the tool index. `runs`: the latest matching rows from the run log. |
 | `find_tools` | `query: str, k: int = 5` | `[{name, purpose}]`, and adds those names to `state.found_tools` |
 
+## HTTP API and web UI
+
+`atlas serve` starts a FastAPI app (`api/app.py`). It builds one Atlas agent (approval pauses on) with one mock backend and one checkpointer; each conversation is a `thread_id`.
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST | `/api/chat/stream` | Run one user message. Body `{message, thread_id?}`. Streams NDJSON events. |
+| POST | `/api/chat/{thread_id}/resume/stream` | Answer an approval pause. Body `{decisions: [{type: "approve" \| "reject", message?}]}`. Streams NDJSON. |
+| GET | `/api/tools/search?q=&k=` | Retrieval inspector: ranked tools with score, purpose, access and group |
+| GET | `/api/meta` | Model, tool count and request budget, for the header |
+| GET | `/api/health` | Liveness |
+| GET | `/` | The built React app (`web/dist`) |
+
+**Stream events** (`agent/stream.py`, one JSON object per line):
+
+| `type` | Fields | When |
+|---|---|---|
+| `started` | `thread_id` | First line |
+| `retrieval` | `step`, `query`, `hits [{name, score}]`, `shown [names]`, `dropped [names]` | Before each model call |
+| `tool_call` | `id`, `name`, `args`, `access` | The model asked for a tool |
+| `tool_result` | `id`, `name`, `status`, `body` | The tool returned |
+| `approval` | `requests [{name, args, description}]` | A write tool is paused for approval; the stream ends here |
+| `message` | `text` | The model's reply |
+| `done` | `status`, `trace_url` | Turn finished |
+| `error` | `detail` | Turn failed |
+
+`ToolRetrievalMiddleware` writes `last_retrieval` (query, scored hits, shown, dropped by the budget) to state in `before_model`; `stream_turn` turns that state update into the `retrieval` event.
+
+**Web app (`web/`):** Vite + React 19 + TypeScript, Penny's CSS tokens and components ported as plain CSS, `react-markdown` for answers. The chat thread shows each turn as a timeline (retrieval step → tool calls with results → approval panel → answer with its LangSmith trace link). The side panel is the retrieval inspector: the latest retrieval's ranked hits (shown vs. dropped by the budget) and a search box over the catalog. `npm run dev` proxies `/api` to `localhost:8000`; `npm run build` writes `web/dist`, which FastAPI serves.
+
 ## Errors
 
 | Error | Where it's handled | What happens |
@@ -273,14 +303,16 @@ tool-retrieval-agent/
 ├── reports/                       ingest_sizes.md, r0_tuning.md
 ├── src/atlas/
 │   ├── config.py  llm.py  tracing.py  catalog.py  jsonpath.py  smoke.py  cli.py
+│   ├── api/        app.py
 │   ├── commands/   ingest.py
 │   ├── tools/      spec.py  schema.py  ingest.py  enrich.py  registry.py  sample.py  rag.py  system.py  find.py
 │   ├── retrieval/  embedder.py  index.py  factory.py
-│   ├── agent/      state.py  middleware.py  build.py  turn.py  runlog.py  factory.py  prompt.md
+│   ├── agent/      state.py  middleware.py  build.py  turn.py  stream.py  runlog.py  factory.py  prompt.md
 │   ├── backend/    base.py  mock.py  seed.json
 │   └── evals/      cases.py  scorers.py  retrieval.py  trajectory.py  agent_run.py
 ├── evals/
 │   ├── cases.jsonl  baselines/r0.json  fixtures/runlog.jsonl
 │   └── results/                   one JSON per run
-└── tests/                         config, ingest, scorers, backend, middleware
+├── web/                           Vite + React app (src/, dist/ is built)
+└── tests/                         config, ingest, scorers, backend, middleware, stream, api
 ```

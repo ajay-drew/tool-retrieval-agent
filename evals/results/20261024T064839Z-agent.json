@@ -1,0 +1,290 @@
+{
+  "run": "agent",
+  "split": "test",
+  "model": "openai/gpt-oss-120b",
+  "errors": [
+    {
+      "id": "m04",
+      "error": "OpenAIInvalidRequestError: Error code: 400 - {'error': {'message': \"Tool call validation failed: tool call validation failed: parameters for tool disputes_list did not match schema: errors: [`/query/disputed_transaction_id`: 'user_123' does not match pattern '^[0-9A-Z_]+$']\", 'type': 'invalid_reques"
+    }
+  ],
+  "summary": {
+    "n": 9,
+    "task_completion": 0.6667,
+    "tool_execution_success": 1.0,
+    "p95_latency_s": 113.9,
+    "cost_per_task_usd": 0.0,
+    "input_tokens_per_task": 8730
+  },
+  "by_split": {
+    "dev": {
+      "n": 5,
+      "task_completion": 0.4,
+      "tool_execution_success": 1.0,
+      "p95_latency_s": 120.1,
+      "cost_per_task_usd": 0.0,
+      "input_tokens_per_task": 9199
+    },
+    "test": {
+      "n": 4,
+      "task_completion": 1.0,
+      "tool_execution_success": 1.0,
+      "p95_latency_s": 53.1,
+      "cost_per_task_usd": 0.0,
+      "input_tokens_per_task": 8144
+    }
+  },
+  "by_category": {
+    "clarify": {
+      "n": 1,
+      "task_completion": 1.0,
+      "tool_execution_success": null,
+      "p95_latency_s": 16.419,
+      "cost_per_task_usd": 0.0,
+      "input_tokens_per_task": 4006
+    },
+    "multi": {
+      "n": 1,
+      "task_completion": 0.0,
+      "tool_execution_success": 1.0,
+      "p95_latency_s": 126.204,
+      "cost_per_task_usd": 0.0,
+      "input_tokens_per_task": 16835
+    },
+    "rag": {
+      "n": 1,
+      "task_completion": 1.0,
+      "tool_execution_success": 1.0,
+      "p95_latency_s": 32.937,
+      "cost_per_task_usd": 0.0,
+      "input_tokens_per_task": 7361
+    },
+    "single": {
+      "n": 5,
+      "task_completion": 0.6,
+      "tool_execution_success": 1.0,
+      "p95_latency_s": 87.2,
+      "cost_per_task_usd": 0.0,
+      "input_tokens_per_task": 7987
+    },
+    "system": {
+      "n": 1,
+      "task_completion": 1.0,
+      "tool_execution_success": 1.0,
+      "p95_latency_s": 86.141,
+      "cost_per_task_usd": 0.0,
+      "input_tokens_per_task": 10434
+    }
+  },
+  "cases": [
+    {
+      "id": "inv-s02",
+      "split": "test",
+      "category": "single",
+      "query": "Pull up invoice INV2-K9L8-M7N6-P5Q4-R3S2",
+      "task_completed": 1.0,
+      "tool_calls": 1,
+      "tool_calls_ok": 1,
+      "latency_ms": 49317,
+      "tokens_in": 11146,
+      "tokens_out": 223,
+      "status": "completed",
+      "error": null,
+      "calls": [
+        [
+          "invoices_get",
+          200
+        ]
+      ],
+      "answer": "Here\u2019s the requested invoice:\n\n- **Invoice ID:** INV2\u2011K9L8\u2011M7N6\u2011P5Q4\u2011R3S2  \n- **Status:** DRAFT  \n- **Invoice number:** NW\u20110142  \n- **Date:** 2026\u201110\u201110 (USD)  \n- **Due date:** 2026\u201111\u201109  \n- **Recipient:** Bob Lee (bob@acme.io)  \n- **Item:** Website retainer \u2013\u202f1\u202f\u00d7\u202f$450.00  \n- **Total amount:** $450.00 USD.",
+      "trace_url": "https://smith.langchain.com/o/78f4cc5e-5728-41b2-a755-5360cd917990/projects/p/a8127ba1-38fe-4090-a2fd-eaaafe7da6e3/trace/01a16ca2-9a50-71d6-85e8-e54a7356df23/run/01a16ca2-9a50-71d6-85e8-e54a7356df23?start_time=2026-10-24T06%3A39%3A18.096735%2B00%3A00"
+    },
+    {
+      "id": "pay-s02",
+      "split": "test",
+      "category": "single",
+      "query": "Refund $15 of capture CAP-9XK12345 to the customer",
+      "task_completed": 1.0,
+      "tool_calls": 1,
+      "tool_calls_ok": 1,
+      "latency_ms": 37438,
+      "tokens_in": 5745,
+      "tokens_out": 177,
+      "status": "completed",
+      "error": null,
+      "calls": [
+        [
+          "captures_refund",
+          201
+        ]
+      ],
+      "answer": "The partial refund of\u202f$15.00\u202fhas been processed for capture **CAP-9XK12345**. The refund ID is **REF-NEW-0001** and its status is **COMPLETED**.",
+      "trace_url": "https://smith.langchain.com/o/78f4cc5e-5728-41b2-a755-5360cd917990/projects/p/a8127ba1-38fe-4090-a2fd-eaaafe7da6e3/trace/01a16ca3-5b53-7d0e-9018-aa17bbb5c41f/run/01a16ca3-5b53-7d0e-9018-aa17bbb5c41f?start_time=2026-10-24T06%3A40%3A07.507068%2B00%3A00"
+    },
+    {
+      "id": "sub-s05",
+      "split": "dev",
+      "category": "single",
+      "query": "Pause subscription I-BW452GLLEP1G for now",
+      "task_completed": 0.0,
+      "tool_calls": 0,
+      "tool_calls_ok": 0,
+      "latency_ms": 20085,
+      "tokens_in": 3108,
+      "tokens_out": 76,
+      "status": "asked_user",
+      "error": null,
+      "calls": [],
+      "answer": "I can suspend the subscription, but I need a short reason for the suspension (e.g., \u201cCustomer requested pause\u201d). Could you let me know the reason you\u2019d like to use?",
+      "trace_url": "https://smith.langchain.com/o/78f4cc5e-5728-41b2-a755-5360cd917990/projects/p/a8127ba1-38fe-4090-a2fd-eaaafe7da6e3/trace/01a16ca3-edb8-73af-944c-cffa4a1150a5/run/01a16ca3-edb8-73af-944c-cffa4a1150a5?start_time=2026-10-24T06%3A40%3A44.984966%2B00%3A00"
+    },
+    {
+      "id": "rep-s01",
+      "split": "dev",
+      "category": "single",
+      "query": "What was my total sales volume last month?",
+      "task_completed": 0.0,
+      "tool_calls": 1,
+      "tool_calls_ok": 1,
+      "latency_ms": 95499,
+      "tokens_in": 11612,
+      "tokens_out": 267,
+      "status": "completed",
+      "error": null,
+      "calls": [
+        [
+          "invoices_search-invoices",
+          200
+        ]
+      ],
+      "answer": "Your total sales volume for September\u202f2026 was **315.00\u202fUSD** (the two September invoices of\u202f$75.00 and\u202f$240.00).",
+      "trace_url": "https://smith.langchain.com/o/78f4cc5e-5728-41b2-a755-5360cd917990/projects/p/a8127ba1-38fe-4090-a2fd-eaaafe7da6e3/trace/01a16ca4-3c51-7de8-82cb-36ded7fbbbc9/run/01a16ca4-3c51-7de8-82cb-36ded7fbbbc9?start_time=2026-10-24T06%3A41%3A05.105384%2B00%3A00"
+    },
+    {
+      "id": "whk-s02",
+      "split": "test",
+      "category": "single",
+      "query": "Send PayPal payment notifications to https://shop.example.com/hooks",
+      "task_completed": 1.0,
+      "tool_calls": 1,
+      "tool_calls_ok": 1,
+      "latency_ms": 53758,
+      "tokens_in": 8323,
+      "tokens_out": 106,
+      "status": "completed",
+      "error": null,
+      "calls": [
+        [
+          "webhooks_post",
+          201
+        ]
+      ],
+      "answer": "The webhook has been created with ID **WH-NEW-0001**, sending all PayPal event notifications to\u202f`https://shop.example.com/hooks`.",
+      "trace_url": "https://smith.langchain.com/o/78f4cc5e-5728-41b2-a755-5360cd917990/projects/p/a8127ba1-38fe-4090-a2fd-eaaafe7da6e3/trace/01a16ca5-b187-726a-baa9-a60fee93e834/run/01a16ca5-b187-726a-baa9-a60fee93e834?start_time=2026-10-24T06%3A42%3A40.647152%2B00%3A00"
+    },
+    {
+      "id": "m01",
+      "split": "dev",
+      "category": "multi",
+      "query": "Send an invoice for $50 to jane@example.com for logo design",
+      "task_completed": 0.0,
+      "tool_calls": 2,
+      "tool_calls_ok": 2,
+      "latency_ms": 126204,
+      "tokens_in": 16835,
+      "tokens_out": 346,
+      "status": "completed",
+      "error": null,
+      "calls": [
+        [
+          "find_tools",
+          200
+        ],
+        [
+          "invoices_create",
+          201
+        ]
+      ],
+      "answer": "Your invoice has been created as a draft.\u202fInvoice ID: **INV2-NEW-0001**, amount **$50.00**, sent to **jane@example.com** for \u201cLogo design\u201d. You can now send or manage it as needed.",
+      "trace_url": "https://smith.langchain.com/o/78f4cc5e-5728-41b2-a755-5360cd917990/projects/p/a8127ba1-38fe-4090-a2fd-eaaafe7da6e3/trace/01a16ca6-83ab-7d73-ae21-a84b2d30623e/run/01a16ca6-83ab-7d73-ae21-a84b2d30623e?start_time=2026-10-24T06%3A43%3A34.443053%2B00%3A00"
+    },
+    {
+      "id": "m04",
+      "split": "test",
+      "category": "multi",
+      "query": "Is there a dispute open from user_123? If so, show me its details",
+      "task_completed": 0.0,
+      "tool_calls": 0,
+      "tool_calls_ok": 0,
+      "latency_ms": 42850,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "status": "error",
+      "error": "OpenAIInvalidRequestError: Error code: 400 - {'error': {'message': \"Tool call validation failed: tool call validation failed: parameters for tool disputes_list did not match schema: errors: [`/query/disputed_transaction_id`: 'user_123' does not match pattern '^[0-9A-Z_]+$']\", 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'failed_generation': '{\"name\": \"disputes_list\", \"arguments\": {\\n  \"query\": {\\n    \"disputed_transaction_id\": \"user_123\"\\n  }\\n}}'}}",
+      "calls": [],
+      "answer": "",
+      "trace_url": "https://smith.langchain.com/o/78f4cc5e-5728-41b2-a755-5360cd917990/projects/p/a8127ba1-38fe-4090-a2fd-eaaafe7da6e3/trace/01a16ca8-70cc-7375-af8c-fe1bd2105fb3/run/01a16ca8-70cc-7375-af8c-fe1bd2105fb3?start_time=2026-10-24T06%3A45%3A40.684508%2B00%3A00"
+    },
+    {
+      "id": "r02",
+      "split": "test",
+      "category": "rag",
+      "query": "Who has to approve a refund over $500?",
+      "task_completed": 1.0,
+      "tool_calls": 1,
+      "tool_calls_ok": 1,
+      "latency_ms": 32937,
+      "tokens_in": 7361,
+      "tokens_out": 101,
+      "status": "completed",
+      "error": null,
+      "calls": [
+        [
+          "rag_search",
+          200
+        ]
+      ],
+      "answer": "Any team member can issue refunds up to\u202f$500. For refunds **over\u202f$500**, the **finance lead must approve** the refund before it\u2019s processed, and the approver\u2019s name should be noted in the refund note.",
+      "trace_url": "https://smith.langchain.com/o/78f4cc5e-5728-41b2-a755-5360cd917990/projects/p/a8127ba1-38fe-4090-a2fd-eaaafe7da6e3/trace/01a16ca9-184f-7d69-9d71-f4373a655f3c/run/01a16ca9-184f-7d69-9d71-f4373a655f3c?start_time=2026-10-24T06%3A46%3A23.567709%2B00%3A00"
+    },
+    {
+      "id": "y03",
+      "split": "dev",
+      "category": "system",
+      "query": "What's the status of my last request?",
+      "task_completed": 1.0,
+      "tool_calls": 1,
+      "tool_calls_ok": 1,
+      "latency_ms": 86141,
+      "tokens_in": 10434,
+      "tokens_out": 104,
+      "status": "completed",
+      "error": null,
+      "calls": [
+        [
+          "system_search",
+          200
+        ]
+      ],
+      "answer": "Your most recent request \u2013 refunding\u202f$15.00 on capture\u202fCAP-9XK12345 \u2013 was completed successfully.",
+      "trace_url": "https://smith.langchain.com/o/78f4cc5e-5728-41b2-a755-5360cd917990/projects/p/a8127ba1-38fe-4090-a2fd-eaaafe7da6e3/trace/01a16ca9-9927-7ade-8673-6f6f3a4e43fd/run/01a16ca9-9927-7ade-8673-6f6f3a4e43fd?start_time=2026-10-24T06%3A46%3A56.551065%2B00%3A00"
+    },
+    {
+      "id": "c01",
+      "split": "dev",
+      "category": "clarify",
+      "query": "Send an invoice for $50 to",
+      "task_completed": 1.0,
+      "tool_calls": 0,
+      "tool_calls_ok": 0,
+      "latency_ms": 16419,
+      "tokens_in": 4006,
+      "tokens_out": 53,
+      "status": "asked_user",
+      "error": null,
+      "calls": [],
+      "answer": "I need the recipient\u2019s email address (or phone number) to create and send the $50.00 invoice. Could you provide that?",
+      "trace_url": "https://smith.langchain.com/o/78f4cc5e-5728-41b2-a755-5360cd917990/projects/p/a8127ba1-38fe-4090-a2fd-eaaafe7da6e3/trace/01a16caa-e9c1-7fd6-b3e2-a50c63a29511/run/01a16caa-e9c1-7fd6-b3e2-a50c63a29511?start_time=2026-10-24T06%3A48%3A22.721135%2B00%3A00"
+    }
+  ]
+}

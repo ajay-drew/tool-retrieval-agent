@@ -28,6 +28,15 @@ How Atlas got to its current shape: the design decisions made along the way, and
 | Read vs write | `GET` is read. POSTs that only search or compute (invoice search, next invoice number, QR code, eligible payment methods, webhook signature check) are read via `specs/paypal/overrides.json`. Everything else is write. | Write tools pause for approval and count as "unexpected changes" in evals. Tagging a search as a write blocked harmless calls. |
 | Example requests per tool | 5: 3 direct requests and 2 questions that need the tool's data | Users ask "what did I sell last month?" and never say `search_get`. Indirect questions close that gap. |
 
+### Web UI
+
+| Decision | Options weighed | Chosen | Why |
+|---|---|---|---|
+| Stack | Vite + React + TS with Penny's CSS; the same with Tailwind; React from a CDN | **Vite + React 19 + TypeScript, Penny's CSS ported** | Keeps Penny's look exactly, with no CSS framework, and the same base as agents-mvp. |
+| Screens | Chat timeline; approvals; retrieval inspector; recent runs and examples | **Chat timeline, approvals, retrieval inspector** | Ajay's pick. The inspector shows the project's core idea: which tools out of 115 the model saw on each call. |
+| Serving | FastAPI serves the build; a separate dev server only | **FastAPI serves `web/dist`** (Vite proxies `/api` in development) | One command, no CORS, the same pattern as Penny. |
+| Streaming | NDJSON; Server-Sent Events; WebSockets | **NDJSON over a POST** | Same as Penny: one JSON event per line, simple to parse, works with `fetch` and an `AbortController`. |
+
 ### Evaluation
 
 | Decision | Chosen | Why |
@@ -103,6 +112,8 @@ Full table in [reports/r0_tuning.md](../reports/r0_tuning.md).
 
 | 30 | Every Groq model returned 413 "Request too large": limit 8,000, requested ~10,700 | Groq's free tier caps each request (and each minute) at 8,000 tokens; 9 retrieved tools plus the prompt was ~10.7k | A request token budget in `ToolRetrievalMiddleware`: tools join in priority order until the request would exceed `ATLAS_MAX_REQUEST_TOKENS` (7,000) | Middleware budget test; Groq turns no longer 413 |
 | 31 | A "no descriptions" trim level came out larger than the 60-character one | `_cut(text, 0)` sliced `text[:-1]`, keeping almost the whole description | Not used: the budget made a tighter trim level unnecessary. The largest tool after the `allOf` merge is ~3.3k tokens, under the cap. | Size measurements |
+
+| 32 | One Groq eval case failed before Atlas saw the tool call: "parameters for tool disputes_list did not match schema: 'user_123' does not match pattern" | Groq validates tool arguments against the schema on its own server and returns 400, so the harness can't hand the error back to the model | Recorded as a known limitation of running on Groq; the case is left out of the scores as a harness error | Groq eval log |
 
 ## Open items
 

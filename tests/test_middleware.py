@@ -117,3 +117,5 @@ def test_request_budget_limits_tools_shown():
         middleware.abefore_model({"messages": [HumanMessage("refund a capture")]}, None)
     )
     assert update["allowed_tools"] == ["t5", "t2", *ALWAYS_ON]
+    assert update["last_retrieval"]["dropped"] == ["t9"]
+    assert [h["name"] for h in update["last_retrieval"]["hits"]] == ["t5", "t2", "t9"]

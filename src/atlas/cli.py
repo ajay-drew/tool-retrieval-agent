@@ -323,3 +323,14 @@ def eval_agent(
         for kind in kinds[:5]:
             typer.secho(f"  {kind}", fg="red", err=True)
         raise typer.Exit(code=1)
+
+
+@app.command()
+def serve(
+    host: str = typer.Option("127.0.0.1", help="Address to listen on."),
+    port: int = typer.Option(8000, help="Port to listen on."),
+) -> None:
+    """Start the HTTP API and the web UI (built into web/dist)."""
+    import uvicorn
+
+    uvicorn.run("atlas.api.app:create_app", factory=True, host=host, port=port)

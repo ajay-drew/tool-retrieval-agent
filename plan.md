@@ -109,7 +109,7 @@ Phase 1 uses PayPal's 115 REST operations, plus `rag_search` and `system_search`
 ### 8. Evals
 - [x] 151 cases: 81 single-tool, 30 multi-step, 15 RAG, 10 system, 15 that should get a question back (60 dev, 91 test)
 - [x] Retrieval metrics (R0): Recall@k, Precision@k, MRR, nDCG@k, plus the leakage check and the CI baseline
-- [ ] One agent run, `atlas eval agent`, on at most 10 cases (Ajay's limit): tool execution success, task completion, p95 latency, cost per task.
+- [x] One agent run, `atlas eval agent`, on 10 cases (Ajay's limit): tool execution success, task completion, p95 latency, cost per task. Groq gpt-oss-120b: 6/9 completed, 1 harness error (see README).
 
 **Done when** the README shows the R0 numbers and the 10-case agent run.
 
@@ -128,6 +128,19 @@ Phase 1 uses PayPal's 115 REST operations, plus `rag_search` and `system_search`
 
 Revised 2026-10-24 after R0 tuning on the dev split (`reports/r0_tuning.md`). The first guesses (Recall@5 ≥ 0.95, MRR ≥ 0.85) are out of reach for a single search: most misses are multi-step requests, where one query has to surface two tools. Inside the agent, `find_tools` covers those, and task completion shows whether it worked.
 
+## Phase 1.5: web UI
+
+Penny's (sandbox/procurement-agent) look and patterns, rebuilt in React.
+
+- [x] HTTP API (`atlas serve`, FastAPI): stream a chat turn as NDJSON, resume an approval pause, search the tool catalog, health
+- [x] `stream_turn`: a turn as a stream of events (retrieval, tool call, tool result, approval, message, done)
+- [x] The retrieval middleware records each call's query, scored hits, tools shown and tools dropped by the budget, for the inspector
+- [x] React app in `web/` (Vite, React 19, TypeScript, Penny's CSS tokens): chat with a live tool timeline, approve or reject changes, retrieval inspector
+- [x] FastAPI serves `web/dist`; Vite's dev server proxies `/api` to it
+- [x] Checked in the browser: one read request, one approval, the inspector search
+
+**Done when** `atlas serve` shows the UI, a request streams its retrieval and tool calls, and an approval pause can be approved or rejected from the page.
+
 ## Phase 2: scale to 2,000 tools
 
 - [ ] Add more public OpenAPI specs through the same ingest. Stripe and Square go first because they are the hardest lookalikes.
@@ -145,6 +158,8 @@ Revised 2026-10-24 after R0 tuning on the dev split (`reports/r0_tuning.md`). Th
 
 - 2026-10-24: plan created.
 - 2026-10-24: model provider changed to OpenRouter (`deepseek/deepseek-v4-flash`, $0.091 / $0.182 per 1M tokens in / out). `langchain-deepseek` replaced by `langchain-openai`. The 1M context means R1 can also run untrimmed.
+- 2026-10-24: web UI built and checked in the browser on Groq. A read request streamed two retrieval steps (the second dropped one tool for the token budget) and an answer with its trace link. An approval paused `subscriptions_suspend`, Approve resumed it, and the mock shows SUSPENDED. Catalog search and phone width were checked too. Two display bugs from resuming were fixed in the UI reducer: the resumed stream re-sends the paused tool call (now skipped by ID), and each stream numbered its steps from 1 (now numbered within the turn).
+- 2026-10-24: web UI planned (Phase 1.5), on Ajay's picks: Vite + React + TypeScript with Penny's CSS, FastAPI serving the build, and three screens (chat timeline, approvals, retrieval inspector). Groq eval: 10 cases, 6/9 completed, 100% tool execution success, p95 114 s (rate-limit waits), $0; m04 errored because Groq rejects a tool call server-side when an argument breaks the schema's `pattern`.
 - 2026-10-24: provider changed to Groq (`openai/gpt-oss-120b`), Ajay's call after Gemini's 20 requests a day. Groq's free tier caps a single request at 8,000 tokens (7,000 input tokens on Qwen), so `ToolRetrievalMiddleware` gained a request token budget (`ATLAS_MAX_REQUEST_TOKENS`): tools are added in priority order (found_tools, then by retrieval rank) until the request would exceed the budget. It's unset (no limit) for other providers. The agent eval is capped at 10 cases, run one at a time.
 - 2026-10-24: Gemini follow-ups. A native `ChatGoogleGenerativeAI` client was added behind a provider registry, because the OpenAI-compatible endpoint loses Gemini 3 thought signatures and the second tool call fails. Daily-quota 429s are no longer retried (a test turn hung waiting on one). The free tier for `gemini-3.5-flash` turned out to be 20 requests a day, too few for the agent eval.
 - 2026-10-24: model provider changed to Gemini (`gemini-3.5-flash`, free tier) because the OpenRouter account had no purchased credits. Ajay picked 3.5-flash from four models that passed a tool-call probe; the 2.5 models are retired for new users. Gemini rejected PayPal schemas where `required` sits outside `allOf` branches, so ingest now merges `allOf` into one object (trimmed size ~57k → ~50.6k tokens, required fields still proven kept). The enrichment cache key no longer includes the schema, so trimming tweaks don't regenerate examples; the existing examples were re-keyed, not regenerated. `ModelRetryMiddleware` retries 429s (15 s initial, up to 60 s). Settings renamed to provider-neutral `LLM_API_KEY`/`LLM_BASE_URL`; prices default to 0 on the free tier, and the agent eval also reports input tokens per task.

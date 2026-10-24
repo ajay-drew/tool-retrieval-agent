@@ -57,6 +57,33 @@ uv run atlas kb               # handbook → Qdrant
 uv run atlas chat             # or: uv run atlas ask "Is there a dispute open from user_123?"
 ```
 
+### Web UI
+
+```bash
+cd web && npm install && npm run build && cd ..
+uv run atlas serve            # http://127.0.0.1:8000
+```
+
+The UI takes Penny's look (from the procurement agent) into React:
+- **Chat with a live timeline:** each turn streams its retrieval step, tool calls with their inputs and results, then the answer and its LangSmith trace link.
+- **Approvals:** changes wait for Approve or Reject.
+- **Retrieval panel:** which tools out of 115 the model saw on each call, with their scores, which ones the token budget dropped, and a search box to try any request against the catalog.
+
+For UI development, run `npm run dev` in `web/` (Vite on :5173, proxying `/api` to :8000).
+
+### Providers
+
+`ATLAS_LLM_PROVIDER=gemini` uses the native Gemini client. `openai` uses any OpenAI-compatible endpoint, such as Groq, OpenRouter or a local Ollama. The free-tier Groq setup used for the results below:
+
+```bash
+ATLAS_LLM_PROVIDER=openai
+LLM_BASE_URL=https://api.groq.com/openai/v1
+ATLAS_MODEL=openai/gpt-oss-120b
+ATLAS_REASONING_EFFORT=low
+ATLAS_MAX_REQUEST_TOKENS=7000     # Groq's free tier caps each request at 8,000 tokens
+ATLAS_MAX_OUTPUT_TOKENS=1024
+```
+
 `data/enrichment.json` is committed, so `atlas enrich` is a no-op unless the specs change.
 
 ## Evals
@@ -81,7 +108,18 @@ uv run atlas eval agent                # one Atlas run per test case: tool execu
 
 Precision@5 is capped at 0.2 on single-tool cases (one right answer in five slots), so it compares setups rather than meeting a target. Most Recall@8 misses are multi-step requests, where one query has to surface two tools; inside the agent `find_tools` picks up the second one.
 
-**Agent run:** pending a model key with credits (see [docs/decisions.md](docs/decisions.md), problem 21).
+**Agent run** (Groq `openai/gpt-oss-120b`, free tier, 10 cases across every category including the brief's three requests)
+
+| Cases scored | Task completion | Tool execution success | p95 latency | Cost per task |
+|---:|---:|---:|---:|---:|
+| 9 of 10 | 66.7% (6/9) | 100% | 114 s | $0 (free tier) |
+
+- **p95 latency is mostly waiting:** Groq's free tier allows 8,000 tokens a minute, so the retry middleware waits out each limit.
+- **Excluded:** one case hit a Groq-side schema rejection before Atlas saw the tool call, so it's left out as a harness error (problem 32).
+- **Misses:**
+  - Last month's sales were answered from invoices instead of transactions.
+  - The $50 invoice was created but never sent.
+  - Pausing a subscription asked for the reason the API requires.
 
 ## Layout
 
@@ -91,10 +129,12 @@ kb/                  handbook for rag_search (fictional merchant)
 src/atlas/
   tools/             ingest, trimming, enrichment, registry, rag, system, find_tools
   retrieval/         embedders, Qdrant tool index
-  agent/             middleware, builder, turn runner, run log, prompt
+  agent/             middleware, builder, turn runner, event stream, run log, prompt
+  api/               FastAPI app and chat service
   backend/           Backend interface, mock PayPal, seed data
   evals/             cases, scorers, R0 runner, agent runner, report
 evals/               cases.jsonl, baselines, fixtures, results
+web/                 React UI (Vite, TypeScript)
 reports/             ingest sizes, R0 tuning notes
 ```
 
