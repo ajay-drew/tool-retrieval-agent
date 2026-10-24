@@ -21,7 +21,7 @@ Phase 1 uses PayPal's 115 REST operations, plus `rag_search` and `system_search`
 | Name | Atlas. The repo is `tool-retrieval-agent` and the package is `atlas`. |
 | Approach | Single agent with tool retrieval: the top 8 tools per model call, plus 3 tools that are always available |
 | Framework | LangChain 1.4.7 `create_agent` with custom middleware |
-| Model | `ChatDeepSeek` (`deepseek-chat`), temperature 0, from `langchain-deepseek` 1.1.1 |
+| Model | DeepSeek `deepseek/deepseek-v4-flash` through OpenRouter, temperature 0, using `ChatOpenAI` from `langchain-openai` with OpenRouter's base URL. A fixed version, never a `~latest` alias, so eval runs stay comparable. Context is 1M tokens. |
 | Embeddings | `BAAI/bge-small-en-v1.5`, run locally through sentence-transformers |
 | Vector index | Plain `faiss-cpu` 1.15.1 `IndexFlatIP` (exact search, no LangChain wrapper) |
 | Tool source | PayPal OpenAPI specs, commit `90e8041`, copied into `specs/paypal/` with their Apache-2.0 LICENSE |
@@ -47,21 +47,21 @@ Phase 1 uses PayPal's 115 REST operations, plus `rag_search` and `system_search`
 ## Phase 1: PayPal, 117 tools
 
 ### 1. Project setup
-- [ ] `uv init`, package `atlas` under `src/`, Python 3.12
-- [ ] Dependencies pinned: langchain, langchain-deepseek, langsmith, faiss-cpu, sentence-transformers, jsonschema, pydantic-settings, typer, ruff, pytest
-- [ ] `.env.example`, `.gitignore`, MIT `LICENSE`, README stub
-- [ ] `config.py` reads every setting from env (see architecture.md, Config)
-- [ ] Smoke test: `ChatDeepSeek` makes one tool call, and the trace shows up in LangSmith
+- [x] `uv init`, package `atlas` under `src/`, Python 3.12
+- [x] Dependencies pinned: langchain, langchain-openai, langsmith, faiss-cpu, sentence-transformers, jsonschema, pydantic-settings, typer, ruff, pytest
+- [x] `.env.example`, `.gitignore`, MIT `LICENSE`, README stub
+- [x] `config.py` reads every setting from env (see architecture.md, Config)
+- [x] Smoke test: the OpenRouter model makes one tool call, and the trace shows up in LangSmith
 
 **Done when** `uv run atlas smoke` prints a tool call and a LangSmith trace link.
 
 ### 2. Ingest and trim
-- [ ] `specs/paypal/` holds the 13 files and LICENSE, pinned to commit `90e8041`
-- [ ] `atlas ingest` writes `data/tools.json` with 115 `ToolSpec` records
-- [ ] Names are made safe (`plans.create` becomes `plans_create`) and map back to the original ID
-- [ ] Every trimming rule from architecture.md is applied, and required fields are never dropped
-- [ ] A size report lists each tool's tokens before and after trimming
-- [ ] Unit tests cover reference resolution, trimming and naming
+- [x] `specs/paypal/` holds the 13 files and LICENSE, pinned to commit `90e8041`
+- [x] `atlas ingest` writes `data/tools.json` with 115 `ToolSpec` records
+- [x] Names are made safe (`plans.create` becomes `plans_create`) and map back to the original ID
+- [x] Every trimming rule from architecture.md is applied, and required fields are never dropped
+- [x] A size report lists each tool's tokens before and after trimming
+- [x] Unit tests cover reference resolution, trimming and naming
 
 **Done when** there are 115 tools, every trimmed schema is valid JSON Schema, and no tool is over 1.5k tokens. Any tool over the limit is listed with a reason.
 
@@ -109,7 +109,7 @@ Phase 1 uses PayPal's 115 REST operations, plus `rag_search` and `system_search`
 ### 8. Full evals and report
 - [ ] 150 cases: 80 single-tool, 30 multi-step, 15 RAG, 10 system, 15 that should get a question back
 - [ ] Cases are synced to the LangSmith dataset `atlas-paypal-v1`
-- [ ] R1: baseline with all tools in the prompt (or a note on why they don't fit)
+- [ ] R1: baseline with all tools in the prompt, both trimmed (about 50k tokens) and untrimmed (about 400k, which fits in v4-flash's 1M context)
 - [ ] R2: Atlas with k = 8
 - [ ] R3: k sweep; description-only vs. with examples; `find_tools` on vs. off; LangChain's `LLMToolSelectorMiddleware` vs. FAISS
 - [ ] `atlas eval report` writes `evals/report.html` and the README results table
@@ -146,3 +146,6 @@ These are first guesses. Change them here, with a reason, after R0.
 ## Change log
 
 - 2026-10-24: plan created.
+- 2026-10-24: model provider changed to OpenRouter (`deepseek/deepseek-v4-flash`, $0.091 / $0.182 per 1M tokens in / out). `langchain-deepseek` replaced by `langchain-openai`. The 1M context means R1 can also run untrimmed.
+- 2026-10-24: step 2 done. 115 tools, ~369k → ~57k tokens. Over-budget tools are trimmed down to a depth-2 floor; 11 stay over 1.5k and are listed in reports/ingest_sizes.md. All header parameters are dropped.
+- 2026-10-24: step 1 built. LangSmith tracing is scoped with `tracing_context` and its own `Client`, rather than by changing environment variables. The smoke test waits on keys.

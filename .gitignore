@@ -8,5 +8,3 @@ data/*
 !data/enrichment.json
 runs/
 .DS_Store
-CLAUDE.local.md
-CLAUDE.architecture.local.md

@@ -13,7 +13,7 @@ flowchart LR
   subgraph Turn["Every turn: LangChain create_agent"]
     U[user message] --> M[ToolRetrievalMiddleware]
     F -.search.-> M
-    M --> L[ChatDeepSeek]
+    M --> L[DeepSeek v4-flash via OpenRouter]
     L -- no tool call --> R[reply + run log row]
     L -- tool call --> H[HumanInTheLoop: write tools only]
     H --> N[tool execution]
@@ -36,7 +36,7 @@ One record per API operation. Everything after ingest reads this record, never t
 
 | Field | Type | Meaning |
 |---|---|---|
-| `name` | str | A name DeepSeek accepts (`^[a-zA-Z0-9_-]{1,64}$`), e.g. `invoices_create` |
+| `name` | str | A name the model API accepts (`^[a-zA-Z0-9_-]{1,64}$`), e.g. `invoices_create` |
 | `original_id` | str | The `operationId` from the spec, e.g. `invoices.create` |
 | `service` | str | e.g. `paypal` (`stripe` in phase 2) |
 | `group` | str | The spec file the operation came from, e.g. `invoicing_v2` |
@@ -56,7 +56,10 @@ Spec files → `list[ToolSpec]` → `data/tools.json`. Trimming rules, applied i
 
 1. Resolve internal `$ref`s to depth 3. Anything deeper becomes `{"type": "object"}` with its description kept.
 2. Drop `readOnly` properties, `example`/`examples` and `x-*` keys.
-3. Drop the headers the harness sets: `Authorization`, `PayPal-Request-Id`, `PayPal-Partner-Attribution-Id`, `Prefer`, `Content-Type`.
+3. Drop every header parameter. In the PayPal specs all 7 are auth or transport (`Authorization`, `PayPal-Request-Id`, `PayPal-Auth-Assertion`, `Prefer`, `PayPal-Client-Metadata-Id`, `User-Agent`, `PayPal-Partner-Attribution-Id`), so the harness owns them and the model never sees them.
+7. Request body: use the `application/json` schema when there is one, otherwise the first content type's schema.
+9. Token budget (`ATLAS_MAX_TOOL_TOKENS`, 1,500). A tool over budget is trimmed again at depth 2 with 120-character descriptions, then depth 2 with 60. Depth 2 is the floor: depth 1 strips fields like `items` and `primary_recipients` from `invoices_create`, which the call needs. Tools still over budget are listed in `reports/ingest_sizes.md`.
+8. The full schema (for the mock's input checks) is resolved to depth 8 with only examples and `x-*` keys removed.
 4. Cut property descriptions to 120 characters.
 5. Keep at most 20 enum values. If there are more, add a note listing how many were dropped.
 6. **Never drop a property that is in `required`**, at any depth.
@@ -106,7 +109,7 @@ return handler(request)
 - The middleware's state adds `found_tools: list[str]`, which only `find_tools` writes to (through `Command(update=…)`).
 
 **`build_atlas(config) -> agent`** calls `create_agent` with:
-- `model`: `ChatDeepSeek(model=config.model, temperature=0)`
+- `model`: `ChatOpenAI(model=config.atlas_model, base_url=config.openrouter_base_url, temperature=0)`, built by `atlas.llm.build_chat_model`. OpenRouter is the only provider, and every caller goes through that one function.
 - `tools`: every tool in the registry plus the 3 always-on tools
 - `middleware`, in this order:
   1. `ToolRetrievalMiddleware`
@@ -159,19 +162,20 @@ The registry builds an async `StructuredTool` per spec that calls `backend.call`
 | 429 / 5xx | `ToolRetryMiddleware` | Up to 3 retries with a growing wait, without calling the model |
 | A tool name that doesn't exist | Tool execution | An error naming `find_tools` as the fix |
 | Step limit reached | Limit middleware | The run ends with `status=limit_hit` and a message to the user |
-| DeepSeek API error | Model retry | Retried, then shown as `failed` |
+| OpenRouter / model API error | Model retry | Retried, then shown as `failed` |
 | Write tool without approval | `HumanInTheLoopMiddleware` | Pauses the run; continues on yes, gives up on no |
 
 ## Config (`config.py`, pydantic-settings)
 
 | Env var | Default |
 |---|---|
-| `DEEPSEEK_API_KEY` | required for the agent and full evals |
-| `ATLAS_MODEL` | `deepseek-chat` |
+| `OPENROUTER_API_KEY` | required for the agent and full evals |
+| `OPENROUTER_BASE_URL` | `https://openrouter.ai/api/v1` |
+| `ATLAS_MODEL` | `deepseek/deepseek-v4-flash` |
 | `ATLAS_K` | `8` |
 | `ATLAS_EMBED_MODEL` | `BAAI/bge-small-en-v1.5` |
 | `ATLAS_APPROVE_WRITES` | `true` (evals set it to `false`) |
-| `ATLAS_PRICE_IN_PER_M`, `ATLAS_PRICE_OUT_PER_M` | DeepSeek's prices in USD, used for cost per task |
+| `ATLAS_PRICE_IN_PER_M`, `ATLAS_PRICE_OUT_PER_M` | `0.091`, `0.182` (OpenRouter's v4-flash prices in USD, checked 2026-10-24), used for cost per task |
 | `LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT` | `true`, required for traces, `atlas` |
 
 ## Evals

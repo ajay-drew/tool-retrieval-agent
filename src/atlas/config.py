@@ -1,0 +1,43 @@
+from functools import lru_cache
+from pathlib import Path
+
+from pydantic import SecretStr, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    openrouter_api_key: SecretStr | None = None
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
+    atlas_model: str = "deepseek/deepseek-v4-flash"
+    atlas_k: int = 8
+    atlas_embed_model: str = "BAAI/bge-small-en-v1.5"
+    atlas_approve_writes: bool = True
+    atlas_price_in_per_m: float = 0.091
+    atlas_price_out_per_m: float = 0.182
+    atlas_services: list[str] = ["paypal"]
+    atlas_specs_dir: Path = Path("specs")
+    atlas_data_dir: Path = Path("data")
+    atlas_runlog: Path = Path("runs/runlog.jsonl")
+    atlas_max_tool_tokens: int = 1500
+    atlas_today: str | None = None
+
+    langsmith_tracing: bool = True
+    langsmith_api_key: SecretStr | None = None
+    langsmith_project: str = "atlas"
+    langsmith_endpoint: str = "https://api.smith.langchain.com"
+
+    @field_validator("openrouter_api_key", "langsmith_api_key", mode="before")
+    @classmethod
+    def _blank_is_unset(cls, value: object) -> object:
+        return None if isinstance(value, str) and not value.strip() else value
+
+    @property
+    def tracing_enabled(self) -> bool:
+        return self.langsmith_tracing and self.langsmith_api_key is not None
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
