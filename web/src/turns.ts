@@ -25,13 +25,22 @@ export function applyEvent(turn: Turn, event: StreamEvent): Turn {
             : item,
         ),
       };
+    case "token":
+      return { ...turn, draft: (turn.draft ?? "") + event.text };
     case "message":
-      return { ...turn, items: [...turn.items, { kind: "note", text: event.text }] };
+      return { ...turn, draft: undefined, items: [...turn.items, { kind: "note", text: event.text }] };
     case "approval":
-      return { ...turn, approval: event.requests, status: "awaiting_approval" };
+      return {
+        ...turn,
+        draft: undefined,
+        approval: event.requests,
+        approvalWarning: event.warning,
+        status: "awaiting_approval",
+      };
     case "done":
       return finish({
         ...turn,
+        draft: undefined,
         status: event.status,
         traceUrl: event.trace_url,
         threadUrl: event.thread_url ?? turn.threadUrl,

@@ -116,6 +116,11 @@ export function TurnView({ turn, busy, isLast, onDecide, onInspect }: Props) {
           ))}
         </ol>
       )}
+      {turn.draft && turn.status === "running" && (
+        <div className="bubble bubble--agent is-streaming">
+          <Markdown remarkPlugins={[remarkGfm]}>{turn.draft}</Markdown>
+        </div>
+      )}
       {turn.status === "running" && (
         <p className="live-status" role="status">
           <img src="/atlas.svg" alt="" width={18} height={18} className="agent-mark is-working" />
@@ -123,7 +128,12 @@ export function TurnView({ turn, busy, isLast, onDecide, onInspect }: Props) {
         </p>
       )}
       {turn.approval && turn.status === "awaiting_approval" && isLast && (
-        <ApprovalPanel requests={turn.approval} busy={busy} onDecide={onDecide} />
+        <ApprovalPanel
+          requests={turn.approval}
+          warning={turn.approvalWarning}
+          busy={busy}
+          onDecide={onDecide}
+        />
       )}
       {turn.answer && (
         <div className="bubble bubble--agent">

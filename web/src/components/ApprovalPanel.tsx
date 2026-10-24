@@ -4,17 +4,19 @@ import { JsonBlock } from "./JsonBlock";
 
 interface Props {
   requests: ApprovalRequest[];
+  warning?: string;
   busy: boolean;
   onDecide: (approved: boolean, reason?: string) => void;
 }
 
-export function ApprovalPanel({ requests, busy, onDecide }: Props) {
+export function ApprovalPanel({ requests, warning, busy, onDecide }: Props) {
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState("");
 
   return (
     <section className="approval" aria-label="Approval needed">
       <p className="eyebrow">Needs your approval</p>
+      {warning && <p className="notice notice--danger">{warning}</p>}
       <p>
         Atlas wants to make {requests.length === 1 ? "a change" : `${requests.length} changes`} to the
         account. Nothing runs until you decide.

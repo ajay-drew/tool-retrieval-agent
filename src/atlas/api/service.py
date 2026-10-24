@@ -24,7 +24,8 @@ class ChatService(Protocol):
 
 async def _recorded(events: AsyncIterator[dict], log: list[dict]) -> AsyncIterator[dict]:
     async for event in events:
-        log.append(event)
+        if event["type"] != "token":
+            log.append(event)
         yield event
 
 

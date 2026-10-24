@@ -1,7 +1,7 @@
 import json
 from collections.abc import AsyncIterator
 
-from langchain_core.messages import AIMessage, ToolMessage
+from langchain_core.messages import AIMessage, AIMessageChunk, ToolMessage
 from langsmith import traceable
 from langsmith.run_helpers import get_current_run_tree
 
@@ -29,6 +29,26 @@ def _tool_result(message: ToolMessage) -> dict:
         "name": message.name,
         "status": status,
         "body": body,
+    }
+
+
+def token_event(message: object, metadata: dict) -> dict | None:
+    """A text piece from the model step; tool-call argument chunks are not shown."""
+    if metadata.get("langgraph_node") != "model" or not isinstance(message, AIMessageChunk):
+        return None
+    text = message.text
+    return {"type": "token", "text": text} if text else None
+
+
+async def _injection_warning(agent, config: dict) -> dict:
+    state = await agent.aget_state(config)
+    flags = state.values.get("injection_flags") or []
+    if not flags:
+        return {}
+    return {
+        "warning": "Earlier tool results in this conversation contained text that looked like "
+        "instructions to Atlas. Check this change was really asked for: "
+        + "; ".join(sorted(set(flags))[:3])
     }
 
 
@@ -81,13 +101,19 @@ async def stream_turn(
     tag_thread(thread_id)
     step = 0
     paused = False
-    async for chunk in agent.astream(payload, config, stream_mode="updates"):
+    async for mode, chunk in agent.astream(payload, config, stream_mode=["updates", "messages"]):
+        if mode == "messages":
+            token = token_event(*chunk)
+            if token:
+                yield token
+            continue
         for node, update in chunk.items():
             for event in events_from_update(node, update, step, access):
                 if event["type"] == "retrieval":
                     step = event["step"]
                 if event["type"] == "approval":
                     paused = True
+                    event = {**event, **await _injection_warning(agent, config)}
                 yield event
     run = get_current_run_tree()
     trace_url = None

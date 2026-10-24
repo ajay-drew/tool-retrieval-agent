@@ -7,3 +7,4 @@ class AtlasState(AgentState):
     found_tools: NotRequired[list[str]]
     allowed_tools: NotRequired[list[str]]
     last_retrieval: NotRequired[dict]
+    injection_flags: NotRequired[list[str]]

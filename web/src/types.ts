@@ -25,7 +25,8 @@ export type StreamEvent =
   | ({ type: "retrieval" } & Retrieval)
   | { type: "tool_call"; id: string; name: string; args: Record<string, unknown>; access: Access }
   | { type: "tool_result"; id: string; name: string; status: number | null; body: unknown }
-  | { type: "approval"; requests: ApprovalRequest[] }
+  | { type: "approval"; requests: ApprovalRequest[]; warning?: string }
+  | { type: "token"; text: string }
   | { type: "message"; text: string }
   | { type: "done"; status: TurnStatus; trace_url: string | null; thread_url?: string | null }
   | { type: "error"; detail: string };
@@ -60,6 +61,8 @@ export interface Turn {
   status: TurnStatus;
   answer?: string;
   approval?: ApprovalRequest[];
+  approvalWarning?: string;
+  draft?: string;
   traceUrl?: string | null;
   threadUrl?: string | null;
   error?: string;

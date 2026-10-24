@@ -150,6 +150,16 @@ button.link { background: none; border: none; padding: 0; color: var(--link); fo
 .bubble { border-radius: var(--radius); padding: 0.75rem 1rem; max-width: 100%; overflow-wrap: anywhere; }
 .bubble--user { justify-self: end; background: var(--ink); color: var(--paper); max-width: 80%; }
 .bubble--agent { background: var(--card); border: 1px solid var(--rule); }
+.bubble--agent.is-streaming > :last-child::after {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: var(--ink);
+  animation: caret 1s steps(2) infinite;
+}
 .bubble--agent p + p, .bubble--agent ul, .bubble--agent ol, .bubble--agent table { margin-top: 0.6rem; }
 .bubble--agent table { border-collapse: collapse; font-size: 0.85rem; display: block; overflow-x: auto; }
 .bubble--agent th, .bubble--agent td { border-bottom: 1px solid var(--rule); padding: 0.3rem 0.6rem; text-align: left; }
@@ -249,12 +259,14 @@ button.link { background: none; border: none; padding: 0; color: var(--link); fo
 .retrieval, .catalog { display: grid; gap: 0.6rem; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+@keyframes caret { 50% { opacity: 0; } }
 @keyframes atlas-pulse { 0%, 100% { transform: scale(0.9); opacity: 0.65; } 50% { transform: scale(1.06); opacity: 1; } }
 @keyframes rise { from { opacity: 0; transform: translateY(4px); } }
 @media (prefers-reduced-motion: reduce) {
   .step { animation: none; }
   .spinner { animation-duration: 2.4s; }
   .agent-mark.is-working { animation: none; }
+  .bubble--agent.is-streaming > :last-child::after { animation: none; }
 }
 
 @media (min-width: 881px) {

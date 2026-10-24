@@ -71,3 +71,16 @@ def test_thread_url_comes_from_the_trace_project():
         == "https://smith.langchain.com/o/org1/projects/p/proj1/t/t9"
     )
     assert langsmith_thread_url(None, "t9") is None
+
+
+def test_token_events_only_come_from_model_text():
+    from langchain_core.messages import AIMessageChunk
+
+    from atlas.agent.stream import token_event
+
+    assert token_event(AIMessageChunk("Hel"), {"langgraph_node": "model"}) == {
+        "type": "token",
+        "text": "Hel",
+    }
+    assert token_event(AIMessageChunk(""), {"langgraph_node": "model"}) is None
+    assert token_event(AIMessageChunk("x"), {"langgraph_node": "tools"}) is None
