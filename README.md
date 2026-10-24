@@ -73,7 +73,25 @@ For UI development, run `npm run dev` in `web/` (Vite on :5173, proxying `/api` 
 
 ### Providers
 
-`ATLAS_LLM_PROVIDER=gemini` uses the native Gemini client. `openai` uses any OpenAI-compatible endpoint, such as Groq, OpenRouter or a local Ollama. The free-tier Groq setup used for the results below:
+`ATLAS_LLM_PROVIDER=gemini` uses the native Gemini client. `openai` uses any OpenAI-compatible endpoint, such as a local Ollama, Groq or OpenRouter.
+
+**Local and free (default for development):** DeepSeek R1 8B through Ollama, with a 16k context window. Ollama's default window is small and silently cuts longer prompts.
+
+```bash
+ollama pull deepseek-r1:8b
+ollama create atlas-deepseek-r1-8b -f ollama/Modelfile
+```
+
+```bash
+ATLAS_LLM_PROVIDER=openai
+LLM_BASE_URL=http://localhost:11434/v1
+LLM_API_KEY=ollama                # any non-empty value; Ollama ignores it
+ATLAS_MODEL=atlas-deepseek-r1-8b
+ATLAS_MAX_REQUEST_TOKENS=12000    # stay inside the 16k window
+ATLAS_MAX_OUTPUT_TOKENS=4096      # R1 thinks before it answers
+```
+
+**Groq free tier** (used for the agent-run results below):
 
 ```bash
 ATLAS_LLM_PROVIDER=openai

@@ -16,6 +16,7 @@ from langchain_core.utils.function_calling import convert_to_openai_tool
 from langgraph.checkpoint.memory import InMemorySaver
 
 from atlas.agent.middleware import ToolRetrievalMiddleware
+from atlas.agent.repair import ToolCallRepairMiddleware
 from atlas.agent.runlog import RunLog
 from atlas.backend.base import Backend, BackendTransientError
 from atlas.llm import is_retryable_model_error
@@ -72,7 +73,8 @@ def build_atlas(deps: AgentDeps, options: AgentOptions):
     middleware: list[AgentMiddleware] = [
         ToolRetrievalMiddleware(
             deps.tool_index, options.k, always_on, sizes, options.max_request_tokens, fixed
-        )
+        ),
+        ToolCallRepairMiddleware(),
     ]
     if options.approve_writes:
         writes = [s.name for s in deps.specs if s.access == "write"]

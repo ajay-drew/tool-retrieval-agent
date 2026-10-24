@@ -116,15 +116,16 @@ return handler(request)
 - The middleware's state adds `found_tools: list[str]`, which only `find_tools` writes to (through `Command(update=…)`).
 
 **`build_atlas(config) -> agent`** calls `create_agent` with:
-- `model`: built by `atlas.llm.build_chat_model` from the `PROVIDERS` registry, picked by `ATLAS_LLM_PROVIDER`. `gemini` (the default) is the native `ChatGoogleGenerativeAI`, which carries Gemini 3's thought signatures between tool calls; the OpenAI-compatible endpoint drops them, and the second call then fails with 400. `openai` is `ChatOpenAI` against any OpenAI-compatible `LLM_BASE_URL` (OpenRouter, Mistral, a local Ollama). Temperature 0, 4,096 output tokens, no client-side retries. Adding a provider means adding a registry entry.
+- `model`: built by `atlas.llm.build_chat_model` from the `PROVIDERS` registry, picked by `ATLAS_LLM_PROVIDER`. `gemini` (the default) is the native `ChatGoogleGenerativeAI`, which carries Gemini 3's thought signatures between tool calls; the OpenAI-compatible endpoint drops them, and the second call then fails with 400. `openai` is `ChatOpenAI` against any OpenAI-compatible `LLM_BASE_URL` (OpenRouter, Groq, Mistral, a local Ollama at `http://localhost:11434/v1`). For Ollama, `ollama/Modelfile` builds a variant with a 16k context window (`ollama create atlas-deepseek-r1-8b -f ollama/Modelfile`), because Ollama's default window is small and it silently drops whatever overflows. Temperature 0, 4,096 output tokens, no client-side retries. Adding a provider means adding a registry entry.
 - `tools`: every tool in the registry plus the 3 always-on tools
 - `middleware`, in this order:
   1. `ToolRetrievalMiddleware`
   2. `HumanInTheLoopMiddleware` on `access == write` tools (only when `config.approve_writes`)
-  3. `ModelRetryMiddleware` (per-minute 429s and server errors: 5 retries, 15 s initial delay, doubling up to 60 s, then raise). A daily-quota 429 is never retried (`is_retryable_model_error`), because waiting a minute can't clear it.
-  4. `ToolRetryMiddleware` (backend 429 and 5xx only)
-  5. `ModelCallLimitMiddleware` (8)
-  6. `ToolCallLimitMiddleware`
+  3. `ToolCallRepairMiddleware`: when the provider itself rejects the model's tool call (Groq validates arguments server-side and returns `tool_use_failed`), the rejection reason goes back to the model as a note, and the call is retried up to twice. That matches how Atlas's own schema-check errors go back to the model.
+  4. `ModelRetryMiddleware` (per-minute 429s and server errors: 5 retries, 15 s initial delay, doubling up to 60 s, then raise). A daily-quota 429 is never retried (`is_retryable_model_error`), because waiting a minute can't clear it.
+  5. `ToolRetryMiddleware` (backend 429 and 5xx only)
+  6. `ModelCallLimitMiddleware` (8)
+  7. `ToolCallLimitMiddleware`
 - `checkpointer`: `InMemorySaver`
 - `system_prompt`: from `agent/prompt.md`. It tells the model to ask instead of guessing when a required input is missing, and to use `find_tools` when none of the tools fit.
 
@@ -212,7 +213,7 @@ The registry builds an async `StructuredTool` per spec that calls `backend.call`
 | Env var | Default |
 |---|---|
 | `ATLAS_LLM_PROVIDER` | `gemini` (native client) or `openai` (any OpenAI-compatible endpoint; used for Groq) |
-| `ATLAS_MAX_REQUEST_TOKENS` | unset (no limit); `7000` for Groq's free tier |
+| `ATLAS_MAX_REQUEST_TOKENS` | unset (no limit); `7000` for Groq's free tier; `12000` for local Ollama with a 16k window |
 | `ATLAS_REASONING_EFFORT` | unset; `low` for gpt-oss on Groq (reasoning tokens count toward the per-minute cap) |
 | `LLM_API_KEY` | required for the agent, enrichment and the agent eval |
 | `LLM_BASE_URL` | `https://generativelanguage.googleapis.com/v1beta/openai/` (Gemini) |
@@ -298,6 +299,7 @@ tool-retrieval-agent/
 ├── .github/workflows/ci.yml       ruff, pytest, ingest, index, R0 against baseline (Qdrant service)
 ├── specs/paypal/                  13 OpenAPI files + LICENSE + SOURCE.md + overrides.json
 ├── kb/                            handbook markdown for rag_search
+├── ollama/Modelfile               16k-context deepseek-r1:8b variant for local runs
 ├── data/                          generated tools.json, full_schemas.json; committed enrichment.json
 ├── runs/                          runlog.jsonl (gitignored)
 ├── reports/                       ingest_sizes.md, r0_tuning.md
@@ -307,7 +309,7 @@ tool-retrieval-agent/
 │   ├── commands/   ingest.py
 │   ├── tools/      spec.py  schema.py  ingest.py  enrich.py  registry.py  sample.py  rag.py  system.py  find.py
 │   ├── retrieval/  embedder.py  index.py  factory.py
-│   ├── agent/      state.py  middleware.py  build.py  turn.py  stream.py  runlog.py  factory.py  prompt.md
+│   ├── agent/      state.py  middleware.py  repair.py  build.py  turn.py  stream.py  runlog.py  factory.py  prompt.md
 │   ├── backend/    base.py  mock.py  seed.json
 │   └── evals/      cases.py  scorers.py  retrieval.py  trajectory.py  agent_run.py
 ├── evals/
